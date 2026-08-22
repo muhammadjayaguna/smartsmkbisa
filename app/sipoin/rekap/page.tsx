@@ -33,45 +33,57 @@ export default function RekapPoinPage() {
     async function fetchData() {
       setLoading(true);
       try {
-        // Fetch all poin_siswa with siswa data
+        // Fetch all active siswa
+        const { data: siswaData } = await supabase
+          .from('siswa')
+          .select('id, nama, nisn, rombel:rombel_id(nama_rombel)');
+          
+        // Fetch all poin_siswa
         const { data: poinData } = await supabase
           .from('poin_siswa')
-          .select('siswa_id, jenis, poin, siswa:siswa_id(nama, nisn, rombel:rombel_id(nama_rombel, id))');
+          .select('siswa_id, jenis, poin');
 
         // Fetch rombel for filter
         const { data: rombels } = await supabase.from('rombel').select('id, nama_rombel').order('nama_rombel');
         setRombelList(rombels || []);
 
-        if (!poinData) { setData([]); setLoading(false); return; }
-
         // Aggregate per siswa
         const map = new Map<string, SiswaRekap>();
-        poinData.forEach((p: any) => {
-          if (!p.siswa_id) return;
-          if (!map.has(p.siswa_id)) {
-            map.set(p.siswa_id, {
-              siswa_id: p.siswa_id,
-              nama: p.siswa?.nama || 'Unknown',
-              nisn: p.siswa?.nisn || '-',
-              rombel_nama: p.siswa?.rombel?.nama_rombel || '-',
+        
+        // Initialize all siswa in map
+        if (siswaData) {
+          siswaData.forEach((s: any) => {
+            map.set(s.id, {
+              siswa_id: s.id,
+              nama: s.nama || 'Unknown',
+              nisn: s.nisn || '-',
+              rombel_nama: s.rombel?.nama_rombel || '-',
               total_positif: 0,
               total_negatif: 0,
               saldo: 0,
               level_sp: 0,
             });
-          }
-          const entry = map.get(p.siswa_id)!;
-          if (p.jenis === 'positif') {
-            entry.total_positif += p.poin;
-          } else {
-            entry.total_negatif += p.poin;
-          }
-          entry.saldo = entry.total_positif - entry.total_negatif;
-          if (entry.total_negatif >= 150) entry.level_sp = 3;
-          else if (entry.total_negatif >= 100) entry.level_sp = 2;
-          else if (entry.total_negatif >= 50) entry.level_sp = 1;
-          else entry.level_sp = 0;
-        });
+          });
+        }
+
+        if (poinData) {
+          poinData.forEach((p: any) => {
+            if (!p.siswa_id || !map.has(p.siswa_id)) return;
+            
+            const entry = map.get(p.siswa_id)!;
+            if (p.jenis === 'positif') {
+              entry.total_positif += p.poin;
+            } else {
+              entry.total_negatif += p.poin;
+            }
+            entry.saldo = entry.total_positif - entry.total_negatif;
+            
+            if (entry.total_negatif >= 150) entry.level_sp = 3;
+            else if (entry.total_negatif >= 100) entry.level_sp = 2;
+            else if (entry.total_negatif >= 50) entry.level_sp = 1;
+            else entry.level_sp = 0;
+          });
+        }
 
         const result = Array.from(map.values());
         result.sort((a, b) => b.saldo - a.saldo);
