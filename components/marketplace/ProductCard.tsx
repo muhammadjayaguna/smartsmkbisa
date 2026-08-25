@@ -66,16 +66,16 @@ const ProductCard = ({ id, title, price, image_url, category, seller_id, seller_
 
   return (
     <Link href={`/products/${id}`}
-      className="group relative block overflow-hidden rounded-lg border border-border bg-card transition-all hover:border-primary/20 hover:shadow-sm"
+      className="group relative block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
     >
       {/* Action buttons */}
-      <div className="absolute right-2 top-2 z-10 flex flex-col gap-1">
+      <div className="absolute right-2 top-2 z-10 flex flex-col gap-1.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:opacity-100">
         <button
           onClick={handleWishlist}
-          className={`rounded-full p-1.5 shadow-sm backdrop-blur-sm transition-all ${
+          className={`rounded-full p-2 shadow-sm backdrop-blur-md transition-all ${
             wished
               ? 'bg-destructive/10 text-destructive'
-              : 'bg-card/70 text-muted-foreground hover:text-destructive hover:bg-card/90'
+              : 'bg-black/20 text-white hover:text-destructive hover:bg-black/40'
           }`}
           title={wished ? 'Hapus dari wishlist' : 'Tambah ke wishlist'}
         >
@@ -83,60 +83,62 @@ const ProductCard = ({ id, title, price, image_url, category, seller_id, seller_
         </button>
         <button
           onClick={handleShare}
-          className="rounded-full p-1.5 shadow-sm backdrop-blur-sm bg-card/70 text-muted-foreground hover:text-primary hover:bg-card/90 transition-all"
+          className="rounded-full p-2 shadow-sm backdrop-blur-md bg-black/20 text-white hover:text-primary hover:bg-black/40 transition-all"
           title="Bagikan"
         >
-          <Share2 size={14} />
+          <Share2 size={16} />
         </button>
       </div>
 
-      <div className="aspect-square overflow-hidden bg-secondary">
+      <div className="aspect-square overflow-hidden bg-secondary/50 relative">
         {image_url ? (
           <img
             src={image_url}
             alt={title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-secondary">
-            <span className="text-3xl text-muted-foreground">📦</span>
+          <div className="flex h-full w-full items-center justify-center bg-secondary/30">
+            <span className="text-4xl text-muted-foreground/50">📦</span>
           </div>
         )}
+        {/* Subtle overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </div>
-      <div className="p-2.5">
-        <h3 className="mb-1.5 text-xs text-foreground line-clamp-2 leading-snug min-h-[2.25rem]">
+      <div className="p-3">
+        <h3 className="mb-1.5 text-xs text-foreground font-medium line-clamp-2 leading-snug min-h-[2.25rem] group-hover:text-primary transition-colors">
           {title}
         </h3>
-        <p className="mb-1.5 text-sm font-bold text-primary">
+        <p className="mb-2 text-sm font-extrabold text-primary tracking-tight">
           {formatPrice(price)}
         </p>
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
           {rating > 0 && (
-            <>
+            <div className="flex items-center gap-0.5">
               <Star size={10} className="fill-warning text-warning" />
-              <span>{rating.toFixed(1)}</span>
-              <span className="mx-0.5 opacity-40">·</span>
-            </>
+              <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+            </div>
           )}
+          {rating > 0 && <span className="opacity-30">|</span>}
           <span>{sold} terjual</span>
         </div>
         {(seller_name || major) && (
           <div
             onClick={handleSellerClick}
-            className="mt-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            className="mt-2.5 pt-2.5 border-t border-border/50 flex items-center gap-2 text-[10px] text-muted-foreground hover:text-primary transition-colors cursor-pointer group/seller"
           >
-            <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary text-[7px] font-bold text-primary-foreground overflow-hidden">
+            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[8px] font-bold text-primary overflow-hidden ring-1 ring-primary/20 transition-all group-hover/seller:ring-primary/50">
               {seller_avatar ? (
                 <img src={seller_avatar} alt={seller_name || ''} className="h-full w-full object-cover" />
               ) : (
                 (seller_name || '?').charAt(0).toUpperCase()
               )}
             </div>
-            <div className="flex items-center gap-0.5 truncate">
-              <span className="truncate">{seller_name || major}</span>
+            <div className="flex items-center gap-1 truncate">
+              <span className="truncate font-medium group-hover/seller:text-primary transition-colors">{seller_name || major}</span>
               {is_verified && (
-                <div className="flex h-3 w-3 shrink-0 items-center justify-center rounded-full bg-blue-500 text-[6px] text-white" title="Verified Seller">
+                <div className="flex h-3 w-3 shrink-0 items-center justify-center rounded-full bg-blue-500 text-[6px] text-white shadow-sm" title="Verified Seller">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="h-2 w-2">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>

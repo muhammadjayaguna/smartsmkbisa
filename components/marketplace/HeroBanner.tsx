@@ -10,28 +10,28 @@ const BANNERS = [
     subtitle: 'Temukan produk & jasa berkualitas dari para pelajar kreatif Banjarmasin',
     cta: 'Belanja Sekarang',
     link: '/products',
-    image: '/banners/banner-tkj-demo.webp',
+    image: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=1200&q=80',
   },
   {
     title: 'Siap Melayani dengan Profesional!',
     subtitle: 'Layanan IT terpercaya langsung dari siswa-siswi jurusan TKJ SMKN 1 Banjarmasin',
     cta: 'Lihat Layanan',
     link: '/products?major=TKJ',
-    image: '/banners/banner-tkj-service.webp',
+    image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200&q=80',
   },
   {
     title: 'Belajar Sambil Berkarya 🔧',
     subtitle: 'Siswa SMKN 1 siap memperbaiki dan merawat perangkat elektronikmu dengan keahlian nyata',
     cta: 'Pesan Jasa',
     link: '/products?category=Jasa',
-    image: '/banners/banner-tkj-repair.webp',
+    image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1200&q=80',
   },
   {
     title: 'Buka Toko Gratis!',
     subtitle: 'Daftar dan mulai jual produk atau jasa kamu ke seluruh komunitas sekolah',
     cta: 'Daftar Sekarang',
     link: '/register',
-    image: '/banners/banner-buka-toko.jpg',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80',
   },
 ];
 
@@ -48,13 +48,13 @@ const HeroBanner = () => {
   const banner = BANNERS[current];
 
   return (
-    <section className="relative overflow-hidden rounded-xl mx-4 mt-4 md:mx-auto md:max-w-[1168px]">
-      <div className="relative h-[180px] md:h-[340px]">
+    <section className="group relative overflow-hidden rounded-xl mx-4 mt-4 md:mx-auto md:max-w-[1168px] md:rounded-2xl shadow-xl shadow-primary/5 transition-all">
+      <div className="relative h-[180px] md:h-[380px]">
         {BANNERS.map((b, i) => (
           <div
             key={i}
-            className={`absolute inset-0 transition-opacity duration-700 ${
-              i === current ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+              i === current ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
             }`}
           >
             <img
@@ -62,25 +62,25 @@ const HeroBanner = () => {
               alt={b.title}
               className="h-full w-full object-cover"
               width={1168}
-              height={340}
+              height={380}
               loading={i === 0 ? 'eager' : 'lazy'}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
           </div>
         ))}
 
-        <div className="container relative z-10 flex h-full flex-col items-start justify-center px-6 md:px-10">
-          <span className="mb-2 inline-block rounded-md bg-accent/90 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">
+        <div className="container relative z-10 flex h-full flex-col items-start justify-center px-6 md:px-12">
+          <span className="mb-3 inline-block rounded-full bg-primary/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary-foreground backdrop-blur-sm shadow-sm md:text-xs">
             SMKN 1 Banjarmasin
           </span>
-          <h1 className="mb-2 max-w-lg font-display text-xl font-extrabold text-primary-foreground md:text-3xl leading-tight">
+          <h1 className="mb-3 max-w-lg font-display text-2xl font-extrabold text-white md:text-4xl leading-tight drop-shadow-md">
             {banner.title}
           </h1>
-          <p className="mb-4 max-w-md text-xs text-primary-foreground/80 md:text-sm leading-relaxed">
+          <p className="mb-6 max-w-md text-xs text-white/90 md:text-base leading-relaxed drop-shadow-sm font-medium">
             {banner.subtitle}
           </p>
           <Link href={banner.link}
-            className="rounded-lg bg-accent px-5 py-2.5 text-xs font-semibold text-accent-foreground hover:bg-accent/90 md:text-sm"
+            className="rounded-full bg-accent px-6 py-3 text-xs font-bold text-accent-foreground shadow-lg transition-all hover:bg-accent/90 hover:scale-105 hover:shadow-accent/30 md:text-sm active:scale-95"
           >
             {banner.cta}
           </Link>
@@ -88,14 +88,15 @@ const HeroBanner = () => {
       </div>
 
       {/* Dots */}
-      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+      <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-2">
         {BANNERS.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`h-2 rounded-full transition-all ${
-              i === current ? 'w-6 bg-primary-foreground' : 'w-2 bg-primary-foreground/40'
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === current ? 'w-8 bg-primary' : 'w-2 bg-white/50 hover:bg-white/80'
             }`}
+            aria-label={`Go to slide ${i + 1}`}
           />
         ))}
       </div>
@@ -103,15 +104,17 @@ const HeroBanner = () => {
       {/* Nav arrows */}
       <button
         onClick={() => setCurrent((current - 1 + BANNERS.length) % BANNERS.length)}
-        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-card/20 p-1.5 text-primary-foreground backdrop-blur-sm hover:bg-card/40"
+        className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white backdrop-blur-md transition-all hover:bg-black/50 hover:scale-110 opacity-0 group-hover:opacity-100 md:opacity-100"
+        aria-label="Previous slide"
       >
-        <ChevronLeft size={18} />
+        <ChevronLeft size={20} />
       </button>
       <button
         onClick={() => setCurrent((current + 1) % BANNERS.length)}
-        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-card/20 p-1.5 text-primary-foreground backdrop-blur-sm hover:bg-card/40"
+        className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white backdrop-blur-md transition-all hover:bg-black/50 hover:scale-110 opacity-0 group-hover:opacity-100 md:opacity-100"
+        aria-label="Next slide"
       >
-        <ChevronRight size={18} />
+        <ChevronRight size={20} />
       </button>
     </section>
   );

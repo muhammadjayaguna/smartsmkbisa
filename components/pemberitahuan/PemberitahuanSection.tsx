@@ -140,7 +140,7 @@ const PemberitahuanSection = () => {
         {/* Animated background decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className={cn(
-            "absolute -top-1/2 -right-1/2 w-full h-full rounded-full blur-3xl opacity-20",
+            "absolute -top-1/2 -right-1/2 w-full h-full rounded-full opacity-20",
             tipe === 'info' && "bg-primary/60",
             tipe === 'warning' && "bg-yellow-400",
             tipe === 'success' && "bg-green-400",

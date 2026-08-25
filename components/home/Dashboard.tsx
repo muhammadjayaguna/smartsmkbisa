@@ -113,6 +113,13 @@ const Dashboard = () => {
       items: [
         { title: 'AI Chat Admin', description: 'Tanya jawab data dengan asisten AI', icon: Bot, color: 'from-blue-600 to-indigo-700', path: '/admin/chat' }
       ]
+    },
+    {
+      category: "Kewirausahaan",
+      items: [
+        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
+        { title: 'Admin SMKmart', description: 'Kelola data toko dan produk', icon: Settings, color: 'from-slate-600 to-slate-800', path: '/admin/marketplace' }
+      ]
     }
   ], []);
 
@@ -141,6 +148,12 @@ const Dashboard = () => {
       items: [
         { title: 'SiPoin', description: 'Pencatatan Poin Prestasi & Pelanggaran', icon: Award, color: 'from-amber-500 to-orange-600', path: '/sipoin' },
       ]
+    },
+    {
+      category: "Kewirausahaan",
+      items: [
+        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' }
+      ]
     }
   ], []);
 
@@ -161,6 +174,12 @@ const Dashboard = () => {
       category: "Kesiswaan",
       items: [
         { title: 'SiPoin', description: 'Lihat Poin Prestasi & Pelanggaran Saya', icon: Award, color: 'from-amber-500 to-orange-600', path: '/sipoin' },
+      ]
+    },
+    {
+      category: "Kewirausahaan",
+      items: [
+        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' }
       ]
     }
   ], []);
@@ -194,8 +213,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 md:pb-0 relative">
       <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-teal-600 via-emerald-700 to-teal-800 z-0 rounded-b-[40px] shadow-lg overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
+        {/* Decorative background removed for performance */}
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-8 pt-8 md:pt-12 relative z-10">

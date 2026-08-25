@@ -189,7 +189,7 @@ const Navbar = () => {
       {/* Main nav */}
       <nav className="container flex h-12 items-center gap-3 sm:h-14 sm:gap-4">
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <img src={logo} alt="Marketplace SMKN 1" className="h-9 w-9 rounded-lg object-cover" />
+          <img src={logo} alt="SMKmart SMKN 1" className="h-9 w-9 rounded-lg object-cover" />
           <div className="hidden lg:block">
             <span className="font-display text-base font-bold text-foreground leading-tight">SMKN 1 Mall</span>
             <span className="block text-[10px] text-muted-foreground leading-tight">Banjarmasin</span>

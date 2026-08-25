@@ -17,7 +17,7 @@ const Footer = () => (
             </div>
           </div>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Platform marketplace karya siswa SMK Negeri 1 Banjarmasin untuk memfasilitasi kewirausahaan dan kreativitas pelajar.
+            Platform SMKmart karya siswa SMK Negeri 1 Banjarmasin untuk memfasilitasi kewirausahaan dan kreativitas pelajar.
           </p>
           <div className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground">
             <GraduationCap size={12} />
@@ -53,7 +53,7 @@ const Footer = () => (
         </div>
       </div>
       <div className="mt-8 border-t border-border pt-6 text-center text-[11px] text-muted-foreground">
-        &copy; {new Date().getFullYear()} Marketplace SMK Negeri 1 Banjarmasin. Dibangun untuk pendidikan kewirausahaan.
+        &copy; {new Date().getFullYear()} SMKmart SMK Negeri 1 Banjarmasin. Dibangun untuk pendidikan kewirausahaan.
       </div>
     </div>
   </footer>

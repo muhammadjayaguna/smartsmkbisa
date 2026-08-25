@@ -63,8 +63,7 @@ export default function AdministrasiGuruDashboard() {
       {/* Banner */}
       <div className="bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 rounded-3xl p-8 border-0 shadow-lg shadow-teal-900/10 flex items-center justify-between relative overflow-hidden">
         {/* Decorative Circles */}
-        <div className="absolute -top-24 -right-12 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-24 -left-12 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
+        {/* Decorative background removed for performance */}
         
         <div className="relative z-10">
           <h2 className="text-3xl font-extrabold text-white mb-4 tracking-tight">{namaSekolah}</h2>

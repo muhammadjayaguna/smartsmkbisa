@@ -167,8 +167,7 @@ const AuthPage = () => {
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-800 p-12 flex-col justify-between overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-full h-1/2 bg-gradient-to-t from-white to-transparent blur-3xl"></div>
+          {/* Decorative background removed for performance */}
         </div>
 
         <div className="relative z-10">
