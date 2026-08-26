@@ -37,66 +37,8 @@ const TRUST_ITEMS = [
   { icon: Award, label: 'Kualitas Terjamin', desc: 'Dibimbing langsung oleh guru' },
 ];
 
-const DUMMY_PRODUCTS: Product[] = [
-  {
-    id: 'dummy-1',
-    title: 'Jasa Install Ulang Windows 11 & Office (Lengkap)',
-    price: 50000,
-    image_url: 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=500&q=80',
-    category: 'Jasa',
-    rating: 4.8,
-    sold: 12,
-    seller_id: 'dummy-seller-1',
-    profiles: { full_name: 'Budi Santoso', major: 'TKJ', avatar_url: null, is_verified: true },
-  },
-  {
-    id: 'dummy-2',
-    title: 'Desain Logo Profesional untuk UMKM & Sekolah',
-    price: 150000,
-    image_url: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=500&q=80',
-    category: 'Jasa',
-    rating: 5.0,
-    sold: 8,
-    seller_id: 'dummy-seller-2',
-    profiles: { full_name: 'Siti Aminah', major: 'Multimedia', avatar_url: null, is_verified: true },
-  },
-  {
-    id: 'dummy-3',
-    title: 'Buku Catatan Praktikum Akuntansi Ringkas',
-    price: 35000,
-    image_url: 'https://images.unsplash.com/photo-1544716278-e513176f20b5?w=500&q=80',
-    category: 'Barang',
-    rating: 4.5,
-    sold: 25,
-    seller_id: 'dummy-seller-3',
-    profiles: { full_name: 'Dewi Lestari', major: 'Akuntansi', avatar_url: null, is_verified: false },
-  },
-  {
-    id: 'dummy-4',
-    title: 'Jasa Ketik Dokumen Cepat & Rapih',
-    price: 10000,
-    image_url: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=500&q=80',
-    category: 'Jasa',
-    rating: 4.9,
-    sold: 40,
-    seller_id: 'dummy-seller-4',
-    profiles: { full_name: 'Agus Pratama', major: 'Perkantoran', avatar_url: null, is_verified: true },
-  },
-  {
-    id: 'dummy-5',
-    title: 'Kabel LAN Cat 6 Custom (Harga per Meter)',
-    price: 5000,
-    image_url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=500&q=80',
-    category: 'Barang',
-    rating: 4.7,
-    sold: 110,
-    seller_id: 'dummy-seller-1',
-    profiles: { full_name: 'Budi Santoso', major: 'TKJ', avatar_url: null, is_verified: true },
-  },
-];
-
 const Index = () => {
-  const [products, setProducts] = useState<Product[]>(DUMMY_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -107,10 +49,14 @@ const Index = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('products')
-      .select('id, title, price, image_url, category, rating, sold, seller_id, profiles(full_name:nama)')
+      .select('id, title, price, image_url, category, rating, sold, seller_id, profiles:users(full_name:nama)')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .limit(20);
+
+    if (error) {
+      console.error("SUPABASE ERROR:", error);
+    }
 
     let normalized: Product[] = [];
     if (data && data.length > 0) {
@@ -120,8 +66,7 @@ const Index = () => {
       });
     }
     
-    // Always show dummy products for demonstration purposes if DB is empty, or append them
-    setProducts(normalized.length > 0 ? [...normalized, ...DUMMY_PRODUCTS] : DUMMY_PRODUCTS);
+    setProducts(normalized);
     setLoading(false);
   };
 
@@ -160,7 +105,7 @@ const Index = () => {
           <div className="grid grid-cols-4 gap-3 md:grid-cols-7">
             {CATEGORIES.map(({ icon: Icon, label, desc }) => (
               <Link key={label}
-                href={['Barang', 'Jasa'].includes(label) ? `/products?category=${label}` : `/products?major=${label}`}
+                href={['Barang', 'Jasa'].includes(label) ? `/marketplace/products?category=${label}` : `/marketplace/products?major=${label}`}
                 className="group flex flex-col items-center gap-2 rounded-2xl p-4 transition-all hover:bg-white hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 dark:hover:bg-secondary/80"
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110 group-hover:shadow-md">
@@ -184,7 +129,7 @@ const Index = () => {
               </div>
               <span className="text-xs font-medium text-muted-foreground hidden sm:block">Berakhir dalam 02:45:10</span>
             </div>
-            <Link href="/products" className="flex items-center gap-1.5 rounded-full bg-secondary/80 px-4 py-1.5 text-xs font-bold text-primary transition-all hover:bg-primary hover:text-primary-foreground">
+            <Link href="/marketplace/products" className="flex items-center gap-1.5 rounded-full bg-secondary/80 px-4 py-1.5 text-xs font-bold text-primary transition-all hover:bg-primary hover:text-primary-foreground">
               Lihat Semua <ArrowRight size={14} />
             </Link>
           </div>
@@ -224,7 +169,7 @@ const Index = () => {
         <div className="container py-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-display text-xl font-black text-foreground">Produk Terbaru</h2>
-            <Link href="/products" className="flex items-center gap-1.5 rounded-full bg-secondary/80 px-4 py-1.5 text-xs font-bold text-primary transition-all hover:bg-primary hover:text-primary-foreground">
+            <Link href="/marketplace/products" className="flex items-center gap-1.5 rounded-full bg-secondary/80 px-4 py-1.5 text-xs font-bold text-primary transition-all hover:bg-primary hover:text-primary-foreground">
               Lihat Semua <ArrowRight size={14} />
             </Link>
           </div>

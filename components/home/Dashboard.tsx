@@ -100,6 +100,13 @@ const Dashboard = () => {
       ]
     },
     {
+      category: "Kewirausahaan",
+      items: [
+        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
+        { title: 'Admin SMKmart', description: 'Kelola data toko dan produk', icon: Settings, color: 'from-slate-600 to-slate-800', path: '/admin/marketplace' }
+      ]
+    },
+    {
       category: "Administrasi Sistem",
       items: [
         { title: 'Manajemen Rombel', description: 'Kelola data rombel dan kelas', icon: GraduationCap, color: 'from-green-500 to-green-600', path: '/manage-rombel' },
@@ -112,13 +119,6 @@ const Dashboard = () => {
       category: "Asisten Cerdas",
       items: [
         { title: 'AI Chat Admin', description: 'Tanya jawab data dengan asisten AI', icon: Bot, color: 'from-blue-600 to-indigo-700', path: '/admin/chat' }
-      ]
-    },
-    {
-      category: "Kewirausahaan",
-      items: [
-        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
-        { title: 'Admin SMKmart', description: 'Kelola data toko dan produk', icon: Settings, color: 'from-slate-600 to-slate-800', path: '/admin/marketplace' }
       ]
     }
   ], []);

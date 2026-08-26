@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from '@/hooks/marketplace/use-router-dom';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { Star, Minus, Plus, ShoppingCart, MessageCircle, Store, Shield, Truck, Share2, Flag } from 'lucide-react';
@@ -60,7 +61,7 @@ const ProductDetail = () => {
     setLoading(true);
     const { data } = await supabase
       .from('products')
-      .select('*, profiles(full_name:nama)')
+      .select('*, profiles:users(full_name:nama)')
       .eq('id', id)
       .single();
 
@@ -80,7 +81,7 @@ const ProductDetail = () => {
   const fetchRelatedProducts = async (category: string, currentId: string) => {
     const { data } = await supabase
       .from('products')
-      .select('id, title, price, image_url, category, rating, sold, seller_id, profiles(full_name:nama)')
+      .select('id, title, price, image_url, category, rating, sold, seller_id, profiles:users(full_name:nama)')
       .eq('category', category)
       .eq('is_active', true)
       .neq('id', currentId)
@@ -97,7 +98,7 @@ const ProductDetail = () => {
   const fetchSellerProducts = async (sellerId: string, currentId: string) => {
     const { data } = await supabase
       .from('products')
-      .select('id, title, price, image_url, category, rating, sold, seller_id, profiles(full_name:nama)')
+      .select('id, title, price, image_url, category, rating, sold, seller_id, profiles:users(full_name:nama)')
       .eq('seller_id', sellerId)
       .eq('is_active', true)
       .neq('id', currentId)
@@ -182,7 +183,7 @@ const ProductDetail = () => {
         <div className="text-center">
           <span className="mb-3 block text-4xl">😕</span>
           <p className="text-sm text-muted-foreground">Produk tidak ditemukan</p>
-          <Link href="/products" className="mt-3 inline-block text-sm text-primary hover:underline">Kembali ke produk</Link>
+          <Link href="/marketplace/products" className="mt-3 inline-block text-sm text-primary hover:underline">Kembali ke produk</Link>
         </div>
       </div>
     );
@@ -193,9 +194,9 @@ const ProductDetail = () => {
       <div className="container py-4">
         {/* Breadcrumb */}
         <div className="mb-3 flex items-center gap-1 text-xs text-muted-foreground">
-          <Link href="/" className="hover:text-primary">Beranda</Link>
+          <Link href="/marketplace" className="hover:text-primary">Beranda</Link>
           <span>/</span>
-          <Link href="/products" className="hover:text-primary">Produk</Link>
+          <Link href="/marketplace/products" className="hover:text-primary">Produk</Link>
           <span>/</span>
           <span className="text-foreground truncate max-w-[200px]">{product.title}</span>
         </div>
@@ -254,16 +255,16 @@ const ProductDetail = () => {
 
               {/* Seller info */}
               <div className="mb-4 flex items-center gap-3 rounded-sm border border-border p-3">
-                <Link href={`/seller/${product.seller_id}`} className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground hover:opacity-80 transition-opacity">
+                <Link href={`/marketplace/seller/${product.seller_id}`} className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground hover:opacity-80 transition-opacity">
                   {product.profiles?.full_name?.charAt(0) || 'S'}
                 </Link>
                 <div className="flex-1">
-                  <Link href={`/seller/${product.seller_id}`} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+                  <Link href={`/marketplace/seller/${product.seller_id}`} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
                     {product.profiles?.full_name || 'Penjual'}
                   </Link>
                   <p className="text-xs text-muted-foreground">{product.profiles?.major}</p>
                 </div>
-                <Link href={`/seller/${product.seller_id}`}
+                <Link href={`/marketplace/seller/${product.seller_id}`}
                   className="flex items-center gap-1 rounded-sm border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                 >
                   <Store size={14} /> Kunjungi

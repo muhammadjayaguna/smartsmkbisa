@@ -232,7 +232,7 @@ const AdminDashboard = () => {
   const fetchProducts = async () => {
     const { data } = await supabase
       .from('products')
-      .select('id, title, price, category, image_url, stock, sold, rating, is_active, created_at, seller_id, profiles:users(full_name:nama:nama)')
+      .select('id, title, price, category, image_url, stock, sold, rating, is_active, created_at, seller_id, profiles:users(full_name:nama)')
       .order('created_at', { ascending: false });
 
     const normalized = ((data as any[]) || []).map((p) => {
@@ -245,7 +245,7 @@ const AdminDashboard = () => {
   const fetchTransactions = async () => {
     const { data } = await supabase
       .from('transactions')
-      .select('id, amount, quantity, status, created_at, buyer:profiles:users!transactions_buyer_id_fkey(full_name:nama:nama), seller:profiles:users!transactions_seller_id_fkey(full_name:nama:nama), product:products!transactions_product_id_fkey(title)')
+      .select('id, amount, quantity, status, created_at, buyer:users!transactions_buyer_id_fkey(full_name:nama), seller:users!transactions_seller_id_fkey(full_name:nama), product:products!transactions_product_id_fkey(title)')
       .order('created_at', { ascending: false })
       .limit(100);
 
@@ -261,7 +261,7 @@ const AdminDashboard = () => {
   const fetchReviews = async () => {
     const { data } = await supabase
       .from('reviews')
-      .select('id, rating, comment, created_at, user:profiles:users!reviews_user_id_fkey(full_name:nama:nama), product:products!reviews_product_id_fkey(title)')
+      .select('id, rating, comment, created_at, user:users!reviews_user_id_fkey(full_name:nama), product:products!reviews_product_id_fkey(title)')
       .order('created_at', { ascending: false })
       .limit(100);
 
@@ -276,7 +276,7 @@ const AdminDashboard = () => {
   const fetchReports = async () => {
     const { data } = await supabase
       .from('reports')
-      .select('id, reason, description, status, admin_notes, created_at, reporter:profiles:users!reports_reporter_id_fkey(full_name:nama:nama), reported_user:profiles:users!reports_reported_user_id_fkey(full_name:nama:nama), product:products!reports_product_id_fkey(title)')
+      .select('id, reason, description, status, admin_notes, created_at, reporter:users!reports_reporter_id_fkey(full_name:nama), reported_user:users!reports_reported_user_id_fkey(full_name:nama), product:products!reports_product_id_fkey(title)')
       .order('created_at', { ascending: false })
       .limit(100);
 

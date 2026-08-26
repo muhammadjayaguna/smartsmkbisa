@@ -46,7 +46,7 @@ const ProductCard = ({ id, title, price, image_url, category, seller_id, seller_
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = `${window.location.origin}/products/${id}`;
+    const url = `${window.location.origin}/marketplace/products/${id}`;
     if (navigator.share) {
       try {
         await navigator.share({ title, text: `Cek ${title} di SMK Marketplace!`, url });
@@ -61,11 +61,11 @@ const ProductCard = ({ id, title, price, image_url, category, seller_id, seller_
     if (!seller_id) return;
     e.preventDefault();
     e.stopPropagation();
-    router.push(`/seller/${seller_id}`);
+    router.push(`/marketplace/seller/${seller_id}`);
   };
 
   return (
-    <Link href={`/products/${id}`}
+    <Link href={`/marketplace/products/${id}`}
       className="group relative block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
     >
       {/* Action buttons */}
