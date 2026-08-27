@@ -54,7 +54,7 @@ const Navbar = () => {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-700 to-emerald-700 tracking-tight group-hover:from-teal-600 group-hover:to-emerald-600 transition-colors">Smart SMK</h1>
+              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-700 to-cyan-700 tracking-tight group-hover:from-sky-600 group-hover:to-cyan-600 transition-colors">Smart SMK</h1>
               <p className="text-xs font-medium text-slate-500">SMK Negeri 1 Banjarmasin</p>
             </div>
           </div>

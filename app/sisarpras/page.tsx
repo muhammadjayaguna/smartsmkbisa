@@ -1,13 +1,18 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Activity, Package, DoorOpen, Wrench, ShoppingCart, Loader2 } from 'lucide-react';
+import { Activity, Package, DoorOpen, Wrench, ShoppingCart, Loader2, ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
-
+import { useUserRole } from '@/hooks/useUserRole';
+import { useAuth } from '@/hooks/useAuth';
+import Link from 'next/link';
 export default function SisarprasDashboard() {
+  const { role } = useUserRole();
+  const { user } = useAuth();
+
   const { data: stats, isLoading } = useQuery({
     queryKey: ['sisarpras-dashboard-stats'],
     queryFn: async () => {
@@ -66,37 +71,127 @@ export default function SisarprasDashboard() {
     <div className="space-y-6 max-w-6xl mx-auto pb-20">
       <PageBreadcrumb currentPage="Beranda SiSarpras" className="mb-2" />
       
-      <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
-        <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
-          <Activity className="w-5 h-5" />
+      {/* Role-aware banner */}
+      {role === 'siswa' ? (
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold">Hai, {user?.nama || 'Siswa'}! 👋</h2>
+            <p className="text-blue-100 text-sm mt-1">Pinjam barang, booking ruangan, atau laporkan kerusakan fasilitas sekolah.</p>
+            <div className="mt-3 inline-flex items-center bg-white/10 px-3 py-1 rounded-full text-xs font-bold text-blue-100">🎓 Siswa</div>
+          </div>
+          <Package className="w-20 h-20 text-white opacity-10 absolute right-6 top-2" />
         </div>
-        <div>
-          <h2 className="font-bold text-lg text-slate-800">Dashboard SiSarpras</h2>
-          <p className="text-xs text-slate-500">Pusat kendali fasilitas dan sarana prasarana sekolah</p>
+      ) : role === 'teknisi' ? (
+        <div className="bg-gradient-to-r from-cyan-600 to-teal-600 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold">Panel Teknisi 🔧</h2>
+            <p className="text-cyan-100 text-sm mt-1">Kelola laporan kerusakan dan maintenance fasilitas sekolah.</p>
+            <div className="mt-3 inline-flex items-center bg-white/10 px-3 py-1 rounded-full text-xs font-bold text-cyan-100">🔧 Teknisi</div>
+          </div>
+          <Wrench className="w-20 h-20 text-white opacity-10 absolute right-6 top-2" />
         </div>
-      </div>
+      ) : (role === 'admin' || role === 'waka_sarpras') ? (
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-500/10 blur-3xl"></div>
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold">{role === 'admin' ? 'Admin SiSarpras' : 'Waka Sarpras'} ⚙️</h2>
+            <p className="text-slate-300 text-sm mt-1">Akses penuh ke manajemen inventaris, peminjaman, dan pengadaan.</p>
+            <div className="mt-3 inline-flex items-center bg-red-500/20 px-3 py-1 rounded-full text-xs font-bold text-red-300 border border-red-500/20">{role === 'admin' ? '⚙️ Super Admin' : '🏫 Waka Sarpras'}</div>
+          </div>
+          <Activity className="w-20 h-20 text-white opacity-5 absolute right-6 top-2" />
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
+          <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+            <Activity className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="font-bold text-lg text-slate-800">Dashboard SiSarpras</h2>
+            <p className="text-xs text-slate-500">Pusat kendali fasilitas dan sarana prasarana sekolah</p>
+          </div>
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { title: 'Total Aset', value: stats?.totalInventaris, icon: Package, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-          { title: 'Ruang Terpakai', value: stats?.totalRuangan, icon: DoorOpen, color: 'text-indigo-500', bg: 'bg-indigo-50' },
-          { title: 'Kerusakan Aktif', value: stats?.totalKerusakan, icon: Wrench, color: 'text-red-500', bg: 'bg-red-50' },
-          { title: 'Pengajuan Baru', value: stats?.totalPengajuan, icon: ShoppingCart, color: 'text-amber-500', bg: 'bg-amber-50' }
-        ].map((stat, i) => (
-          <Card key={i} className="border-slate-200/60 shadow-sm">
+      {/* Stats — filtered per role */}
+      <div className={`grid grid-cols-1 ${role === 'siswa' ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-4'} gap-4`}>
+        {role !== 'siswa' && (
+          <Card className="border-slate-200/60 shadow-sm">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center`}>
-                <stat.icon className="w-6 h-6" />
+              <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center">
+                <Package className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{stat.title}</p>
-                <h3 className="text-2xl font-black text-slate-700">{stat.value}</h3>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Aset</p>
+                <h3 className="text-2xl font-black text-slate-700">{stats?.totalInventaris}</h3>
               </div>
             </CardContent>
           </Card>
-        ))}
+        )}
+        <Card className="border-slate-200/60 shadow-sm">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center">
+              <DoorOpen className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ruang Terpakai</p>
+              <h3 className="text-2xl font-black text-slate-700">{stats?.totalRuangan}</h3>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-slate-200/60 shadow-sm">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center">
+              <Wrench className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Kerusakan Aktif</p>
+              <h3 className="text-2xl font-black text-slate-700">{stats?.totalKerusakan}</h3>
+            </div>
+          </CardContent>
+        </Card>
+        {role !== 'siswa' && (
+          <Card className="border-slate-200/60 shadow-sm">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
+                <ShoppingCart className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pengajuan Baru</p>
+                <h3 className="text-2xl font-black text-slate-700">{stats?.totalPengajuan}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
+
+      {/* Quick Actions for Siswa */}
+      {role === 'siswa' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { title: 'Pinjam Barang', desc: 'Ajukan peminjaman barang sekolah', path: '/sisarpras/peminjaman-barang', icon: Package, color: 'text-blue-600 bg-blue-50' },
+            { title: 'Booking Ruangan', desc: 'Ajukan peminjaman ruangan', path: '/sisarpras/peminjaman-ruangan', icon: DoorOpen, color: 'text-indigo-600 bg-indigo-50' },
+            { title: 'Lapor Kerusakan', desc: 'Laporkan fasilitas yang rusak', path: '/sisarpras/lapor-kerusakan', icon: Wrench, color: 'text-red-600 bg-red-50' },
+          ].map((item) => (
+            <Link key={item.path} href={item.path}>
+              <Card className="border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className={`w-14 h-14 rounded-2xl ${item.color.split(' ')[1]} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <item.icon className={`w-7 h-7 ${item.color.split(' ')[0]}`} />
+                  </div>
+                  <h3 className="font-bold text-slate-800">{item.title}</h3>
+                  <p className="text-xs text-slate-500">{item.desc}</p>
+                  <span className={`text-xs font-semibold ${item.color.split(' ')[0]} flex items-center gap-1`}>
+                    Akses <ArrowRight className="w-3 h-3" />
+                  </span>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
       
+      {/* Charts — hidden for siswa */}
+      {role !== 'siswa' && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-slate-200/60 shadow-sm">
           <CardHeader>
@@ -154,6 +249,7 @@ export default function SisarprasDashboard() {
           </CardContent>
         </Card>
       </div>
+      )}
     </div>
   );
 }

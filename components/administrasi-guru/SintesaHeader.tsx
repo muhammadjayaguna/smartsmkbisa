@@ -22,7 +22,7 @@ export default function SintesaHeader({ title, subtitle }: SintesaHeaderProps) {
   const { user, signOut } = useAuth();
   const pathname = usePathname() || '';
   const isWaliPage = pathname.includes('/wali-');
-  const { listMapel, activeMapelId, setActiveMapelId, loading } = useSisminjar();
+  const { listMapel, activeMapelId, setActiveMapelId, loading, userRole } = useSisminjar();
   const { listRombel, activeRombelId, setActiveRombelId, loadingWali } = useWali();
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -48,6 +48,14 @@ export default function SintesaHeader({ title, subtitle }: SintesaHeaderProps) {
 
   // Mapping logic for breadcrumbs and dynamic titles
   const getPageInfo = () => {
+    // Siswa-specific pages
+    if (pathname.includes('/nilai-saya')) return { group: 'Akademik Saya', title: 'Nilai Saya', subtitle: 'Lihat seluruh nilai per mata pelajaran' };
+    if (pathname.includes('/jadwal-saya')) return { group: 'Akademik Saya', title: 'Jadwal Pelajaran', subtitle: 'Jadwal mingguan dan info guru pengampu' };
+    if (pathname.includes('/absensi-saya')) return { group: 'Akademik Saya', title: 'Absensi Saya', subtitle: 'Rekap kehadiran dan persentase' };
+    // Kepala Sekolah pages
+    if (pathname.includes('/monitoring-guru')) return { group: 'Monitoring', title: 'Monitoring Guru', subtitle: 'Pantau aktivitas dan kinerja guru' };
+    if (pathname.includes('/laporan-sekolah')) return { group: 'Monitoring', title: 'Laporan Sekolah', subtitle: 'Rekap data akademik seluruh sekolah' };
+    // Existing pages
     if (pathname.includes('/ma')) return { group: 'Dokumen Mengajar', title: 'Modul Ajar (RPP)', subtitle: 'Penyusunan modul ajar cerdas berbasis AI' };
     if (pathname.includes('/asesmen')) return { group: 'Dokumen Mengajar', title: 'Instrumen Asesmen', subtitle: 'Penyusunan instrumen penilaian siswa' };
     if (pathname.includes('/p5')) return { group: 'Dokumen Mengajar', title: 'Modul Projek P5', subtitle: 'Perancangan modul projek penguatan profil pelajar' };
@@ -87,7 +95,9 @@ export default function SintesaHeader({ title, subtitle }: SintesaHeaderProps) {
 
       <div className="flex items-center space-x-2 md:space-x-4">
         
-        {/* Dropdown Pemilih Mapel atau Rombel */}
+        {/* Dropdown Pemilih Mapel atau Rombel — only for guru/admin */}
+        {(userRole === 'siswa' || userRole === 'kepala_sekolah') ? null : (
+        <>
         {isWaliPage ? (
           <div className="relative">
             <button
@@ -189,6 +199,8 @@ export default function SintesaHeader({ title, subtitle }: SintesaHeaderProps) {
               </div>
             )}
           </div>
+        )}
+        </>
         )}
 
         <div className="w-px h-8 bg-slate-200 mx-2 hidden sm:block"></div>

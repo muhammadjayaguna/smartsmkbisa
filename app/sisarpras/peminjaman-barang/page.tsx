@@ -44,7 +44,7 @@ const PeminjamanBarang = () => {
         mulai_jam: parseInt(data.mulai_jam),
         sampai_jam: parseInt(data.sampai_jam),
         user_id: user?.db_id || user?.id,
-        status: 'Menunggu'
+        status: 'Disetujui'
       });
       if (error) throw error;
     },

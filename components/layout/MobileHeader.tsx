@@ -78,7 +78,7 @@ const MobileHeader = () => {
             className="h-8 w-8 mr-2"
           />
           <div>
-            <h1 className="text-sm font-bold text-teal-700">Smart SMK</h1>
+            <h1 className="text-sm font-bold text-sky-700">Smart SMK</h1>
             <p className="text-[10px] text-muted-foreground">SMKN 1 Banjarmasin</p>
           </div>
         </div>

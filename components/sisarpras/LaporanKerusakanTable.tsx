@@ -10,8 +10,8 @@ import { useUserRole } from '@/hooks/useUserRole';
 
 export default function LaporanKerusakanTable() {
   const { user } = useAuth();
-  const { role } = useUserRole();
-  const isAdmin = role === 'admin' || role === 'kepsek';
+  const { role, isTeknisi } = useUserRole();
+  const isAdmin = role === 'admin' || role === 'kepala_sekolah' || role === 'waka_sarpras' || isTeknisi;
   
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

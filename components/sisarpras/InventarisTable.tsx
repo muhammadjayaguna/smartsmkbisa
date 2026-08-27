@@ -9,8 +9,12 @@ import { toast } from '@/components/ui/use-toast';
 import QRCode from 'react-qr-code';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import QRCodeScanner from './QRCodeScanner';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export default function InventarisTable() {
+  const { role, isTeknisi } = useUserRole();
+  const isManager = role === 'admin' || role === 'kepala_sekolah' || role === 'waka_sarpras' || isTeknisi;
+  
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -132,9 +136,11 @@ export default function InventarisTable() {
           <Button onClick={() => setIsScannerOpen(true)} variant="outline" className="w-full sm:w-auto hover:bg-slate-100">
             <Camera className="w-4 h-4 mr-2" /> Scan QR
           </Button>
-          <Button onClick={() => { setEditingItem(null); setIsFormOpen(true); }} className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
-            <Plus className="w-4 h-4 mr-2" /> Tambah Barang
-          </Button>
+          {isManager && (
+            <Button onClick={() => { setEditingItem(null); setIsFormOpen(true); }} className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
+              <Plus className="w-4 h-4 mr-2" /> Tambah Barang
+            </Button>
+          )}
         </div>
       </div>
 
@@ -148,7 +154,7 @@ export default function InventarisTable() {
               <th className="px-6 py-4 font-semibold">Lokasi</th>
               <th className="px-6 py-4 font-semibold text-center">Kondisi</th>
               <th className="px-6 py-4 font-semibold text-center">Jumlah</th>
-              <th className="px-6 py-4 font-semibold text-right">Aksi</th>
+              <th className="px-6 py-4 font-semibold text-right">QR / Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
@@ -185,12 +191,16 @@ export default function InventarisTable() {
                       <Button variant="outline" size="sm" onClick={() => setQrItem(item)} className="hover:text-indigo-600">
                         <QrCode className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => { setEditingItem(item); setIsFormOpen(true); }}>
-                        <Edit2 className="w-4 h-4 text-slate-600" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)} className="hover:text-red-600">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {isManager && (
+                        <>
+                          <Button variant="outline" size="sm" onClick={() => { setEditingItem(item); setIsFormOpen(true); }}>
+                            <Edit2 className="w-4 h-4 text-slate-600" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)} className="hover:text-red-600">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

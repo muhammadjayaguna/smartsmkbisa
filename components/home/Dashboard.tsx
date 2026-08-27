@@ -206,7 +206,7 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600 mx-auto"></div>
           <p className="mt-4 text-slate-500 font-medium">Memuat Data...</p>
         </div>
       </div>
@@ -215,7 +215,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 md:pb-0 relative">
-      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-teal-600 via-emerald-700 to-teal-800 z-0 rounded-b-[40px] shadow-lg overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-sky-600 via-cyan-700 to-sky-800 z-0 rounded-b-[40px] shadow-lg overflow-hidden">
         {/* Decorative background removed for performance */}
       </div>
 
@@ -226,7 +226,7 @@ const Dashboard = () => {
               <h1 className="text-2xl md:text-4xl font-bold tracking-tight">
                 Selamat Datang, {role === 'admin' ? 'Administrator' : role === 'siswa' ? 'Siswa' : 'Guru'}
               </h1>
-              <p className="text-blue-100 text-sm md:text-lg font-medium opacity-90">
+              <p className="text-sky-100 text-sm md:text-lg font-medium opacity-90">
                 SMK Negeri 1 Banjarmasin
               </p>
               <div className="inline-flex items-center mt-3 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white text-xs md:text-sm font-medium">
@@ -302,7 +302,7 @@ const Dashboard = () => {
           {currentMenuItems.map((categoryGroup, catIdx) => (
             <div key={catIdx}>
               <h3 className="text-lg md:text-xl font-bold text-slate-700 mb-4 flex items-center">
-                <span className="w-1.5 h-6 bg-blue-600 rounded-full mr-3"></span>
+                <span className="w-1.5 h-6 bg-sky-600 rounded-full mr-3"></span>
                 {categoryGroup.category}
               </h3>
               <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
@@ -318,10 +318,10 @@ const Dashboard = () => {
                       <item.icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
                     </div>
                     
-                    <h4 className="text-base md:text-lg font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">{item.title}</h4>
+                    <h4 className="text-base md:text-lg font-bold text-slate-800 mb-2 group-hover:text-sky-600 transition-colors line-clamp-1">{item.title}</h4>
                     <p className="text-slate-500 text-xs md:text-sm leading-relaxed line-clamp-2">{item.description}</p>
                     
-                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center text-sm font-medium text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-2 group-hover:translate-x-0">
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center text-sm font-medium text-sky-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-2 group-hover:translate-x-0">
                       Akses Fitur <span className="ml-2">→</span>
                     </div>
                   </div>

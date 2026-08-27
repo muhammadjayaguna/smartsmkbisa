@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole, UserRole } from '@/hooks/useUserRole';
 
 export interface PengaturanGuru {
   id: string;
@@ -32,6 +33,8 @@ interface SisminjarContextType {
   setActiveMapelId: (id: string) => void;
   loading: boolean;
   refreshData: () => Promise<void>;
+  userRole: UserRole | null;
+  roleLoading: boolean;
 }
 
 const SisminjarContext = createContext<SisminjarContextType>({
@@ -41,12 +44,15 @@ const SisminjarContext = createContext<SisminjarContextType>({
   setActiveMapelId: () => {},
   loading: true,
   refreshData: async () => {},
+  userRole: null,
+  roleLoading: true,
 });
 
 export const useSisminjar = () => useContext(SisminjarContext);
 
 export const SisminjarProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
+  const { role: userRole, loading: roleLoading } = useUserRole();
   const [listMapel, setListMapel] = useState<PengaturanGuru[]>([]);
   const [activeMapelId, setActiveMapelIdState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -112,7 +118,9 @@ export const SisminjarProvider = ({ children }: { children: React.ReactNode }) =
       activeMapelId,
       setActiveMapelId,
       loading,
-      refreshData: fetchPengaturan
+      refreshData: fetchPengaturan,
+      userRole,
+      roleLoading,
     }}>
       {children}
     </SisminjarContext.Provider>

@@ -164,7 +164,7 @@ const AuthPage = () => {
     return (
     <div className="min-h-screen flex w-full">
       {/* Kiri: Ilustrasi & Branding (Desktop Only) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-800 p-12 flex-col justify-between overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-sky-600 via-cyan-600 to-sky-800 p-12 flex-col justify-between overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
           {/* Decorative background removed for performance */}
@@ -184,14 +184,14 @@ const AuthPage = () => {
           
           <h1 className="text-5xl font-extrabold text-white leading-tight mb-6">
             Masa Depan <br/>
-            <span className="text-emerald-200">Digitalisasi Sekolah.</span>
+            <span className="text-cyan-200">Digitalisasi Sekolah.</span>
           </h1>
-          <p className="text-emerald-50 text-lg max-w-md leading-relaxed">
+          <p className="text-sky-50 text-lg max-w-md leading-relaxed">
             Platform sistem informasi sekolah cerdas terpadu untuk kemudahan absensi, jurnal mengajar, dan kegiatan siswa.
           </p>
         </div>
 
-        <div className="relative z-10 flex items-center gap-4 text-emerald-100 font-medium">
+        <div className="relative z-10 flex items-center gap-4 text-sky-100 font-medium">
           <GraduationCap className="h-6 w-6" />
           <span>© {new Date().getFullYear()} SMK Negeri 1 Banjarmasin</span>
         </div>

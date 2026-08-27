@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/lib/supabase/client';
 
-export type UserRole = 'admin' | 'guru' | 'siswa' | 'kepala_sekolah' | 'operator' | 'tamu' | 'kajur' | 'waka_sarpras' | 'bendahara_bos';
+export type UserRole = 'admin' | 'guru' | 'siswa' | 'kepala_sekolah' | 'operator' | 'tamu' | 'kajur' | 'waka_sarpras' | 'bendahara_bos' | 'teknisi';
 
 // Cache for user roles to prevent repeated queries
 const roleCache = new Map<string, { role: UserRole; timestamp: number }>();
@@ -107,6 +107,7 @@ export const useUserRole = () => {
   const isSiswa = role === 'siswa';
   const isKepalaSekolah = role === 'kepala_sekolah';
   const isOperator = role === 'operator';
+  const isTeknisi = role === 'teknisi';
 
   return {
     role,
@@ -116,6 +117,7 @@ export const useUserRole = () => {
     isSiswa,
     isKepalaSekolah,
     isOperator,
+    isTeknisi,
     refetch: fetchUserRole
   };
 };
