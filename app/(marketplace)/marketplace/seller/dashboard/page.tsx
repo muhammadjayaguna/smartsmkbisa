@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import {
-  Plus, Package, TrendingUp, ShoppingBag, Trash2, Eye, EyeOff,
+  Plus, Package, TrendingUp, ShoppingBag, Trash2, Eye, EyeOff, Home, ChevronRight,
   Clock, CheckCircle, XCircle, Truck, PackageCheck, AlertCircle,
   Wallet, ExternalLink, Info, ChevronDown, ChevronUp, DollarSign
 } from 'lucide-react';
@@ -136,7 +137,7 @@ const SellerDashboard = () => {
       supabase.from('products').select('*').eq('seller_id', user.db_id || user.id).order('created_at', { ascending: false }),
       supabase
         .from('transactions')
-        .select('id, amount, quantity, status, created_at, updated_at, mayar_payment_id, mayar_link, product_id, products(title, image_url), buyer:profiles!transactions_buyer_id_fkey(full_name:nama, phone)')
+        .select('id, amount, quantity, status, created_at, updated_at, mayar_payment_id, mayar_link, product_id, products(title, image_url), buyer:users!transactions_buyer_id_fkey(full_name:nama)')
         .eq('seller_id', user.db_id || user.id)
         .order('created_at', { ascending: false })
         .limit(100),
@@ -222,6 +223,19 @@ const SellerDashboard = () => {
   return (
     <div className="min-h-screen bg-secondary">
       <div className="container py-4">
+                {/* -- Breadcrumb -- */}
+        <nav className="mb-6 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <Link href="/" className="flex items-center gap-1 hover:text-primary transition-colors">
+            <Home size={14} />
+            <span className="hidden sm:inline">Dashboard</span>
+          </Link>
+          <ChevronRight size={14} className="opacity-50" />
+          <Link href="/marketplace" className="hover:text-primary transition-colors">
+            Kewirausahaan
+          </Link>
+          <ChevronRight size={14} className="opacity-50" />
+          <span className="text-foreground font-semibold">Toko Saya</span>
+        </nav>
         <div className="mb-4 flex items-center justify-between">
           <h1 className="font-display text-base font-bold text-foreground">Seller Centre</h1>
           <button
@@ -612,3 +626,5 @@ const SellerDashboard = () => {
 };
 
 export default SellerDashboard;
+
+

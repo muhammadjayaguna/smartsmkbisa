@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
-import { Users, GraduationCap, UserCheck, FileText, Calendar, Settings, Camera, Database, BookOpen, Megaphone, Package, Bot, Map, DoorOpen, Activity, Briefcase, Award } from 'lucide-react';
+import { Users, GraduationCap, UserCheck, FileText, Calendar, Settings, Camera, Database, BookOpen, Megaphone, Package, Bot, Map, DoorOpen, Activity, Briefcase, Award, Store } from 'lucide-react';
 import PemberitahuanSection from '@/components/pemberitahuan/PemberitahuanSection';
 import { getLocalDateString } from '@/lib/utils';
 
@@ -103,6 +103,7 @@ const Dashboard = () => {
       category: "Kewirausahaan",
       items: [
         { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
+        { title: 'Toko Saya', description: 'Kelola produk dan pesanan toko Anda', icon: Store, color: 'from-blue-500 to-cyan-600', path: '/marketplace/seller/dashboard' },
         { title: 'Admin SMKmart', description: 'Kelola data toko dan produk', icon: Settings, color: 'from-slate-600 to-slate-800', path: '/admin/marketplace' }
       ]
     },
@@ -112,7 +113,7 @@ const Dashboard = () => {
         { title: 'Manajemen Rombel', description: 'Kelola data rombel dan kelas', icon: GraduationCap, color: 'from-green-500 to-green-600', path: '/manage-rombel' },
         { title: 'Manajemen Siswa', description: 'Kelola data siswa', icon: Users, color: 'from-orange-500 to-orange-600', path: '/manage-siswa' },
         { title: 'Manajemen Pengguna', description: 'Kelola data pengguna sistem', icon: Settings, color: 'from-indigo-500 to-indigo-600', path: '/manage-users' },
-        { title: 'Manajemen Pemberitahuan', description: 'Kelola pengumuman untuk semua pengguna', icon: Megaphone, color: 'from-purple-500 to-pink-600', path: '/manage-pemberitahuan' },
+        { title: 'Manajemen Info', description: 'Kelola pengumuman untuk semua pengguna', icon: Megaphone, color: 'from-purple-500 to-pink-600', path: '/manage-pemberitahuan' },
       ]
     },
     {
@@ -152,7 +153,8 @@ const Dashboard = () => {
     {
       category: "Kewirausahaan",
       items: [
-        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' }
+        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
+        { title: 'Toko Saya', description: 'Kelola produk dan pesanan toko Anda', icon: Store, color: 'from-blue-500 to-cyan-600', path: '/marketplace/seller/dashboard' }
       ]
     }
   ], []);
@@ -179,7 +181,8 @@ const Dashboard = () => {
     {
       category: "Kewirausahaan",
       items: [
-        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' }
+        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
+        { title: 'Toko Saya', description: 'Kelola produk dan pesanan toko Anda', icon: Store, color: 'from-blue-500 to-cyan-600', path: '/marketplace/seller/dashboard' }
       ]
     }
   ], []);
@@ -333,3 +336,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+

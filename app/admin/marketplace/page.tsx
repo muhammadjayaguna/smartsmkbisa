@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -30,7 +31,7 @@ import {
   AlertTriangle,
   Ban,
   Flag,
-} from 'lucide-react';
+  Home, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ─── Types ───────────────────────────────────────────────────────────
@@ -150,8 +151,8 @@ const Avatar = ({ url, name }: { url: string | null; name: string }) => (
 // ─── Main Component ──────────────────────────────────────────────────
 
 const AdminDashboard = () => {
-  const { user, loading: authLoading } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const router = useRouter();
 
   const [tab, setTab] = useState<TabKey>('overview');
@@ -166,11 +167,11 @@ const AdminDashboard = () => {
 
   // auth guard
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
+    if (!roleLoading && !isAdmin) {
       router.push('/');
       toast.error('Akses ditolak: Anda bukan administrator');
     }
-  }, [isAdmin, authLoading, router]);
+  }, [isAdmin, roleLoading, router]);
 
   // fetch data when tab changes
   useEffect(() => {
@@ -368,7 +369,7 @@ const AdminDashboard = () => {
 
   // ── Loading state ──────────────────────────────────────────────────
 
-  if (authLoading) {
+  if (roleLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary">
         <div className="text-center">
@@ -794,3 +795,8 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
+
+
+
