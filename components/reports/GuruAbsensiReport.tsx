@@ -70,7 +70,7 @@ const GuruAbsensiReport = () => {
             email
           )
         `)
-        .eq('jenis_absensi', 'upacara')
+        .eq('jenis_absensi', 'mengajar')
         .gte('tanggal', filters.tanggal_dari)
         .lte('tanggal', filters.tanggal_sampai)
         .order('tanggal', { ascending: false });
@@ -100,7 +100,7 @@ const GuruAbsensiReport = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Gagal memuat data laporan absensi guru apel",
+        description: "Gagal memuat data laporan absensi guru mengajar",
         variant: "destructive",
       });
     } finally {
@@ -135,7 +135,7 @@ const GuruAbsensiReport = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `laporan_absensi_guru_upacara_${filters.tanggal_dari}_${filters.tanggal_sampai}.csv`);
+    link.setAttribute('download', `laporan_absensi_guru_mengajar_${filters.tanggal_dari}_${filters.tanggal_sampai}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -143,7 +143,7 @@ const GuruAbsensiReport = () => {
 
     toast({
       title: "Berhasil",
-      description: "Laporan absensi guru apel berhasil diekspor",
+      description: "Laporan absensi guru mengajar berhasil diekspor",
     });
   };
 
@@ -153,9 +153,9 @@ const GuruAbsensiReport = () => {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Camera className="h-6 w-6" />
-            <span>Filter Laporan Absensi Guru Apel</span>
+            <span>Filter Laporan Absensi Guru Mengajar</span>
           </CardTitle>
-          <CardDescription>Filter laporan absensi upacara Senin</CardDescription>
+          <CardDescription>Filter laporan absensi mengajar guru</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
@@ -196,14 +196,14 @@ const GuruAbsensiReport = () => {
             <div>
               <CardTitle className="flex items-center space-x-2">
                 <Camera className="h-6 w-6" />
-                <span>Data Absensi Upacara Guru</span>
+                <span>Data Absensi Mengajar Guru</span>
               </CardTitle>
               <CardDescription>
                 {reportData.length > 0 ? `Menampilkan ${reportData.length} record` : 'Belum ada data'}
               </CardDescription>
             </div>
             <ExportButtons
-              title="Laporan Absensi Upacara Guru"
+              title="Laporan Absensi Mengajar Guru"
               headers={['Nama Guru', 'Email', 'Tanggal', 'Status', 'Waktu Absen', 'Keterangan']}
               rows={reportData.map(row => [
                 row.guru_nama, row.guru_email,
@@ -275,7 +275,7 @@ const GuruAbsensiReport = () => {
             <div className="text-center py-8">
               <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 mb-2">Belum Ada Data</h3>
-              <p className="text-gray-500">Pilih filter dan klik "Tampilkan Laporan" untuk melihat data absensi guru apel</p>
+              <p className="text-gray-500">Pilih filter dan klik "Tampilkan Laporan" untuk melihat data absensi guru mengajar</p>
             </div>
           )}
         </CardContent>

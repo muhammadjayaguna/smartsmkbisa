@@ -35,7 +35,7 @@ export default function KehadiranGuruPage() {
         .select('*')
         .eq('guru_id', uid)
         .eq('tanggal', today)
-        .eq('jenis_absensi', 'upacara')
+        .eq('jenis_absensi', 'mengajar')
         .maybeSingle();
       
       setAbsensiToday(data);
@@ -43,8 +43,6 @@ export default function KehadiranGuruPage() {
   }, [user]);
 
   useEffect(() => { checkTodayAbsensi(); }, [checkTodayAbsensi]);
-
-  const isMonday = () => new Date().getDay() === 1;
 
   // Handle Foto
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,7 +77,7 @@ export default function KehadiranGuruPage() {
       const { error } = await supabase.from('absensi_guru').insert({
         guru_id: uid,
         tanggal: getLocalDateString(),
-        jenis_absensi: 'upacara',
+        jenis_absensi: 'mengajar',
         status: formData.status,
         foto_url: finalPhotoUrl,
         keterangan: formData.keterangan || null,
@@ -103,7 +101,7 @@ export default function KehadiranGuruPage() {
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
       <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600"><CheckSquare className="w-5 h-5" /></div>
-        <div><h2 className="font-bold text-lg text-slate-800">Kehadiran Guru (Absen)</h2><p className="text-xs text-slate-500">Rekam absensi apel/upacara harian Anda</p></div>
+        <div><h2 className="font-bold text-lg text-slate-800">Kehadiran Guru (Absen)</h2><p className="text-xs text-slate-500">Rekam absensi mengajar harian Anda</p></div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -119,14 +117,12 @@ export default function KehadiranGuruPage() {
           </CardContent>
         </Card>
         
-        <Card className={`${isMonday() ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'} shadow-sm`}>
+        <Card className="bg-amber-50 border-amber-200 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
-            {isMonday() ? <CheckCircle2 className="w-8 h-8 text-amber-500" /> : <Clock className="w-8 h-8 text-slate-400" />}
+            <CheckCircle2 className="w-8 h-8 text-amber-500" />
             <div>
-              <p className={`text-xs font-bold uppercase ${isMonday() ? 'text-amber-600' : 'text-slate-500'}`}>Status Hari</p>
-              <p className={`font-bold text-sm ${isMonday() ? 'text-amber-800' : 'text-slate-800'}`}>
-                {isMonday() ? 'Wajib Apel / Upacara' : 'Bukan Hari Upacara'}
-              </p>
+              <p className="text-xs font-bold uppercase text-amber-600">Status Hari</p>
+              <p className="font-bold text-sm text-amber-800">Wajib Absen Mengajar</p>
             </div>
           </CardContent>
         </Card>
@@ -188,7 +184,7 @@ export default function KehadiranGuruPage() {
                     <SelectValue placeholder="Pilih status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hadir">Hadir (Upacara/Apel)</SelectItem>
+                    <SelectItem value="hadir">Hadir (Mengajar)</SelectItem>
                     <SelectItem value="izin">Izin</SelectItem>
                     <SelectItem value="sakit">Sakit</SelectItem>
                     <SelectItem value="alpha">Alpha</SelectItem>

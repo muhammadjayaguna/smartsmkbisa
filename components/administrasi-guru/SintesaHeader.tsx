@@ -63,7 +63,7 @@ export default function SintesaHeader({ title, subtitle }: SintesaHeaderProps) {
     if (pathname.includes('/atp')) return { group: 'Capaian & Tujuan', title: 'Alur Tujuan Pembelajaran', subtitle: 'Penyusunan ATP dan KKTP mata pelajaran' };
     if (pathname.includes('/prota')) return { group: 'Capaian & Tujuan', title: 'Prota & Promes', subtitle: 'Program Tahunan dan Program Semester' };
     if (pathname.includes('/jurnal')) return { group: 'Administrasi Kelas', title: 'Jurnal Mengajar', subtitle: 'Catatan harian KBM dan materi kelas' };
-    if (pathname.includes('/absensi')) return { group: 'Administrasi Kelas', title: 'Kehadiran Guru', subtitle: 'Rekam kehadiran apel/upacara harian' };
+    if (pathname.includes('/absensi')) return { group: 'Administrasi Kelas', title: 'Kehadiran Guru', subtitle: 'Rekam kehadiran mengajar harian' };
     if (pathname.includes('/penilaian')) return { group: 'Administrasi Kelas', title: 'Penilaian Tugas', subtitle: 'Buku nilai digital dan rekapitulasi' };
     if (pathname.includes('/remedial')) return { group: 'Administrasi Kelas', title: 'Program Remedial', subtitle: 'Tindak lanjut perbaikan nilai siswa' };
     if (pathname.includes('/siswa')) return { group: 'Guru Wali', title: 'Daftar Siswa', subtitle: 'Data profil siswa bimbingan' };

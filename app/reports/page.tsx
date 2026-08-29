@@ -35,7 +35,7 @@ const Reports = () => {
               </TabsTrigger>
               <TabsTrigger value="guru" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 py-2 text-xs md:text-sm">
                 <Camera className="h-4 w-4" />
-                <span className="hidden sm:inline">Absensi Guru Apel</span>
+                <span className="hidden sm:inline">Absensi Guru mengajar</span>
                 <span className="sm:hidden">Guru</span>
               </TabsTrigger>
               <TabsTrigger value="jurnal" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 py-2 text-xs md:text-sm">

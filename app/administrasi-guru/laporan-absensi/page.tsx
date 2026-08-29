@@ -11,7 +11,7 @@ export default function LaporanAbsensiGuruPage() {
       
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200/60">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Laporan Absensi Guru (Apel)</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Laporan Absensi Guru (Mengajar)</h1>
           <p className="text-slate-500 mt-1">Lihat dan ekspor data kehadiran guru.</p>
         </div>
         

@@ -45,7 +45,7 @@ const guruMenu: MenuGroup[] = [
   ]},
   { group: 'ADMINISTRASI KELAS', items: [
     { name: 'Absensi Siswa', path: '/administrasi-guru/absensi-siswa', icon: Users },
-    { name: 'Absensi Guru Apel', path: '/administrasi-guru/absensi', icon: CheckSquare },
+    { name: 'Absensi Guru Mengajar', path: '/administrasi-guru/absensi', icon: CheckSquare },
     { name: 'Laporan Absensi Guru', path: '/administrasi-guru/laporan-absensi', icon: FileCheck },
     { name: 'Jurnal Mengajar', path: '/administrasi-guru/jurnal', icon: Book },
     { name: 'Penilaian Tugas', path: '/administrasi-guru/penilaian', icon: Trophy },

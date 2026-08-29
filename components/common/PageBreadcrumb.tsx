@@ -25,7 +25,7 @@ interface PageBreadcrumbProps {
 const routeLabels: Record<string, string> = {
   '/': 'Beranda',
   '/rombel': 'Absensi Siswa',
-  '/absensi-guru': 'Absensi Guru Apel',
+  '/absensi-guru': 'Absensi Guru Mengajar',
   '/simagang/peta-dudika': 'Peta Lokasi DUDIKA',
   '/simagang/absensi': 'Absensi Siswa Magang',
   '/simagang/laporan': 'Data Absensi Siswa Magang',
