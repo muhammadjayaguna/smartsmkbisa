@@ -7,9 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Search, CheckCircle, XCircle, Printer } from 'lucide-react';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export default function PengajuanAdmin() {
   const { toast } = useToast();
+  const { isAdmin, isOperator } = useUserRole();
+  const canApprove = isAdmin || isOperator;
   const [pengajuans, setPengajuans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -123,14 +126,18 @@ export default function PengajuanAdmin() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       {p.status === 'Menunggu' ? (
-                        <div className="flex justify-end gap-2">
-                          <Button size="sm" onClick={() => handleAction(p.id, 'Disetujui')} className="bg-green-600 hover:bg-green-700 h-8 text-xs">
-                            <CheckCircle className="h-4 w-4 mr-1" /> Setujui
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleAction(p.id, 'Ditolak')} className="text-red-600 border-red-200 hover:bg-red-50 h-8 text-xs">
-                            <XCircle className="h-4 w-4 mr-1" /> Tolak
-                          </Button>
-                        </div>
+                        canApprove ? (
+                          <div className="flex justify-end gap-2">
+                            <Button size="sm" onClick={() => handleAction(p.id, 'Disetujui')} className="bg-green-600 hover:bg-green-700 h-8 text-xs">
+                              <CheckCircle className="h-4 w-4 mr-1" /> Setujui
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => handleAction(p.id, 'Ditolak')} className="text-red-600 border-red-200 hover:bg-red-50 h-8 text-xs">
+                              <XCircle className="h-4 w-4 mr-1" /> Tolak
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">Menunggu</span>
+                        )
                       ) : p.status === 'Disetujui' ? (
                         <Button size="sm" variant="outline" onClick={() => window.open(`/cetak/surat-pengajuan/${p.id}`, '_blank')} className="text-teal-600 border-teal-200 hover:bg-teal-50 h-8 text-xs">
                           <Printer className="h-4 w-4 mr-1" /> Cetak Surat

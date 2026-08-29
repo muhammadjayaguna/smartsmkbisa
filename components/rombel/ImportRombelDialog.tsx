@@ -16,14 +16,13 @@ import { supabase } from '@/lib/supabase/client';
 import { Loader2, UploadCloud, FileSpreadsheet, CheckCircle2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-interface SiswaImportDialogProps {
-  open: boolean;
+interface ImportRombelDialogProps {
+  isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onImportComplete: () => void;
-  rombelList: Array<{ id: string; nama_rombel: string }>;
+  onSuccess: () => void;
 }
 
-export default function SiswaImportDialog({ open, onOpenChange, onImportComplete, rombelList }: SiswaImportDialogProps) {
+export default function ImportRombelDialog({ isOpen, onOpenChange, onSuccess }: ImportRombelDialogProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -43,70 +42,27 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
   };
 
   const processExcelData = (data: any[]) => {
-    // Map common Dapodik headers to our database columns
-    const usersToInsert = data.map(row => {
-      // Find name
-      const nama = row['Nama'] || row['Nama Lengkap'] || row['nama'] || '';
-      const kelas = row['Kelas'] || row['Rombel'] || row['Rombongan Belajar'] || row['kelas'] || '';
+    const rombelToInsert = data.map(row => {
+      // Find Rombel Name
+      const nama_rombel = row['Nama Rombel'] || row['nama_rombel'] || row['Rombongan Belajar'] || row['Rombel'] || row['Kelas'] || '';
       
-      // Determine Rombel ID
-      let rombel_id = null;
-      if (kelas) {
-        const rombel = rombelList.find(r => 
-          r.nama_rombel.toLowerCase().replace(/\s+/g, '') === kelas.toLowerCase().replace(/\s+/g, '')
-        );
-        if (rombel) {
-          rombel_id = rombel.id;
-        }
-      }
-
-      // Generate a dummy NISN if missing
-      let nisn = row['NISN'] || row['nisn'] || '';
-      if (!nisn && nama) {
-        nisn = Math.floor(10000000 + Math.random() * 90000000).toString(); // Dummy 8 digit NISN
-      }
-
-      // Generate a dummy email if not provided
-      let email = row['Email'] || row['email'] || '';
-      if (!email && nama && nisn) {
-        const cleanName = nama.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-        email = `${cleanName}.${nisn}@smk.id`;
-      }
-
-      // Format JK
-      let jk = row['JK'] || row['Jenis Kelamin'] || row['jk'] || '';
-      if (jk) {
-        if (jk.toLowerCase().startsWith('l')) jk = 'L';
-        else if (jk.toLowerCase().startsWith('p')) jk = 'P';
-      }
-
-      // Format Date
-      let tanggal_lahir = row['Tanggal Lahir'] || row['tanggal_lahir'] || row['Tanggal_Lahir'] || null;
-      // Convert Excel serial date to string if needed
-      if (typeof tanggal_lahir === 'number') {
-        const date = new Date((tanggal_lahir - (25567 + 2)) * 86400 * 1000); // Excel epoch adjustment
-        tanggal_lahir = date.toISOString().split('T')[0];
-      }
-
-      const alamat = row['Alamat'] || row['alamat'] || null;
-      const telepon = row['Telepon'] || row['telepon'] || null;
-      const hp = row['HP'] || row['No HP'] || row['hp'] || null;
+      // Find Wali Kelas
+      const wali_kelas = row['Wali Kelas'] || row['wali_kelas'] || row['Wali'] || '-';
+      
+      // Find Tahun Ajaran
+      const tahun_ajaran = row['Tahun Ajaran'] || row['tahun_ajaran'] || '2024/2025';
 
       return {
-        nama,
-        nisn: nisn.toString().trim(),
-        email: email.toLowerCase(),
-        rombel_id,
-        kelas_raw: kelas, // Store for error reporting if rombel not found
-        jk,
-        tanggal_lahir,
-        alamat,
-        telepon: telepon ? telepon.toString().trim() : null,
-        hp: hp ? hp.toString().trim() : null
+        nama_rombel: nama_rombel.toString().trim(),
+        wali_kelas: wali_kelas.toString().trim(),
+        tahun_ajaran: tahun_ajaran.toString().trim()
       };
-    }).filter(u => u.nama && u.nisn); // Keep rows with at least name and NISN
+    }).filter(r => r.nama_rombel); // Must have at least rombel name
 
-    return usersToInsert;
+    // Remove completely identical duplicates from the excel sheet itself
+    const uniqueRombel = Array.from(new Set(rombelToInsert.map(r => JSON.stringify(r)))).map(str => JSON.parse(str));
+
+    return uniqueRombel;
   };
 
   const handleImport = async () => {
@@ -132,71 +88,57 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
           setProgress(30);
           setStatusText('Memproses data...');
 
-          const rawData = processExcelData(jsonData);
+          const rombelData = processExcelData(jsonData);
           
-          if (rawData.length === 0) {
-            toast({ title: 'Data kosong', description: 'Tidak ada data siswa yang valid di file tersebut.', variant: 'destructive' });
-            setIsProcessing(false);
-            return;
-          }
-
-          // Filter out rows without valid rombel
-          const invalidRombel = rawData.filter(r => !r.rombel_id);
-          const validData = rawData.filter(r => r.rombel_id);
-
-          if (validData.length === 0) {
-            const detectedClasses = Array.from(new Set(invalidRombel.map(r => r.kelas_raw || 'Kosong'))).slice(0, 3).join(', ');
-            toast({ 
-              title: 'Rombel Tidak Cocok', 
-              description: `Semua data memiliki kelas yang tidak cocok dengan data Rombel di sistem. (Contoh di Excel: "${detectedClasses}"). Pastikan penamaan kelas sama persis.`, 
-              variant: 'destructive' 
-            });
+          if (rombelData.length === 0) {
+            toast({ title: 'Data kosong', description: 'Tidak ada data rombel yang valid di file tersebut.', variant: 'destructive' });
             setIsProcessing(false);
             return;
           }
 
           setProgress(50);
-          setStatusText(`Menyimpan ${validData.length} data siswa...`);
+          setStatusText(`Menyimpan ${rombelData.length} data rombel...`);
 
           let successCount = 0;
           let errorCount = 0;
 
+          // Insert directly to database
+          // Since we might hit unique constraints (duplicate rombel names), we process them one by one or in small batches
           const batchSize = 50;
-          for (let i = 0; i < validData.length; i += batchSize) {
-            const batch = validData.slice(i, i + batchSize);
+          for (let i = 0; i < rombelData.length; i += batchSize) {
+            const batch = rombelData.slice(i, i + batchSize);
             
-            // Clean payload before inserting to match db schema
-            const payload = batch.map(({ kelas_raw, ...rest }) => rest);
-            
-            const { error: insertError } = await supabase
-              .from('siswa')
-              .upsert(payload, { onConflict: 'nisn' });
+            for (const rombel of batch) {
+              const { error: insertError } = await supabase
+                .from('rombel')
+                .insert(rombel);
 
-            if (insertError) {
-              console.error('Upsert Error:', insertError);
-              errorCount += payload.length;
-            } else {
-              successCount += payload.length;
+              if (insertError) {
+                // Ignore unique constraint errors silently (duplicate names)
+                if (insertError.code === '23505') {
+                  errorCount++;
+                } else {
+                  console.error('Insert Error:', insertError);
+                  errorCount++;
+                }
+              } else {
+                successCount++;
+              }
             }
             
-            setProgress(50 + Math.floor(((i + batchSize) / validData.length) * 50));
+            setProgress(50 + Math.floor(((i + batchSize) / rombelData.length) * 50));
           }
 
           setProgress(100);
           setStatusText('Selesai!');
           
-          let alertDesc = `Berhasil mengimpor ${successCount} siswa. Gagal/Duplikat NISN: ${errorCount}.`;
-          if (invalidRombel.length > 0) {
-            alertDesc += ` (${invalidRombel.length} data dilewati karena Rombel tidak cocok).`;
-          }
-
           toast({ 
             title: 'Import Selesai', 
-            description: alertDesc
+            description: `Berhasil mengimpor ${successCount} rombel baru. (Dilewati/Duplikat: ${errorCount})`
           });
 
           setTimeout(() => {
-            onImportComplete();
+            onSuccess();
             onOpenChange(false);
             setFile(null);
             setProgress(0);
@@ -219,12 +161,12 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl md:max-w-2xl overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Import Data Siswa (Excel)</DialogTitle>
+          <DialogTitle>Import Rombel (Excel)</DialogTitle>
           <DialogDescription className="break-words">
-            Unggah file Excel data Dapodik siswa untuk menambahkannya ke Rombel secara massal.
+            Unggah file Excel data Dapodik untuk menambahkan daftar Rombel secara massal.
           </DialogDescription>
         </DialogHeader>
         
@@ -235,15 +177,15 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
               Pilih file .xlsx atau .xls
             </p>
             <p className="text-xs text-slate-500 text-center mb-4 break-words px-4">
-              Kolom yang dibaca: Nama, Kelas, NISN, JK, Tanggal Lahir, Alamat, Telepon, HP, Email
+              Kolom yang dibaca: Nama Rombel/Kelas, Wali Kelas (opsional), Tahun Ajaran (opsional)
             </p>
-            <Label htmlFor="excel-upload-siswa" className="cursor-pointer">
+            <Label htmlFor="excel-upload-rombel" className="cursor-pointer">
               <div className="bg-white border border-slate-200 px-4 py-2 rounded-md hover:bg-slate-50 transition-colors">
                 Jelajahi File
               </div>
             </Label>
             <Input 
-              id="excel-upload-siswa" 
+              id="excel-upload-rombel" 
               type="file" 
               accept=".xlsx, .xls" 
               className="hidden" 
@@ -276,10 +218,6 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
               </div>
             </div>
           )}
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
-            <strong>Catatan:</strong> Pastikan penamaan kelas di Excel (misal: "XII RPL 1") sama persis dengan nama Rombel yang ada di sistem agar otomatis terkait.
-          </div>
         </div>
 
         <DialogFooter>

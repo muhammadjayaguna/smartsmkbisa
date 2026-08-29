@@ -10,11 +10,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, ArrowLeft, Users, FileSpreadsheet } from 'lucide-react';
+import { Plus, Edit, Trash2, ArrowLeft, Users, FileSpreadsheet, Search, Filter, ArrowRightLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import AppLayout from '@/components/layout/AppLayout';
 import SiswaImportDialog from '@/components/siswa/SiswaImportDialog';
+import KenaikanKelasDialog from '@/components/siswa/KenaikanKelasDialog';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 
 interface Siswa {
@@ -40,7 +41,10 @@ const ManageSiswa = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isKenaikanDialogOpen, setIsKenaikanDialogOpen] = useState(false);
   const [editingSiswa, setEditingSiswa] = useState<Siswa | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRombel, setSelectedRombel] = useState('all');
   const [formData, setFormData] = useState({
     nama: '',
     nisn: '',
@@ -328,6 +332,15 @@ const ManageSiswa = () => {
               <div className="flex flex-wrap items-center gap-2">
                 <Button 
                   variant="outline"
+                  onClick={() => setIsKenaikanDialogOpen(true)}
+                  className="flex items-center space-x-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
+                >
+                  <ArrowRightLeft className="h-4 w-4" />
+                  <span>Kenaikan Kelas</span>
+                </Button>
+                
+                <Button 
+                  variant="outline"
                   onClick={() => setIsImportDialogOpen(true)}
                   className="flex items-center space-x-2"
                 >
@@ -421,11 +434,47 @@ const ManageSiswa = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-6 w-6" />
-                <span>Daftar Siswa</span>
-              </CardTitle>
-              <CardDescription>Total {siswaList.length} siswa terdaftar</CardDescription>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Users className="h-6 w-6" />
+                    <span>Daftar Siswa</span>
+                  </CardTitle>
+                  <CardDescription>Total {siswaList.length} siswa terdaftar</CardDescription>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                  <div className="relative w-full sm:w-64">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <Input
+                      type="text"
+                      placeholder="Cari nama, NISN, atau email..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <div className="relative w-full sm:w-48">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Filter className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <select
+                      value={selectedRombel}
+                      onChange={(e) => setSelectedRombel(e.target.value)}
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="all">Semua Rombel</option>
+                      {rombelList.map((rombel) => (
+                        <option key={rombel.id} value={rombel.id}>
+                          {rombel.nama_rombel}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
@@ -439,7 +488,20 @@ const ManageSiswa = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {siswaList.map((siswa) => (
+                  {siswaList
+                    .filter(siswa => {
+                      // Filter by search query
+                      const matchesSearch = 
+                        siswa.nama.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        siswa.nisn.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (siswa.email && siswa.email.toLowerCase().includes(searchQuery.toLowerCase()));
+                      
+                      // Filter by rombel
+                      const matchesRombel = selectedRombel === 'all' || siswa.rombel_id === selectedRombel;
+                      
+                      return matchesSearch && matchesRombel;
+                    })
+                    .map((siswa) => (
                     <TableRow key={siswa.id}>
                       <TableCell className="font-medium">{siswa.nisn}</TableCell>
                       <TableCell>{siswa.nama}</TableCell>
@@ -482,6 +544,13 @@ const ManageSiswa = () => {
         open={isImportDialogOpen}
         onOpenChange={setIsImportDialogOpen}
         onImportComplete={fetchData}
+        rombelList={rombelList}
+      />
+      
+      <KenaikanKelasDialog
+        isOpen={isKenaikanDialogOpen}
+        onOpenChange={setIsKenaikanDialogOpen}
+        onSuccess={fetchData}
         rombelList={rombelList}
       />
     </AppLayout>

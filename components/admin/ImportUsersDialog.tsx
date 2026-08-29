@@ -15,15 +15,15 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase/client';
 import { Loader2, UploadCloud, FileSpreadsheet, CheckCircle2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { UserRole } from '@/hooks/useUserRole';
 
-interface SiswaImportDialogProps {
-  open: boolean;
+interface ImportUsersDialogProps {
+  isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onImportComplete: () => void;
-  rombelList: Array<{ id: string; nama_rombel: string }>;
+  onSuccess: () => void;
 }
 
-export default function SiswaImportDialog({ open, onOpenChange, onImportComplete, rombelList }: SiswaImportDialogProps) {
+export default function ImportUsersDialog({ isOpen, onOpenChange, onSuccess }: ImportUsersDialogProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -43,68 +43,44 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
   };
 
   const processExcelData = (data: any[]) => {
-    // Map common Dapodik headers to our database columns
+    // Basic mapping: Looking for common Dapodik headers
+    // Example: Nama, NIP, NIK, NISN, Email, Role, Jenis PTK
     const usersToInsert = data.map(row => {
       // Find name
-      const nama = row['Nama'] || row['Nama Lengkap'] || row['nama'] || '';
-      const kelas = row['Kelas'] || row['Rombel'] || row['Rombongan Belajar'] || row['kelas'] || '';
+      const nama = row['Nama'] || row['Nama Lengkap'] || row['NAMA'] || '';
       
-      // Determine Rombel ID
-      let rombel_id = null;
-      if (kelas) {
-        const rombel = rombelList.find(r => 
-          r.nama_rombel.toLowerCase().replace(/\s+/g, '') === kelas.toLowerCase().replace(/\s+/g, '')
-        );
-        if (rombel) {
-          rombel_id = rombel.id;
+      // Determine Role
+      let role: UserRole = 'tamu';
+      const jenisPtk = (row['Jenis PTK'] || row['Jabatan'] || row['Role'] || '').toLowerCase();
+      
+      if (jenisPtk.includes('guru')) role = 'guru';
+      else if (jenisPtk.includes('kepala sekolah')) role = 'kepala_sekolah';
+      else if (jenisPtk.includes('operator') || jenisPtk.includes('tu')) role = 'operator';
+      else if (row['NISN'] || row['nisn']) role = 'siswa';
+      else if (row['Role']) {
+        const rawRole = row['Role'].toLowerCase();
+        if (['admin', 'guru', 'siswa', 'kepala_sekolah', 'operator', 'tamu'].includes(rawRole)) {
+          role = rawRole as UserRole;
         }
+      } else if (nama) {
+        // Default fallback if it's a person
+        role = 'siswa'; // Assuming mostly students if unspecified in a student sheet
       }
 
-      // Generate a dummy NISN if missing
-      let nisn = row['NISN'] || row['nisn'] || '';
-      if (!nisn && nama) {
-        nisn = Math.floor(10000000 + Math.random() * 90000000).toString(); // Dummy 8 digit NISN
-      }
-
-      // Generate a dummy email if not provided
+      // Generate a dummy email if not provided, for supabase uniqueness
       let email = row['Email'] || row['email'] || '';
-      if (!email && nama && nisn) {
+      if (!email && nama) {
+        const uniqueId = row['NISN'] || row['NIP'] || row['NIK'] || Math.floor(Math.random() * 1000000);
         const cleanName = nama.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-        email = `${cleanName}.${nisn}@smk.id`;
+        email = `${cleanName}.${uniqueId}@smk.id`;
       }
-
-      // Format JK
-      let jk = row['JK'] || row['Jenis Kelamin'] || row['jk'] || '';
-      if (jk) {
-        if (jk.toLowerCase().startsWith('l')) jk = 'L';
-        else if (jk.toLowerCase().startsWith('p')) jk = 'P';
-      }
-
-      // Format Date
-      let tanggal_lahir = row['Tanggal Lahir'] || row['tanggal_lahir'] || row['Tanggal_Lahir'] || null;
-      // Convert Excel serial date to string if needed
-      if (typeof tanggal_lahir === 'number') {
-        const date = new Date((tanggal_lahir - (25567 + 2)) * 86400 * 1000); // Excel epoch adjustment
-        tanggal_lahir = date.toISOString().split('T')[0];
-      }
-
-      const alamat = row['Alamat'] || row['alamat'] || null;
-      const telepon = row['Telepon'] || row['telepon'] || null;
-      const hp = row['HP'] || row['No HP'] || row['hp'] || null;
 
       return {
         nama,
-        nisn: nisn.toString().trim(),
         email: email.toLowerCase(),
-        rombel_id,
-        kelas_raw: kelas, // Store for error reporting if rombel not found
-        jk,
-        tanggal_lahir,
-        alamat,
-        telepon: telepon ? telepon.toString().trim() : null,
-        hp: hp ? hp.toString().trim() : null
+        role
       };
-    }).filter(u => u.nama && u.nisn); // Keep rows with at least name and NISN
+    }).filter(u => u.nama && u.email); // Only keep valid rows
 
     return usersToInsert;
   };
@@ -132,75 +108,80 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
           setProgress(30);
           setStatusText('Memproses data...');
 
-          const rawData = processExcelData(jsonData);
+          const usersToInsert = processExcelData(jsonData);
           
-          if (rawData.length === 0) {
-            toast({ title: 'Data kosong', description: 'Tidak ada data siswa yang valid di file tersebut.', variant: 'destructive' });
-            setIsProcessing(false);
-            return;
-          }
-
-          // Filter out rows without valid rombel
-          const invalidRombel = rawData.filter(r => !r.rombel_id);
-          const validData = rawData.filter(r => r.rombel_id);
-
-          if (validData.length === 0) {
-            const detectedClasses = Array.from(new Set(invalidRombel.map(r => r.kelas_raw || 'Kosong'))).slice(0, 3).join(', ');
-            toast({ 
-              title: 'Rombel Tidak Cocok', 
-              description: `Semua data memiliki kelas yang tidak cocok dengan data Rombel di sistem. (Contoh di Excel: "${detectedClasses}"). Pastikan penamaan kelas sama persis.`, 
-              variant: 'destructive' 
-            });
+          if (usersToInsert.length === 0) {
+            toast({ title: 'Data kosong', description: 'Tidak ada data valid yang bisa diimpor dari file tersebut.', variant: 'destructive' });
             setIsProcessing(false);
             return;
           }
 
           setProgress(50);
-          setStatusText(`Menyimpan ${validData.length} data siswa...`);
+          setStatusText(`Menyimpan ${usersToInsert.length} data pengguna...`);
 
           let successCount = 0;
           let errorCount = 0;
 
+          // Process in small batches to avoid timeout/payload issues
           const batchSize = 50;
-          for (let i = 0; i < validData.length; i += batchSize) {
-            const batch = validData.slice(i, i + batchSize);
+          for (let i = 0; i < usersToInsert.length; i += batchSize) {
+            const batch = usersToInsert.slice(i, i + batchSize);
             
-            // Clean payload before inserting to match db schema
-            const payload = batch.map(({ kelas_raw, ...rest }) => rest);
-            
-            const { error: insertError } = await supabase
-              .from('siswa')
-              .upsert(payload, { onConflict: 'nisn' });
+            for (const user of batch) {
+              // 1. Insert into public.users
+              const { data: newUser, error: userError } = await supabase
+                .from('users')
+                .insert({
+                  nama: user.nama,
+                  email: user.email,
+                  // auth_id is intentionally left null. They can use "Aktifkan Email" later.
+                })
+                .select('id')
+                .maybeSingle();
 
-            if (insertError) {
-              console.error('Upsert Error:', insertError);
-              errorCount += payload.length;
-            } else {
-              successCount += payload.length;
+              if (userError) {
+                // Usually unique constraint on email
+                if (userError.code !== '23505') {
+                  console.error('User Insert Error:', userError);
+                }
+                errorCount++;
+                continue;
+              }
+
+              if (newUser) {
+                // 2. Insert role
+                const { error: roleError } = await supabase
+                  .from('user_roles')
+                  .insert({
+                    user_id: newUser.id,
+                    role: user.role
+                  });
+                
+                if (roleError) {
+                  console.error('Role Insert Error:', roleError);
+                }
+                successCount++;
+              }
             }
-            
-            setProgress(50 + Math.floor(((i + batchSize) / validData.length) * 50));
+
+            // Update progress
+            setProgress(50 + Math.floor(((i + batchSize) / usersToInsert.length) * 50));
           }
 
           setProgress(100);
           setStatusText('Selesai!');
           
-          let alertDesc = `Berhasil mengimpor ${successCount} siswa. Gagal/Duplikat NISN: ${errorCount}.`;
-          if (invalidRombel.length > 0) {
-            alertDesc += ` (${invalidRombel.length} data dilewati karena Rombel tidak cocok).`;
-          }
-
           toast({ 
             title: 'Import Selesai', 
-            description: alertDesc
+            description: `Berhasil mengimpor ${successCount} data. Gagal/Duplikat: ${errorCount} data.`
           });
 
           setTimeout(() => {
-            onImportComplete();
+            onSuccess();
             onOpenChange(false);
             setFile(null);
             setProgress(0);
-          }, 1500);
+          }, 1000);
 
         } catch (error: any) {
           console.error(error);
@@ -219,12 +200,12 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl md:max-w-2xl overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Import Data Siswa (Excel)</DialogTitle>
+          <DialogTitle>Import Data Excel (Dapodik)</DialogTitle>
           <DialogDescription className="break-words">
-            Unggah file Excel data Dapodik siswa untuk menambahkannya ke Rombel secara massal.
+            Unggah file Excel data guru atau siswa untuk menambahkannya ke dalam sistem.
           </DialogDescription>
         </DialogHeader>
         
@@ -235,15 +216,15 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
               Pilih file .xlsx atau .xls
             </p>
             <p className="text-xs text-slate-500 text-center mb-4 break-words px-4">
-              Kolom yang dibaca: Nama, Kelas, NISN, JK, Tanggal Lahir, Alamat, Telepon, HP, Email
+              Pastikan terdapat kolom Nama, Email, dan Role (opsional)
             </p>
-            <Label htmlFor="excel-upload-siswa" className="cursor-pointer">
+            <Label htmlFor="excel-upload" className="cursor-pointer">
               <div className="bg-white border border-slate-200 px-4 py-2 rounded-md hover:bg-slate-50 transition-colors">
                 Jelajahi File
               </div>
             </Label>
             <Input 
-              id="excel-upload-siswa" 
+              id="excel-upload" 
               type="file" 
               accept=".xlsx, .xls" 
               className="hidden" 
@@ -276,10 +257,6 @@ export default function SiswaImportDialog({ open, onOpenChange, onImportComplete
               </div>
             </div>
           )}
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
-            <strong>Catatan:</strong> Pastikan penamaan kelas di Excel (misal: "XII RPL 1") sama persis dengan nama Rombel yang ada di sistem agar otomatis terkait.
-          </div>
         </div>
 
         <DialogFooter>

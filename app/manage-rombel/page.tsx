@@ -11,11 +11,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { Plus, Edit, Trash2, ArrowLeft, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import AppLayout from '@/components/layout/AppLayout';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
+import ImportRombelDialog from '@/components/rombel/ImportRombelDialog';
 
 interface Rombel {
   id: string;
@@ -29,6 +30,7 @@ const ManageRombel = () => {
   const [rombels, setRombels] = useState<Rombel[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [editingRombel, setEditingRombel] = useState<Rombel | null>(null);
   const [formData, setFormData] = useState({
     nama_rombel: '',
@@ -241,6 +243,14 @@ const ManageRombel = () => {
             <PageBreadcrumb currentPage="Manajemen Rombel" className="mb-4" />
             
             <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsImportDialogOpen(true)}
+                className="flex items-center space-x-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
+              >
+                <UploadCloud className="h-4 w-4" />
+                <span>Import Rombel</span>
+              </Button>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="flex items-center space-x-2">
@@ -351,6 +361,12 @@ const ManageRombel = () => {
           </Card>
         </div>
       </div>
+
+      <ImportRombelDialog 
+        isOpen={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onSuccess={fetchRombels}
+      />
     </AppLayout>
   );
 };

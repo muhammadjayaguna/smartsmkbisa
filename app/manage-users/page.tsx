@@ -17,13 +17,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Users, Trash2, Edit, ArrowLeft, UserCheck, AlertTriangle, CheckCircle, RefreshCw, KeyRound } from 'lucide-react';
+import { Plus, Edit, Trash2, Shield, User, GraduationCap, ArrowLeft, KeyRound, Check, FileSpreadsheet, UploadCloud, UserCheck, Search, Filter, Users, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import AppLayout from '@/components/layout/AppLayout';
 import { UserRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/hooks/useAuth';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
+import ImportUsersDialog from '@/components/admin/ImportUsersDialog';
 
 interface User {
   id: string;
@@ -50,6 +51,7 @@ const ManageUsers = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isReactivateDialogOpen, setIsReactivateDialogOpen] = useState(false);
   const [reactivateEmailInput, setReactivateEmailInput] = useState('');
@@ -61,6 +63,8 @@ const ManageUsers = () => {
   const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null);
   const [resetPasswordInput, setResetPasswordInput] = useState('');
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRole, setSelectedRole] = useState('all');
 
   const form = useForm<UpdateUserForm>({
     resolver: zodResolver(updateUserSchema),
@@ -359,12 +363,47 @@ const ManageUsers = () => {
           <div className="grid gap-6">
             <Card>
               <CardHeader>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <CardTitle>Daftar Pengguna</CardTitle>
                     <CardDescription>Kelola role dan data pengguna yang sudah terdaftar</CardDescription>
                   </div>
-                  <div className="flex gap-2">
+                  
+                  <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                    <div className="relative w-full sm:w-64">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <Input
+                        type="text"
+                        placeholder="Cari nama atau email..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <div className="relative w-full sm:w-48">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Filter className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <select
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="all">Semua Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="guru">Guru</option>
+                        <option value="siswa">Siswa</option>
+                        <option value="kepala_sekolah">Kepala Sekolah</option>
+                        <option value="operator">Operator</option>
+                      </select>
+                    </div>
+
+                    <Button onClick={() => setIsImportDialogOpen(true)} variant="outline" className="flex items-center space-x-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200">
+                      <UploadCloud className="h-4 w-4" />
+                      <span className="hidden sm:inline">Import Excel</span>
+                    </Button>
                     <Button onClick={() => setIsReactivateDialogOpen(true)} variant="outline" className="flex items-center space-x-2">
                       <UserCheck className="h-4 w-4" />
                       <span>Aktifkan Email</span>
@@ -397,7 +436,19 @@ const ManageUsers = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {users.map((user) => {
+                        {users
+                          .filter(user => {
+                            // Filter by search query
+                            const matchesSearch = 
+                              user.nama.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase()));
+                            
+                            // Filter by role
+                            const matchesRole = selectedRole === 'all' || user.role === selectedRole;
+                            
+                            return matchesSearch && matchesRole;
+                          })
+                          .map((user) => {
                           const canManageRole = Boolean(user.auth_id);
                           return (
                             <TableRow key={user.id}>
@@ -501,6 +552,12 @@ const ManageUsers = () => {
               </Form>
             </DialogContent>
           </Dialog>
+
+          <ImportUsersDialog 
+            isOpen={isImportDialogOpen}
+            onOpenChange={setIsImportDialogOpen}
+            onSuccess={fetchUsers}
+          />
 
           <Dialog open={isReactivateDialogOpen} onOpenChange={setIsReactivateDialogOpen}>
             <DialogContent className="max-w-md">
