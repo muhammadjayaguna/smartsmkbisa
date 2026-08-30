@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         let supabaseUserId = null;
+        let userNama = null;
         try {
           // 1. Check if user exists in `users` table
           const { data: existingUser } = await supabase
@@ -39,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .maybeSingle();
 
           supabaseUserId = existingUser?.id;
-          let userNama = existingUser?.nama;
+          userNama = existingUser?.nama;
 
           if (!existingUser) {
             // Insert new user

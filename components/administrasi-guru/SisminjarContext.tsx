@@ -23,7 +23,12 @@ export interface PengaturanGuru {
   teks_acuan_cp: string;
   is_guru_bk: boolean;
   pengumuman_siswa: string;
-  jadwal_pelajaran: string;
+}
+
+export interface AppSettings {
+  id: number;
+  url_logo: string;
+  url_kop_surat: string;
 }
 
 interface SisminjarContextType {
@@ -35,6 +40,7 @@ interface SisminjarContextType {
   refreshData: () => Promise<void>;
   userRole: UserRole | null;
   roleLoading: boolean;
+  appSettings: AppSettings | null;
 }
 
 const SisminjarContext = createContext<SisminjarContextType>({
@@ -46,6 +52,7 @@ const SisminjarContext = createContext<SisminjarContextType>({
   refreshData: async () => {},
   userRole: null,
   roleLoading: true,
+  appSettings: null,
 });
 
 export const useSisminjar = () => useContext(SisminjarContext);
@@ -56,6 +63,7 @@ export const SisminjarProvider = ({ children }: { children: React.ReactNode }) =
   const [listMapel, setListMapel] = useState<PengaturanGuru[]>([]);
   const [activeMapelId, setActiveMapelIdState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
 
   const fetchPengaturan = async () => {
     if (!user) {
@@ -70,6 +78,16 @@ export const SisminjarProvider = ({ children }: { children: React.ReactNode }) =
         .select('*')
         .eq('guru_id', user.db_id || user.id)
         .order('created_at', { ascending: true });
+
+      const { data: appData, error: appError } = await supabase
+        .from('pengaturan_aplikasi')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (appData) {
+        setAppSettings(appData);
+      }
 
       if (error) {
         console.error('Error fetching pengaturan_guru:', error);
@@ -121,6 +139,7 @@ export const SisminjarProvider = ({ children }: { children: React.ReactNode }) =
       refreshData: fetchPengaturan,
       userRole,
       roleLoading,
+      appSettings,
     }}>
       {children}
     </SisminjarContext.Provider>

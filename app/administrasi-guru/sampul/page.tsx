@@ -17,7 +17,7 @@ export default function SampulPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const { activeMapel, loading: contextLoading } = useSisminjar();
+  const { activeMapel, appSettings, loading: contextLoading } = useSisminjar();
 
   // Form State
   const [judul, setJudul] = useState('BUKU KERJA GURU');
@@ -180,8 +180,8 @@ export default function SampulPage() {
 
                 {/* Middle Section (Optional Logo or just blank space as in screenshot) */}
                 <div className="flex-1 flex flex-col justify-center items-center my-16 w-full">
-                  {activeMapel?.url_logo ? (
-                    <img src={activeMapel.url_logo} alt="Logo" className="w-40 h-40 object-contain grayscale" />
+                  {appSettings?.url_logo ? (
+                    <img src={appSettings.url_logo} alt="Logo" className="w-40 h-40 object-contain" />
                   ) : (
                     <div className="w-full max-w-sm">
                       {/* Daftar Isi Preview (Optional, usually in next page, but some put it on cover) 
@@ -223,8 +223,8 @@ export default function SampulPage() {
                 </div>
 
                 <div className="flex-1 flex justify-center items-center my-16">
-                  {activeMapel?.url_logo && (
-                    <img src={activeMapel.url_logo} alt="Logo" className="w-40 h-40 object-contain grayscale" />
+                  {appSettings?.url_logo && (
+                    <img src={appSettings.url_logo} alt="Logo" className="w-40 h-40 object-contain" />
                   )}
                 </div>
 

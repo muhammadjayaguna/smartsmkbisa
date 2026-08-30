@@ -310,7 +310,7 @@ export default function CapaianPembelajaranPage() {
   const fase = activeMapel?.fase || 'Fase E (Kelas 10)';
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20 print-container">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 print-container print:p-12 print:max-w-none print:w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">
@@ -338,8 +338,8 @@ export default function CapaianPembelajaranPage() {
       </div>
 
       {/* Deskripsi Umum */}
-      <Card className="border-slate-200/60 shadow-sm overflow-hidden">
-        <CardContent className="p-6">
+      <Card className={`border-slate-200/60 shadow-sm overflow-hidden print:border-none print:shadow-none print:break-inside-avoid print:mb-8 ${!deskripsiUmum ? 'print:hidden' : ''}`}>
+        <CardContent className="p-6 print:p-0">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-slate-700 flex items-center gap-2">
               <span className="text-lg">📋</span> Deskripsi Umum CP
@@ -368,8 +368,8 @@ export default function CapaianPembelajaranPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-xl p-5 border border-slate-100">
-              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+            <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-xl p-5 border border-slate-100 print:bg-none print:border-none print:p-0 print:rounded-none">
+              <p className={`text-sm text-slate-600 print:text-black leading-relaxed whitespace-pre-wrap ${!deskripsiUmum ? 'print:hidden' : ''}`}>
                 {deskripsiUmum || 'Belum ada deskripsi. Klik ikon ✏️ di atas untuk menambahkan, atau gunakan tombol Generate AI!'}
               </p>
             </div>
@@ -378,9 +378,9 @@ export default function CapaianPembelajaranPage() {
       </Card>
 
       {/* Elemen CP */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-slate-700 text-lg">Elemen Capaian Pembelajaran</h3>
+      <div className="space-y-4 print:space-y-8">
+        <div className="flex items-center justify-between print:mb-4">
+          <h3 className="font-bold text-slate-700 text-lg print:text-xl print:text-black print:uppercase print:tracking-wide">Elemen Capaian Pembelajaran</h3>
           <Button
             size="sm"
             onClick={() => setShowAddForm(!showAddForm)}
@@ -441,9 +441,9 @@ export default function CapaianPembelajaranPage() {
               return (
                 <Card
                   key={elemen.id}
-                  className={`border-l-4 ${BORDER_COLORS[colorIdx]} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden`}
+                  className={`border-l-4 ${BORDER_COLORS[colorIdx]} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden print:border-0 print:border-b print:border-slate-400 print:shadow-none print:rounded-none print:break-inside-avoid print:bg-transparent`}
                 >
-                  <CardContent className="p-5">
+                  <CardContent className="p-5 print:pt-12 print:pb-8 print:px-0">
                     {isEditing && editForm ? (
                       /* Edit Mode */
                       <div className="space-y-3">
@@ -465,10 +465,10 @@ export default function CapaianPembelajaranPage() {
                       <>
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <span className={`${ICON_COLORS[colorIdx]}`}>
+                            <span className={`${ICON_COLORS[colorIdx]} print:hidden`}>
                               {ICON_LIST[index % ICON_LIST.length]}
                             </span>
-                            <h4 className="font-bold text-slate-800 text-base">
+                            <h4 className="font-bold text-slate-800 print:text-black text-base print:text-lg">
                               {elemen.kode} — {elemen.judul}
                             </h4>
                           </div>
@@ -484,7 +484,7 @@ export default function CapaianPembelajaranPage() {
                             </Button>
                           </div>
                         </div>
-                        <p className="text-sm text-slate-600 leading-relaxed">{elemen.deskripsi}</p>
+                        <p className="text-sm text-slate-600 print:text-black leading-relaxed text-justify">{elemen.deskripsi}</p>
                       </>
                     )}
                   </CardContent>

@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Target, Plus, Trash2, Save, Edit3, Printer } from 'lucide-react';
+import { Target, Plus, Trash2, Save, Edit3, Printer, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -36,13 +36,101 @@ export default function KKTPPage() {
   const [newItem, setNewItem] = useState<KKTPItem>({
     tp_kode: '', tujuan: '', kriteria_tercapai: '', kriteria_berkembang: '', kriteria_mulai: '', kriteria_belum: '', urutan: 0
   });
+  const [generating, setGenerating] = useState(false);
+
+  const handleGenerateAI = async () => {
+    if (!user) return;
+    if (!activeMapel) return toast({ title: '⚠️ Pilih atau Buat Mata Pelajaran terlebih dahulu', variant: 'destructive' });
+    
+    setGenerating(true);
+    toast({ title: '🤖 Mengambil data ATP...', description: 'Mohon tunggu sebentar.' });
+    
+    try {
+      const uid = user.db_id || user.id;
+      // 1. Ambil ATP
+      const { data: atpData, error: atpError } = await supabase.from('atp').select('*').eq('guru_id', uid).order('urutan', { ascending: true });
+      
+      if (atpError) throw atpError;
+      if (!atpData || atpData.length === 0) {
+        toast({ title: '⚠️ Belum ada ATP', description: 'Buat Tujuan Pembelajaran (ATP) terlebih dahulu di menu ATP.', variant: 'destructive' });
+        setGenerating(false);
+        return;
+      }
+
+      if (kktpList.length > 0) {
+        if (!confirm('⚠️ Generate AI akan MENGGANTI seluruh KKTP yang sudah ada.\\n\\nLanjutkan?')) {
+          setGenerating(false);
+          return;
+        }
+      }
+
+      // 2. Panggil API AI secara bertahap (chunking) untuk mencegah Cloudflare 524 Timeout
+      const chunkSize = 3;
+      let allNewKktp: any[] = [];
+      let currentIndex = 0;
+
+      for (let i = 0; i < atpData.length; i += chunkSize) {
+        const chunk = atpData.slice(i, i + chunkSize);
+        toast({ title: `🤖 Sedang men-generate KKTP (${i+1}-${Math.min(i+chunkSize, atpData.length)} dari ${atpData.length})...`, description: 'Mohon tunggu.' });
+        
+        const res = await fetch('/api/generate-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'generate_kktp',
+            mataPelajaran: activeMapel?.mata_pelajaran || 'Mata Pelajaran',
+            fase: activeMapel?.fase || 'Fase E (Kelas 10)',
+            jenjang: activeMapel?.jenjang_sekolah || 'SMK',
+            atpList: chunk
+          }),
+        });
+        
+        const result = await res.json();
+        if (!res.ok || !result.success) throw new Error(result.error || `Gagal generate KKTP pada batch ${i+1}`);
+
+        const aiData = result.data;
+        if (!aiData || !aiData.kktp || !Array.isArray(aiData.kktp)) throw new Error('Format output AI tidak valid pada batch tertentu');
+
+        const mappedChunk = aiData.kktp.map((item: any) => {
+          currentIndex++;
+          return {
+            guru_id: uid,
+            tp_kode: item.tp_kode,
+            tujuan: atpData.find(a => a.kode === item.tp_kode)?.tujuan || item.tujuan || '',
+            kriteria_tercapai: item.kriteria_tercapai,
+            kriteria_berkembang: item.kriteria_berkembang,
+            kriteria_mulai: item.kriteria_mulai,
+            kriteria_belum: item.kriteria_belum,
+            urutan: currentIndex
+          };
+        });
+
+        allNewKktp = [...allNewKktp, ...mappedChunk];
+      }
+
+      // 3. Hapus KKTP lama
+      await supabase.from('kktp').delete().eq('guru_id', uid);
+
+      // 4. Insert KKTP baru
+      const { error: insertError } = await supabase.from('kktp').insert(allNewKktp);
+      if (insertError) throw insertError;
+
+      toast({ title: '✅ Berhasil!', description: 'KKTP berhasil di-generate menggunakan AI.' });
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: 'Gagal generate', description: err.message, variant: 'destructive' });
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const fetchData = useCallback(async () => {
     if (!user) return;
     try {
       const uid = user.db_id || user.id;
-      const { data: pgData } = await supabase.from('pengaturan_guru').select('*').eq('guru_id', uid).maybeSingle();
-      if (pgData) setPengaturan(pgData);
+      // const { data: pgData } = await supabase.from('pengaturan_guru').select('*').eq('guru_id', uid).maybeSingle();
+      // if (pgData) setPengaturan(pgData);
 
       const { data } = await supabase.from('kktp').select('*').eq('guru_id', uid).order('urutan', { ascending: true });
       if (data) setKktpList(data);
@@ -87,7 +175,7 @@ export default function KKTPPage() {
   const kkm = activeMapel?.kkm || 75;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20">
+    <div className="max-w-6xl mx-auto space-y-6 pb-20 print:pt-[1.5cm] print:pb-[1.5cm] print:px-[1.5cm]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">
@@ -100,6 +188,13 @@ export default function KKTPPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button onClick={handleGenerateAI} disabled={generating} className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md disabled:opacity-70">
+            {generating ? (
+              <><div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div> Generating...</>
+            ) : (
+              <><Sparkles className="w-4 h-4 mr-2" /> Generate KKTP (AI)</>
+            )}
+          </Button>
           <Button onClick={() => window.print()} variant="outline" className="border-slate-300">
             <Printer className="w-4 h-4 mr-2" /> Cetak KKTP
           </Button>
@@ -146,7 +241,7 @@ export default function KKTPPage() {
         </Card>
       )}
 
-      {/* KKTP Cards */}
+      {/* KKTP Cards (Web View) */}
       {kktpList.length === 0 ? (
         <Card className="bg-slate-50 no-print"><CardContent className="p-12 flex flex-col items-center text-center">
           <Target className="w-12 h-12 text-slate-300 mb-3" />
@@ -154,7 +249,7 @@ export default function KKTPPage() {
           <p className="text-sm text-slate-500 mt-1">Tambahkan kriteria ketercapaian untuk setiap tujuan pembelajaran</p>
         </CardContent></Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 no-print">
           {kktpList.map((item) => (
             <Card key={item.id} className="border-slate-200/60 shadow-sm overflow-hidden">
               <CardContent className="p-0">
@@ -208,6 +303,45 @@ export default function KKTPPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* KKTP Print Table (Print View) */}
+      {kktpList.length > 0 && (
+        <div className="hidden print:block w-full text-sm">
+          <table className="w-full border-collapse print-table table-fixed">
+            <thead>
+              <tr className="print:border-none print:border-transparent">
+                <td colSpan={5} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+              </tr>
+              <tr className="bg-gray-100 print:border-black">
+                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Tujuan Pembelajaran</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Tercapai</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Berkembang</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Mulai Berkembang</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Belum Berkembang</th>
+              </tr>
+            </thead>
+            <tbody>
+              {kktpList.map((item) => (
+                <tr key={item.id} className="border border-black print:break-inside-avoid">
+                  <td className="p-3 border border-black align-top break-words whitespace-normal">
+                    <span className="font-bold block mb-1">{item.tp_kode}</span>
+                    {item.tujuan}
+                  </td>
+                  <td className="p-3 border border-black align-top text-xs leading-relaxed break-words whitespace-normal">{item.kriteria_tercapai || '-'}</td>
+                  <td className="p-3 border border-black align-top text-xs leading-relaxed break-words whitespace-normal">{item.kriteria_berkembang || '-'}</td>
+                  <td className="p-3 border border-black align-top text-xs leading-relaxed break-words whitespace-normal">{item.kriteria_mulai || '-'}</td>
+                  <td className="p-3 border border-black align-top text-xs leading-relaxed break-words whitespace-normal">{item.kriteria_belum || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot className="print:table-footer-group print:border-none print:border-transparent">
+              <tr className="print:border-none print:border-transparent">
+                <td colSpan={5} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       )}
     </div>

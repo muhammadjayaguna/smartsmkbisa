@@ -12,17 +12,17 @@ export default function AdministrasiGuruLayout({
   return (
     <SisminjarProvider>
       <WaliProvider>
-        <div className="flex h-screen overflow-hidden bg-slate-50 font-sans">
+        <div className="flex h-screen print:h-auto overflow-hidden print:overflow-visible bg-slate-50 font-sans print:block">
           {/* Sidebar */}
           <SintesaSidebar />
           
           {/* Main Content */}
-          <div className="flex-1 flex flex-col ml-64 print:ml-0 h-full print:h-auto overflow-hidden print:overflow-visible relative bg-slate-50 print:bg-white">
+          <div className="flex-1 flex flex-col ml-64 print:ml-0 h-full print:h-auto overflow-hidden print:overflow-visible relative bg-slate-50 print:bg-white print:block">
             <SintesaHeader title="Administrasi Guru" />
             
             {/* Scrollable Content Area */}
-            <main className="flex-1 overflow-y-auto print:overflow-visible scroll-smooth">
-              <div className="p-4 md:p-8 print:p-0 animate-in fade-in duration-500 max-w-[1600px] print:max-w-none mx-auto print:mx-0">
+            <main className="flex-1 overflow-y-auto print:overflow-visible scroll-smooth print:block">
+              <div className="p-4 md:p-8 print:p-0 animate-in fade-in duration-500 max-w-[1600px] print:max-w-none mx-auto print:mx-0 print:block">
                 {children}
               </div>
             </main>

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Settings, Save, Shield, Plus } from 'lucide-react';
+import { Settings, Save, Shield, Plus, Upload, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSisminjar, PengaturanGuru } from './SisminjarContext';
 
@@ -26,6 +26,8 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingKop, setUploadingKop] = useState(false);
   const [formData, setFormData] = useState({
     nama_sekolah: 'SMK Negeri 1',
     kkm: 75,
@@ -156,6 +158,41 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'kop_surat') => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (type === 'logo') setUploadingLogo(true);
+    else setUploadingKop(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${type}-${Date.now()}.${fileExt}`;
+      const filePath = `${user.db_id || user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('sekolah-assets')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('sekolah-assets').getPublicUrl(filePath);
+      
+      setFormData(prev => ({
+        ...prev,
+        [type === 'logo' ? 'url_logo' : 'url_kop_surat']: data.publicUrl
+      }));
+
+      toast({ title: 'Gambar berhasil diunggah' });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({ title: 'Gagal mengunggah gambar', description: error.message || 'Pastikan bucket sekolah-assets sudah dibuat dan di-set Public', variant: 'destructive' });
+    } finally {
+      if (type === 'logo') setUploadingLogo(false);
+      else setUploadingKop(false);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -216,16 +253,7 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">URL Logo Sekolah (Opsional)</Label>
-                <Input name="url_logo" placeholder="https://contoh.com/logo.png" value={formData.url_logo} onChange={handleChange} className="bg-white" />
-                <p className="text-[11px] text-slate-400">Kosongkan jika ingin menggunakan logo default.</p>
-              </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">URL Gambar Kop Surat Penuh (Opsional)</Label>
-                <Input name="url_kop_surat" placeholder="https://contoh.com/kop-surat.png" value={formData.url_kop_surat} onChange={handleChange} className="bg-white" />
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">

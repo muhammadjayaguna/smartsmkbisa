@@ -116,6 +116,37 @@ Berikan output dalam JSON valid dengan struktur:
   "asesmen_deskripsi": "Deskripsi bentuk asesmen"
 }`;
 
+    } else if (action === 'generate_kktp') {
+      const { atpList } = body;
+      systemPrompt = `Kamu adalah ahli kurikulum Kurikulum Merdeka. Tugasmu membuat Kriteria Ketercapaian Tujuan Pembelajaran (KKTP) secara detail.
+ATURAN PENTING:
+- SANGAT PENTING: Kamu WAJIB menggunakan nama Mata Pelajaran yang diminta secara spesifik. DILARANG menggantinya menjadi "Informatika" atau mapel lain secara sepihak.
+- Output HANYA JSON valid.
+- JANGAN PERNAH menyingkat atau memakai "...". Tulis secara lengkap.
+- Bahasa Indonesia baku.
+- Buatkan 4 kriteria (Tercapai, Berkembang, Mulai Berkembang, Belum Berkembang) untuk SETIAP Tujuan Pembelajaran yang diberikan.`;
+
+      userPrompt = `Buatkan Kriteria Ketercapaian Tujuan Pembelajaran (KKTP) untuk daftar Tujuan Pembelajaran (ATP) berikut:
+Mata Pelajaran: ${mataPelajaran} (${fase} SMK)
+
+Daftar ATP:
+${JSON.stringify(atpList)}
+
+Berikan output dalam JSON valid dengan struktur array seperti ini:
+{
+  "kktp": [
+    {
+      "tp_kode": "Kode TP (misal: TP1)",
+      "kriteria_tercapai": "Deskripsi jika siswa sudah mencapai tujuan dengan sangat baik",
+      "kriteria_berkembang": "Deskripsi jika siswa sudah berkembang sesuai harapan",
+      "kriteria_mulai": "Deskripsi jika siswa baru mulai berkembang",
+      "kriteria_belum": "Deskripsi jika siswa belum berkembang sama sekali"
+    }
+  ]
+}
+
+PENTING: Pastikan kamu mengembalikan array "kktp" yang berisi objek kriteria untuk SEMUA Tujuan Pembelajaran yang ada di daftar ATP di atas. Jangan ada yang terlewat!`;
+
     } else if (action === 'generate_asesmen') {
       const { tp_kode, tujuan } = body;
       systemPrompt = `Kamu adalah ahli evaluasi pembelajaran Kurikulum Merdeka. Buatlah instrumen asesmen dan rubrik penilaian.

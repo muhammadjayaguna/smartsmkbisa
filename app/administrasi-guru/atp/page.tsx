@@ -186,7 +186,7 @@ export default function ATPPage() {
   const sem2JP = atpList.filter(t => t.semester === 2).reduce((sum, t) => sum + (t.jp || 0), 0);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 print:pt-[1.5cm] print:pb-[1.5cm] print:px-[1.5cm]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">
@@ -311,24 +311,27 @@ export default function ATPPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden print:shadow-none print:border-none print:rounded-none">
+          <div className="overflow-x-auto print:overflow-visible">
+            <table id="atp-table" className="w-full text-sm print:text-base print:border-collapse print-table">
               <thead>
-                <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                  <th className="px-4 py-3 text-left font-bold text-slate-600 w-[70px]">Kode</th>
-                  <th className="px-4 py-3 text-left font-bold text-slate-600">Tujuan Pembelajaran</th>
-                  <th className="px-4 py-3 text-center font-bold text-slate-600 w-[60px]">JP</th>
-                  <th className="px-4 py-3 text-center font-bold text-slate-600 w-[90px]">Semester</th>
-                  <th className="px-4 py-3 text-center font-bold text-slate-600 w-[80px]">Elemen</th>
-                  <th className="px-4 py-3 text-center font-bold text-slate-600 w-[80px] no-print">Aksi</th>
+                <tr className="hidden print:table-row print:border-transparent print:border-none">
+                  <td colSpan={6} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                </tr>
+                <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 print:bg-gray-100 print:border-black">
+                  <th style={{ padding: '16px' }} className="p-4 text-left font-bold text-slate-600 w-[70px] print:text-black print:border print:border-black print:text-center align-middle">Kode</th>
+                  <th style={{ padding: '16px' }} className="p-4 text-left font-bold text-slate-600 print:text-black print:border print:border-black print:text-center align-middle">Tujuan Pembelajaran</th>
+                  <th style={{ padding: '16px' }} className="p-4 text-center font-bold text-slate-600 w-[60px] print:text-black print:border print:border-black align-middle">JP</th>
+                  <th style={{ padding: '16px' }} className="p-4 text-center font-bold text-slate-600 w-[90px] print:text-black print:border print:border-black align-middle">Semester</th>
+                  <th style={{ padding: '16px' }} className="p-4 text-center font-bold text-slate-600 w-[80px] print:text-black print:border print:border-black align-middle">Elemen</th>
+                  <th style={{ padding: '16px' }} className="p-4 text-center font-bold text-slate-600 w-[80px] no-print align-middle">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredAtp.map((tp, index) => {
                   const isEditing = editingId === tp.id;
                   return (
-                    <tr key={tp.id} className={`border-b border-slate-100 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-blue-50/30`}>
+                    <tr key={tp.id} className={`border-b border-slate-100 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-blue-50/30 print:border-black print:bg-white print:break-inside-avoid`}>
                       {isEditing && editForm ? (
                         <>
                           <td className="px-3 py-2"><Input value={editForm.kode} onChange={e => setEditForm({ ...editForm, kode: e.target.value })} className="h-8 text-xs" /></td>
@@ -350,17 +353,17 @@ export default function ATPPage() {
                         </>
                       ) : (
                         <>
-                          <td className="px-4 py-3 font-bold text-blue-600">{tp.kode}</td>
-                          <td className="px-4 py-3 text-slate-700 leading-relaxed">{tp.tujuan}</td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">{tp.jp}</span>
+                          <td style={{ padding: '16px' }} className="p-4 font-bold text-blue-600 print:text-black print:border print:border-black print:text-center align-top">{tp.kode}</td>
+                          <td style={{ padding: '16px' }} className="p-4 text-slate-700 leading-relaxed print:text-black print:border print:border-black print:text-left align-top">{tp.tujuan}</td>
+                          <td style={{ padding: '16px' }} className="p-4 text-center print:border print:border-black align-top">
+                            <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full print:bg-transparent print:text-black print:text-base">{tp.jp}</span>
                           </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tp.semester === 1 ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'}`}>
+                          <td style={{ padding: '16px' }} className="p-4 text-center print:border print:border-black align-top">
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tp.semester === 1 ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'} print:bg-transparent print:text-black print:text-base`}>
                               Sem {tp.semester}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-center text-xs font-medium text-slate-500">{tp.elemen_terkait}</td>
+                          <td style={{ padding: '16px' }} className="p-4 text-center text-xs font-medium text-slate-500 print:text-black print:text-base print:border print:border-black align-top">{tp.elemen_terkait}</td>
                           <td className="px-4 py-3 text-center no-print">
                             <div className="flex gap-0.5 justify-center">
                               <Button variant="ghost" size="sm" onClick={() => handleStartEdit(tp)} className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"><Edit3 className="w-3.5 h-3.5" /></Button>
@@ -372,15 +375,19 @@ export default function ATPPage() {
                     </tr>
                   );
                 })}
-              </tbody>
-              <tfoot>
-                <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200">
-                  <td className="px-4 py-3 font-extrabold text-slate-700">Total</td>
-                  <td className="px-4 py-3 text-slate-500 text-xs">{filteredAtp.length} Tujuan Pembelajaran</td>
-                  <td className="px-4 py-3 text-center">
-                    <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">{filteredAtp.reduce((s, t) => s + (t.jp || 0), 0)} JP</span>
+                {/* Total Row moved inside tbody so it doesn't repeat on every printed page */}
+                <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200 print:bg-gray-100 print:border-black print:break-inside-avoid">
+                  <td style={{ padding: '16px' }} className="p-4 font-extrabold text-slate-700 print:text-black print:border print:border-black">Total</td>
+                  <td style={{ padding: '16px' }} className="p-4 text-slate-500 text-xs print:text-black print:text-base print:border print:border-black">{filteredAtp.length} Tujuan Pembelajaran</td>
+                  <td style={{ padding: '16px' }} className="p-4 text-center print:border print:border-black">
+                    <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full print:bg-transparent print:text-black print:text-base">{filteredAtp.reduce((s, t) => s + (t.jp || 0), 0)} JP</span>
                   </td>
-                  <td colSpan={3}></td>
+                  <td colSpan={3} className="print:border print:border-black"></td>
+                </tr>
+              </tbody>
+              <tfoot className="hidden print:table-footer-group print:border-none print:border-transparent">
+                <tr className="print:border-none print:border-transparent">
+                  <td colSpan={6} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
                 </tr>
               </tfoot>
             </table>

@@ -195,6 +195,14 @@
 
   @page {
     size: A4 portrait;
-    margin: 1.5cm;
+    margin: 0;
+  }
+
+  .print-table th, .print-table td {
+    padding: 16px !important;
+  }
+
+  #atp-table th, #atp-table td {
+    padding: 16px !important;
   }
 }
