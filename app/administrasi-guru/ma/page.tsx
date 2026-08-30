@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { FileEdit, Sparkles, BookOpen, ChevronDown, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
+import PrintHeader from '@/components/common/PrintHeader';
 
 export default function ModulAjarPage() {
   const { user } = useAuth();
@@ -145,16 +146,21 @@ export default function ModulAjarPage() {
           </div>
         ) : (
           modulList.map((ma, idx) => (
-            <Card key={ma.id} className="overflow-hidden border-slate-200">
-              <div className="bg-gradient-to-r from-slate-100 to-white px-5 py-3 border-b border-slate-200 flex justify-between items-center">
+            <Card key={ma.id} className="overflow-hidden border-slate-200 print-card-reset break-inside-avoid print:mb-12 print:break-after-page">
+              <div className="bg-gradient-to-r from-slate-100 to-white px-5 py-3 border-b border-slate-200 flex justify-between items-center no-print">
                 <div className="flex items-center gap-3">
                   <span className="bg-orange-100 text-orange-700 font-bold text-xs px-2.5 py-1 rounded-md">{ma.tp_kode}</span>
                   <h3 className="font-bold text-slate-800 text-lg">{ma.judul}</h3>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => deleteModul(ma.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50 no-print">Hapus</Button>
               </div>
-              <CardContent className="p-5 space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <CardContent className="p-5 print:p-0 space-y-5">
+                <PrintHeader title={`MODUL AJAR (${ma.tp_kode})`} />
+                <div className="hidden print-only mb-6 text-center -mt-4">
+                  <h3 className="font-bold text-xl uppercase">{ma.judul}</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 print:grid-cols-2">
                   <div className="space-y-3">
                     <div>
                       <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Pemahaman Bermakna</h4>

@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Download, Calendar, BookOpen, ChevronUp, ChevronDown, Printer } from 'lucide-react';
 import ExportButtons from '@/components/reports/ExportButtons';
+import PrintHeader from '@/components/common/PrintHeader';
 import { format } from 'date-fns';
 
 interface JurnalMengajarData {
@@ -203,7 +204,7 @@ const JurnalMengajarReport = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="no-print">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Calendar className="h-6 w-6" />
@@ -268,8 +269,8 @@ const JurnalMengajarReport = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="print-card-reset">
+        <CardHeader className="no-print">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center space-x-2">
@@ -303,11 +304,17 @@ const JurnalMengajarReport = () => {
           </div>
         </CardHeader>
         <CardContent>
+          <PrintHeader title="LAPORAN JURNAL MENGAJAR" />
+          
+          <div className="hidden print-only mb-4 text-sm font-bold text-slate-700">
+            <p>Periode: {filters.tanggal_dari} s/d {filters.tanggal_sampai}</p>
+          </div>
+
           {filteredData.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
+            <div className="overflow-x-auto print:overflow-visible">
+              <Table className="print:border-none print:shadow-none w-full print:text-sm">
+                <TableHeader className="print:bg-slate-100">
+                  <TableRow className="print:border-black">
                     <TableHead>
                       <Button
                         variant="ghost"
@@ -384,27 +391,11 @@ const JurnalMengajarReport = () => {
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
-                        <div className="space-y-1 text-xs">
-                          {row.siswa_izin && row.siswa_izin.length > 0 && (
-                            <div className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                              Izin: {row.siswa_izin.length}
-                            </div>
-                          )}
-                          {row.siswa_sakit && row.siswa_sakit.length > 0 && (
-                            <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                              Sakit: {row.siswa_sakit.length}
-                            </div>
-                          )}
-                          {row.siswa_alfa && row.siswa_alfa.length > 0 && (
-                            <div className="bg-red-100 text-red-800 px-2 py-1 rounded">
-                              Alfa: {row.siswa_alfa.length}
-                            </div>
-                          )}
-                          {(!row.siswa_izin || row.siswa_izin.length === 0) &&
-                            (!row.siswa_sakit || row.siswa_sakit.length === 0) &&
-                            (!row.siswa_alfa || row.siswa_alfa.length === 0) && (
-                              <div className="text-green-600">-</div>
-                            )}
+                        <div className="text-xs">
+                          {row.siswa_izin && row.siswa_izin.length > 0 && <div className="text-amber-600">Izin: {row.siswa_izin.join(', ')}</div>}
+                          {row.siswa_sakit && row.siswa_sakit.length > 0 && <div className="text-blue-600">Sakit: {row.siswa_sakit.join(', ')}</div>}
+                          {row.siswa_alfa && row.siswa_alfa.length > 0 && <div className="text-red-600">Alfa: {row.siswa_alfa.join(', ')}</div>}
+                          {(!row.siswa_izin?.length && !row.siswa_sakit?.length && !row.siswa_alfa?.length) && <div className="text-emerald-600">Nihil (Hadir Semua)</div>}
                         </div>
                       </TableCell>
                     </TableRow>
