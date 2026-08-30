@@ -194,15 +194,30 @@
   }
 
   @page {
-    size: A4 portrait;
+    size: A4;
     margin: 0;
   }
 
+  table, tbody, tr, td, th {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  .print-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+
   .print-table th, .print-table td {
-    padding: 16px !important;
+    padding: 8px !important;
+    word-break: break-all !important;
+    overflow-wrap: break-word !important;
   }
 
   #atp-table th, #atp-table td {
-    padding: 16px !important;
+    padding: 8px !important;
+    word-break: break-all !important;
+    overflow-wrap: break-word !important;
   }
 }

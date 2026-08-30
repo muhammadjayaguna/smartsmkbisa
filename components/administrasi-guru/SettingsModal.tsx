@@ -29,19 +29,16 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingKop, setUploadingKop] = useState(false);
   const [formData, setFormData] = useState({
-    nama_sekolah: 'SMK Negeri 1',
+    mata_pelajaran: 'Kurikulum Merdeka',
+    jp_per_minggu: '',
+    jenjang_sekolah: 'SMK',
+    fase: 'Fase E (Kelas 10)',
     kkm: 75,
     url_logo: '',
     url_kop_surat: '',
     nama_guru_override: '',
     nip_guru: '',
-    nama_kepala_sekolah: '',
-    nip_kepala_sekolah: '',
     lokasi_penetapan: 'Banjarmasin',
-    mata_pelajaran: 'Kurikulum Merdeka',
-    jp_per_minggu: '',
-    jenjang_sekolah: 'SMK',
-    fase: 'Fase E (Kelas 10)',
     teks_acuan_cp: '',
     is_guru_bk: false,
     pengumuman_siswa: '',
@@ -68,19 +65,16 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
 
   const populateForm = (data: PengaturanGuru) => {
     setFormData({
-      nama_sekolah: data.nama_sekolah || 'SMK Negeri 1',
+      mata_pelajaran: data.mata_pelajaran || 'Kurikulum Merdeka',
+      jp_per_minggu: data.jp_per_minggu || '',
+      jenjang_sekolah: data.jenjang_sekolah || 'SMK',
+      fase: data.fase || 'Fase E (Kelas 10)',
       kkm: data.kkm || 75,
       url_logo: data.url_logo || '',
       url_kop_surat: data.url_kop_surat || '',
       nama_guru_override: user?.nama || '',
       nip_guru: data.nip_guru || '',
-      nama_kepala_sekolah: data.nama_kepala_sekolah || '',
-      nip_kepala_sekolah: data.nip_kepala_sekolah || '',
       lokasi_penetapan: data.lokasi_penetapan || 'Banjarmasin',
-      mata_pelajaran: data.mata_pelajaran || 'Kurikulum Merdeka',
-      jp_per_minggu: data.jp_per_minggu || '',
-      jenjang_sekolah: data.jenjang_sekolah || 'SMK',
-      fase: data.fase || 'Fase E (Kelas 10)',
       teks_acuan_cp: data.teks_acuan_cp || '',
       is_guru_bk: data.is_guru_bk || false,
       pengumuman_siswa: data.pengumuman_siswa || '',
@@ -243,11 +237,7 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200">
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Sekolah</Label>
-                  <Input name="nama_sekolah" value={formData.nama_sekolah} onChange={handleChange} className="bg-white" />
-                </div>
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">KKM / KCM</Label>
                   <Input name="kkm" type="number" value={formData.kkm} onChange={handleChange} className="bg-white" />
                 </div>
@@ -263,17 +253,6 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">NIP Guru</Label>
                   <Input name="nip_guru" value={formData.nip_guru} onChange={handleChange} className="bg-white" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Kepala Sekolah</Label>
-                  <Input name="nama_kepala_sekolah" value={formData.nama_kepala_sekolah} onChange={handleChange} className="bg-white" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">NIP Kepala Sekolah</Label>
-                  <Input name="nip_kepala_sekolah" value={formData.nip_kepala_sekolah} onChange={handleChange} className="bg-white" />
                 </div>
               </div>
 

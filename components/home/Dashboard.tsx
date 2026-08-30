@@ -22,7 +22,7 @@ const STATS_CACHE_DURATION = 2 * 60 * 1000;
 const Dashboard = () => {
   const router = useRouter();
   const { isAdmin, role, loading: roleLoading } = useUserRole();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const [stats, setStats] = useState<Stats>({
     totalRombel: 0,
     totalSiswa: 0,
@@ -114,6 +114,7 @@ const Dashboard = () => {
         { title: 'Manajemen Siswa', description: 'Kelola data siswa', icon: Users, color: 'from-orange-500 to-orange-600', path: '/manage-siswa' },
         { title: 'Manajemen Pengguna', description: 'Kelola data pengguna sistem', icon: Settings, color: 'from-indigo-500 to-indigo-600', path: '/manage-users' },
         { title: 'Manajemen Info', description: 'Kelola pengumuman untuk semua pengguna', icon: Megaphone, color: 'from-purple-500 to-pink-600', path: '/manage-pemberitahuan' },
+        ...(user?.email === 'kunbobo42@gmail.com' ? [{ title: 'Pengaturan Aplikasi', description: 'Kelola logo dan kop surat sekolah', icon: Settings, color: 'from-slate-500 to-slate-600', path: '/admin/pengaturan' }] : []),
       ]
     },
     {
@@ -122,7 +123,7 @@ const Dashboard = () => {
         { title: 'AI Chat Admin', description: 'Tanya jawab data dengan asisten AI', icon: Bot, color: 'from-blue-600 to-indigo-700', path: '/admin/chat' }
       ]
     }
-  ], []);
+  ], [user?.email]);
 
   const guruMenuItems = useMemo(() => [
 

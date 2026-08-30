@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 import { Target, Plus, Trash2, Save, Edit3, Printer, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
@@ -175,7 +176,7 @@ export default function KKTPPage() {
   const kkm = activeMapel?.kkm || 75;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20 print:pt-[1.5cm] print:pb-[1.5cm] print:px-[1.5cm]">
+    <div className="max-w-6xl mx-auto space-y-6 pb-20 print:pt-[1cm] print:pb-[1cm] print:px-[1.5cm]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">
@@ -308,23 +309,28 @@ export default function KKTPPage() {
 
       {/* KKTP Print Table (Print View) */}
       {kktpList.length > 0 && (
-        <div className="hidden print:block w-full text-sm">
-          <table className="w-full border-collapse print-table table-fixed">
+        <div className="hidden print:block w-full text-sm" style={{ pageBreakInside: 'auto', breakInside: 'auto' }}>
+          <KopSurat />
+          <div className="pb-4 pt-2 text-center">
+            <h2 className="text-xl font-bold uppercase underline pb-2">Kriteria Ketercapaian Tujuan Pembelajaran (KKTP)</h2>
+            <p className="text-sm font-medium">Mata Pelajaran: {mataPelajaran}</p>
+          </div>
+          <table className="w-full border-collapse print-table table-fixed" style={{ pageBreakInside: 'auto', breakInside: 'auto' }}>
             <thead>
-              <tr className="print:border-none print:border-transparent">
-                <td colSpan={5} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+              <tr className="hidden print:table-row print:border-transparent print:border-none">
+                <td colSpan={5} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
               </tr>
               <tr className="bg-gray-100 print:border-black">
-                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Tujuan Pembelajaran</th>
-                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Tercapai</th>
-                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Berkembang</th>
-                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Mulai Berkembang</th>
-                <th className="p-3 border border-black font-bold text-center align-middle w-[20%] break-words">Belum Berkembang</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-1/5 break-words">Tujuan Pembelajaran</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-1/5 break-words">Tercapai</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-1/5 break-words">Berkembang</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-1/5 break-words">Mulai Berkembang</th>
+                <th className="p-3 border border-black font-bold text-center align-middle w-1/5 break-words">Belum Berkembang</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ pageBreakInside: 'auto', breakInside: 'auto' }}>
               {kktpList.map((item) => (
-                <tr key={item.id} className="border border-black print:break-inside-avoid">
+                <tr key={item.id} className="border border-black">
                   <td className="p-3 border border-black align-top break-words whitespace-normal">
                     <span className="font-bold block mb-1">{item.tp_kode}</span>
                     {item.tujuan}
@@ -336,7 +342,7 @@ export default function KKTPPage() {
                 </tr>
               ))}
             </tbody>
-            <tfoot className="print:table-footer-group print:border-none print:border-transparent">
+            <tfoot className="hidden print:table-footer-group print:border-none print:border-transparent">
               <tr className="print:border-none print:border-transparent">
                 <td colSpan={5} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
               </tr>

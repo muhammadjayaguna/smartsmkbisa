@@ -9,16 +9,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import AppSettingModal from '@/components/administrasi-guru/AppSettingModal';
 
 // ─── Guru Dashboard (existing) ────────────────────────────────────
 
 function GuruDashboard() {
   const { user } = useAuth();
-  const { activeMapel, loading } = useSisminjar();
+  const { activeMapel, appSettings, loading } = useSisminjar();
   const [jurnalList, setJurnalList] = useState<any[]>([]);
   const [loadingJurnal, setLoadingJurnal] = useState(true);
-  const [isAppSettingOpen, setIsAppSettingOpen] = useState(false);
 
   useEffect(() => {
     const fetchJurnal = async () => {
@@ -49,7 +47,7 @@ function GuruDashboard() {
     return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div></div>;
   }
 
-  const namaSekolah = activeMapel?.nama_sekolah || 'SMK Negeri 1';
+  const namaSekolah = appSettings?.nama_sekolah || 'SMK Negeri 1';
   const mataPelajaran = activeMapel?.mata_pelajaran || 'Kurikulum Merdeka';
   const kkm = activeMapel?.kkm || 75;
 
@@ -77,20 +75,8 @@ function GuruDashboard() {
             </div>
           </div>
         </div>
-        <div className="relative z-10 hidden md:block">
-          <Button 
-            variant="outline" 
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-xl"
-            onClick={() => setIsAppSettingOpen(true)}
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Pengaturan Aplikasi
-          </Button>
-        </div>
         <Monitor className="w-24 h-24 text-white opacity-10 absolute right-8" />
       </div>
-
-      <AppSettingModal isOpen={isAppSettingOpen} onClose={() => setIsAppSettingOpen(false)} />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

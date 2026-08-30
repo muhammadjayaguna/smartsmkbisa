@@ -88,7 +88,7 @@ export default function SampulPage() {
   const guruName = user?.nama || 'NAMA GURU, S.Pd';
   const nip = activeMapel?.nip_guru || '-';
   const mataPelajaran = activeMapel?.mata_pelajaran || 'MATA PELAJARAN';
-  const namaSekolah = activeMapel?.nama_sekolah || 'SMK NEGERI 1';
+  const namaSekolah = appSettings?.nama_sekolah || 'SMK NEGERI 1';
   const lokasi = activeMapel?.lokasi_penetapan || 'ALAMAT';
   const tahunPenetapan = new Date().getFullYear();
 

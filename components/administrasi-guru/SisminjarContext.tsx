@@ -29,6 +29,10 @@ export interface AppSettings {
   id: number;
   url_logo: string;
   url_kop_surat: string;
+  nama_sekolah?: string;
+  npsn?: string;
+  nama_kepala_sekolah?: string;
+  nip_kepala_sekolah?: string;
 }
 
 interface SisminjarContextType {

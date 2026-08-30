@@ -186,7 +186,7 @@ export default function ATPPage() {
   const sem2JP = atpList.filter(t => t.semester === 2).reduce((sum, t) => sum + (t.jp || 0), 0);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20 print:pt-[1.5cm] print:pb-[1.5cm] print:px-[1.5cm]">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 print:pt-[1cm] print:pb-[1cm] print:px-[1.5cm]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">
@@ -316,7 +316,7 @@ export default function ATPPage() {
             <table id="atp-table" className="w-full text-sm print:text-base print:border-collapse print-table">
               <thead>
                 <tr className="hidden print:table-row print:border-transparent print:border-none">
-                  <td colSpan={6} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                  <td colSpan={6} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
                 </tr>
                 <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 print:bg-gray-100 print:border-black">
                   <th style={{ padding: '16px' }} className="p-4 text-left font-bold text-slate-600 w-[70px] print:text-black print:border print:border-black print:text-center align-middle">Kode</th>
