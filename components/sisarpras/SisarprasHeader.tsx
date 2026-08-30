@@ -41,10 +41,12 @@ export default function SisarprasHeader({ title }: SisarprasHeaderProps) {
     <header className="bg-white border-b border-slate-200/60 sticky top-0 z-30 h-16 flex items-center justify-between px-6 no-print">
       <div className="flex items-center gap-4">
         <div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
-            <span>SiSarpras</span>
+          <div className="flex items-center text-[10px] text-slate-400 font-semibold mb-0.5 space-x-1 tracking-wide uppercase">
+            <Link href="/" className="hover:text-indigo-600 transition-colors">Dasbor</Link>
             <ChevronRight className="w-3 h-3 text-slate-300" />
-            <span className="text-indigo-500">{pageInfo.group}</span>
+            <Link href="/sisarpras" className="hover:text-indigo-600 transition-colors">SiSarpras</Link>
+            <ChevronRight className="w-3 h-3 text-slate-300" />
+            <span className="text-indigo-600">{pageInfo.group}</span>
           </div>
           <h1 className="font-semibold text-slate-800 text-sm md:text-base">{pageInfo.title}</h1>
         </div>
