@@ -34,11 +34,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // 1. Check if user exists in `users` table
           const { data: existingUser } = await supabase
             .from('users')
-            .select('id')
+            .select('id, nama')
             .eq('auth_id', firebaseUser.uid)
             .maybeSingle();
 
           supabaseUserId = existingUser?.id;
+          let userNama = existingUser?.nama;
 
           if (!existingUser) {
             // Insert new user
@@ -49,11 +50,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 email: firebaseUser.email,
                 nama: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
               })
-              .select('id')
+              .select('id, nama')
               .single();
               
             if (!insertError && newUser) {
               supabaseUserId = newUser.id;
+              userNama = newUser.nama;
             }
           }
 
@@ -92,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: firebaseUser.uid,
           db_id: supabaseUserId, // Set right away
           email: firebaseUser.email,
+          nama: userNama || firebaseUser.displayName || firebaseUser.email?.split('@')[0],
           user_metadata: {
             full_name: firebaseUser.displayName || firebaseUser.email?.split('@')[0],
             avatar_url: firebaseUser.photoURL

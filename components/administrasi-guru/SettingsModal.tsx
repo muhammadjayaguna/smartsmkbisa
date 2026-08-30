@@ -31,6 +31,7 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
     kkm: 75,
     url_logo: '',
     url_kop_surat: '',
+    nama_guru_override: '',
     nip_guru: '',
     nama_kepala_sekolah: '',
     nip_kepala_sekolah: '',
@@ -69,6 +70,7 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
       kkm: data.kkm || 75,
       url_logo: data.url_logo || '',
       url_kop_surat: data.url_kop_surat || '',
+      nama_guru_override: user?.nama || '',
       nip_guru: data.nip_guru || '',
       nama_kepala_sekolah: data.nama_kepala_sekolah || '',
       nip_kepala_sekolah: data.nip_kepala_sekolah || '',
@@ -112,17 +114,19 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
     try {
       const uid = user.db_id || user.id;
       
+      const { nama_guru_override, ...pengaturanData } = formData;
+      
       let error;
       if (editingMapelId !== 'baru') {
         const { error: updateError } = await supabase.from('pengaturan_guru').update({
-          ...formData,
+          ...pengaturanData,
           updated_at: new Date().toISOString()
         }).eq('id', editingMapelId);
         error = updateError;
       } else {
         const { data: insertedData, error: insertError } = await supabase.from('pengaturan_guru').insert({
           guru_id: uid,
-          ...formData
+          ...pengaturanData
         }).select('id').single();
         error = insertError;
         if (insertedData) {
@@ -131,6 +135,15 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
       }
 
       if (error) throw error;
+
+      // Update users table for nama guru
+      if (nama_guru_override !== undefined && nama_guru_override !== user.nama) {
+        await supabase.from('users').update({ nama: nama_guru_override }).eq('id', uid);
+        if (typeof window !== 'undefined') {
+          // Quick reload to update auth context
+          window.location.reload();
+        }
+      }
 
       toast({ title: 'Pengaturan berhasil disimpan!' });
       await refreshData();
@@ -214,7 +227,11 @@ export default function SettingsModal({ isOpen, onClose, defaultNew = false }: S
                 <Input name="url_kop_surat" placeholder="https://contoh.com/kop-surat.png" value={formData.url_kop_surat} onChange={handleChange} className="bg-white" />
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Guru (Opsional dengan Gelar)</Label>
+                  <Input name="nama_guru_override" value={formData.nama_guru_override} onChange={handleChange} className="bg-white" placeholder="Contoh: Muhammad Jayaguna, S.Pd" />
+                </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">NIP Guru</Label>
                   <Input name="nip_guru" value={formData.nip_guru} onChange={handleChange} className="bg-white" />
