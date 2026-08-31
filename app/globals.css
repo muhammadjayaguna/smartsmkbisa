@@ -195,7 +195,7 @@
 
   @page {
     size: A4;
-    margin: 0;
+    margin: 1.5cm 1cm;
   }
 
   table, tbody, tr, td, th {

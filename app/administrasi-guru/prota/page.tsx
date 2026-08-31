@@ -6,7 +6,7 @@ import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { KopSurat } from '@/components/administrasi-guru/KopSurat';
-import { Calendar, Printer, Save, Edit3 } from 'lucide-react';
+import { Calendar, Printer, Save, Edit3, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,7 @@ export default function ProtaPromesPage() {
   const [loading, setLoading] = useState(true);
   const { activeMapel, loading: contextLoading } = useSisminjar();
   const [atpList, setAtpList] = useState<any[]>([]);
+  const [generating, setGenerating] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -25,12 +26,60 @@ export default function ProtaPromesPage() {
       const { data: pgData } = await supabase.from('pengaturan_guru').select('*').eq('guru_id', uid).maybeSingle();
       if (pgData) setPengaturan(pgData);
 
-      const { data: atpData } = await supabase.from('atp').select('*').eq('guru_id', uid).order('urutan', { ascending: true });
+      const { data: atpData } = await supabase.from('atp').select('*').eq('pengaturan_guru_id', activeMapel?.id).order('urutan', { ascending: true });
       if (atpData) setAtpList(atpData);
     } catch (err) { console.error(err); } finally { setLoading(false); }
-  }, [user]);
+  }, [user, activeMapel]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleGeneratePromes = async () => {
+    if (!user) return;
+    if (!activeMapel) return toast({ title: '⚠️ Pilih Mata Pelajaran', variant: 'destructive' });
+    if (atpList.length === 0) return toast({ title: '⚠️ ATP Kosong', variant: 'destructive' });
+
+    setGenerating(true);
+    toast({ title: '🤖 Sedang men-generate Promes...', description: 'AI sedang mengalokasikan bulan. Mohon tunggu.' });
+
+    try {
+      const uid = user.db_id || user.id;
+      const res = await fetch('/api/generate-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate_promes',
+          mataPelajaran: activeMapel.mata_pelajaran,
+          fase: activeMapel.fase || 'Fase E',
+          atpList: atpList.map(t => ({ kode: t.kode, jp: t.jp, semester: t.semester }))
+        })
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) throw new Error(result.error || 'Gagal generate AI');
+
+      const aiData = result.data;
+      if (aiData.promes && Array.isArray(aiData.promes)) {
+        // Update database for each ATP
+        const updatePromises = aiData.promes.map(async (item: any) => {
+          await supabase.from('atp')
+            .update({ alokasi_promes: item.bulan_pelaksanaan })
+            .eq('kode', item.tp_kode)
+            .eq('pengaturan_guru_id', activeMapel.id);
+        });
+        
+        await Promise.all(updatePromises);
+        toast({ title: '✅ Promes berhasil di-generate!' });
+        fetchData();
+      } else {
+        throw new Error('Format balasan AI tidak valid');
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: '❌ Gagal men-generate', description: err.message, variant: 'destructive' });
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   if (loading || contextLoading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>;
 
@@ -55,9 +104,14 @@ export default function ProtaPromesPage() {
             <p className="text-xs text-slate-500">{mapel} · Total {totalJP} JP/Tahun</p>
           </div>
         </div>
-        <Button onClick={() => window.print()} variant="outline" className="border-slate-300">
-          <Printer className="w-4 h-4 mr-2" /> Cetak Prota/Promes
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleGeneratePromes} disabled={generating || atpList.length === 0} className="bg-amber-500 hover:bg-amber-600 text-white">
+            <Sparkles className="w-4 h-4 mr-2" /> {generating ? 'Generating...' : 'Generate AI Promes'}
+          </Button>
+          <Button onClick={() => window.print()} variant="outline" className="border-slate-300">
+            <Printer className="w-4 h-4 mr-2" /> Cetak
+          </Button>
+        </div>
       </div>
 
       {/* Info */}
@@ -83,9 +137,16 @@ export default function ProtaPromesPage() {
             <KopSurat />
             <div className="overflow-x-auto print:overflow-visible">
               <table className="w-full text-sm print:text-base print:border-collapse print-table">
+                <colgroup>
+                  <col className="w-[60px]" />
+                  <col className="w-[80px]" />
+                  <col className="w-full" />
+                  <col className="w-[60px]" />
+                  <col className="w-[100px]" />
+                </colgroup>
                 <thead>
                   <tr className="hidden print:table-row print:border-transparent print:border-none">
-                    <td colSpan={6} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                    <td colSpan={5} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
                   </tr>
                   <tr className="bg-gradient-to-r from-amber-50 to-amber-100 border-b border-amber-200 print:bg-gray-100 print:border-black">
                     <th className="p-4 text-left font-bold text-slate-600 w-[60px] print:text-black print:border print:border-black print:text-center align-middle">No</th>
@@ -98,46 +159,27 @@ export default function ProtaPromesPage() {
                 <tbody>
                   {atpList.map((tp, idx) => (
                     <tr key={tp.id} className={`border-b border-slate-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} print:border-black print:bg-white print:break-inside-avoid`}>
-            <div className="p-4 print:p-0">
-              <div className="overflow-x-auto print:overflow-visible">
-                <table className="w-full text-sm print:text-base print:border-collapse print-table">
-                  <thead>
-                    <tr className="hidden print:table-row print:border-transparent print:border-none">
-                      <td colSpan={5} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                      <td className="p-4 text-slate-500 print:text-black print:border print:border-black print:text-center align-top">{idx + 1}</td>
+                      <td className="p-4 font-bold text-blue-600 print:text-black print:border print:border-black print:text-center align-top">{tp.kode}</td>
+                      <td className="p-4 text-slate-700 leading-relaxed print:text-black print:border print:border-black print:text-left align-top">{tp.tujuan}</td>
+                      <td className="p-4 text-center print:border print:border-black align-top"><span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full print:bg-transparent print:text-black print:text-base">{tp.jp}</span></td>
+                      <td className="p-4 text-center print:border print:border-black align-top">
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tp.semester === 1 ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'} print:bg-transparent print:text-black print:text-base`}>Sem {tp.semester}</span>
+                      </td>
                     </tr>
-                    <tr className="bg-gradient-to-r from-amber-50 to-amber-100 border-b border-amber-200 print:bg-gray-100 print:border-black">
-                      <th className="p-4 text-left font-bold text-slate-600 print:text-black print:border print:border-black print:text-center align-middle">No</th>
-                      <th className="p-4 text-left font-bold text-slate-600 print:text-black print:border print:border-black print:text-center align-middle">Kode</th>
-                      <th className="p-4 text-left font-bold text-slate-600 print:text-black print:border print:border-black print:text-center align-middle">Tujuan Pembelajaran</th>
-                      <th className="p-4 text-center font-bold text-slate-600 print:text-black print:border print:border-black align-middle">JP</th>
-                      <th className="p-4 text-center font-bold text-slate-600 print:text-black print:border print:border-black align-middle">Semester</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {atpList.map((tp, idx) => (
-                      <tr key={tp.id} className={`border-b border-slate-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} print:border-black print:bg-white print:break-inside-avoid`}>
-                        <td className="p-4 text-slate-500 print:text-black print:border print:border-black print:text-center align-top">{idx + 1}</td>
-                        <td className="p-4 font-bold text-blue-600 print:text-black print:border print:border-black print:text-center align-top">{tp.kode}</td>
-                        <td className="p-4 text-slate-700 leading-relaxed print:text-black print:border print:border-black print:text-left align-top">{tp.tujuan}</td>
-                        <td className="p-4 text-center print:border print:border-black align-top"><span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full print:bg-transparent print:text-black print:text-base">{tp.jp}</span></td>
-                        <td className="p-4 text-center print:border print:border-black align-top">
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tp.semester === 1 ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'} print:bg-transparent print:text-black print:text-base`}>Sem {tp.semester}</span>
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="bg-amber-50 border-t-2 border-amber-200 print:bg-gray-100 print:border-black print:break-inside-avoid">
-                      <td colSpan={3} className="p-4 font-extrabold text-slate-700 print:text-black print:border print:border-black">Total JP per Tahun</td>
-                      <td className="p-4 text-center print:border print:border-black"><span className="bg-amber-600 text-white text-xs font-bold px-2.5 py-1 rounded-full print:bg-transparent print:text-black print:text-base">{totalJP} JP</span></td>
-                      <td className="print:border print:border-black"></td>
-                    </tr>
-                  </tbody>
-                  <tfoot className="hidden print:table-footer-group print:border-none print:border-transparent">
-                    <tr className="print:border-none print:border-transparent">
-                      <td colSpan={5} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                  ))}
+                  <tr className="bg-amber-50 border-t-2 border-amber-200 print:bg-gray-100 print:border-black print:break-inside-avoid">
+                    <td colSpan={3} className="p-4 font-extrabold text-slate-700 print:text-black print:border print:border-black">Total JP per Tahun</td>
+                    <td className="p-4 text-center print:border print:border-black"><span className="bg-amber-600 text-white text-xs font-bold px-2.5 py-1 rounded-full print:bg-transparent print:text-black print:text-base">{totalJP} JP</span></td>
+                    <td className="print:border print:border-black"></td>
+                  </tr>
+                </tbody>
+                <tfoot className="hidden print:table-footer-group print:border-none print:border-transparent">
+                  <tr className="print:border-none print:border-transparent">
+                    <td colSpan={5} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
           </div>
 
@@ -154,9 +196,21 @@ export default function ProtaPromesPage() {
             </div>
             <CardContent className="p-0 print:p-0">
               <div className="overflow-x-auto print:overflow-visible">
-                <table className="w-full text-xs print:text-[11px] print:border-collapse print-table">
+                <table className="w-full text-xs print:text-xs print:border-collapse print-table">
+                  <colgroup>
+                    <col className="w-[60px]" />
+                    <col className="w-full" />
+                    <col className="w-[40px]" />
+                    {months1.map(m => <col key={m} className="w-[50px]" />)}
+                  </colgroup>
                   <thead>
                     <tr className="hidden print:table-row print:border-transparent print:border-none">
+                      <td colSpan={9} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                    </tr>
+                    <tr className="bg-slate-50 border-b print:bg-gray-100 print:border-black">
+                      <th className="p-3 text-left font-bold text-slate-500 w-[60px] print:text-black print:border print:border-black print:text-center align-middle">Kode</th>
+                      <th className="p-3 text-left font-bold text-slate-500 print:text-black print:border print:border-black print:text-center align-middle">Tujuan Pembelajaran</th>
+                      <th className="p-3 text-center font-bold text-slate-500 w-[40px] print:text-black print:border print:border-black align-middle">JP</th>
                       {months1.map(m => <th key={m} className="p-2 text-center font-bold text-slate-500 w-[50px] print:text-black print:border print:border-black align-middle">{m.slice(0, 3)}</th>)}
                     </tr>
                   </thead>
@@ -168,7 +222,7 @@ export default function ProtaPromesPage() {
                         <td className="p-3 text-center font-bold print:border print:border-black align-top">{tp.jp}</td>
                         {months1.map((m, mi) => (
                           <td key={m} className="p-2 text-center print:border print:border-black align-middle">
-                            {mi === idx % months1.length ? <div className="w-6 h-4 bg-amber-400 rounded mx-auto print:border print:border-black print:bg-black"></div> : ''}
+                            {Array.isArray(tp.alokasi_promes) && tp.alokasi_promes.includes(m) ? <div className="w-6 h-4 bg-amber-400 rounded mx-auto print:border print:border-black print:bg-black"></div> : ''}
                           </td>
                         ))}
                       </tr>
@@ -176,7 +230,7 @@ export default function ProtaPromesPage() {
                   </tbody>
                   <tfoot className="hidden print:table-footer-group print:border-none print:border-transparent">
                     <tr className="print:border-none print:border-transparent">
-                      <td colSpan={12} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                      <td colSpan={9} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
                     </tr>
                   </tfoot>
                 </table>
@@ -194,10 +248,16 @@ export default function ProtaPromesPage() {
             </div>
             <CardContent className="p-0 print:p-0">
               <div className="overflow-x-auto print:overflow-visible">
-                <table className="w-full text-xs print:text-sm print:border-collapse print-table">
+                <table className="w-full text-xs print:text-xs print:border-collapse print-table">
+                  <colgroup>
+                    <col className="w-[60px]" />
+                    <col className="w-full" />
+                    <col className="w-[40px]" />
+                    {months2.map(m => <col key={m} className="w-[50px]" />)}
+                  </colgroup>
                   <thead>
                     <tr className="hidden print:table-row print:border-transparent print:border-none">
-                      <td colSpan={12} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                      <td colSpan={9} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
                     </tr>
                     <tr className="bg-slate-50 border-b print:bg-gray-100 print:border-black">
                       <th className="p-3 text-left font-bold text-slate-500 w-[60px] print:text-black print:border print:border-black print:text-center align-middle">Kode</th>
@@ -214,7 +274,7 @@ export default function ProtaPromesPage() {
                         <td className="p-3 text-center font-bold print:border print:border-black align-top">{tp.jp}</td>
                         {months2.map((m, mi) => (
                           <td key={m} className="p-2 text-center print:border print:border-black align-middle">
-                            {mi === idx % months2.length ? <div className="w-6 h-4 bg-purple-400 rounded mx-auto print:border print:border-black print:bg-black"></div> : ''}
+                            {Array.isArray(tp.alokasi_promes) && tp.alokasi_promes.includes(m) ? <div className="w-6 h-4 bg-purple-400 rounded mx-auto print:border print:border-black print:bg-black"></div> : ''}
                           </td>
                         ))}
                       </tr>
@@ -222,7 +282,7 @@ export default function ProtaPromesPage() {
                   </tbody>
                   <tfoot className="hidden print:table-footer-group print:border-none print:border-transparent">
                     <tr className="print:border-none print:border-transparent">
-                      <td colSpan={12} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                      <td colSpan={9} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
                     </tr>
                   </tfoot>
                 </table>

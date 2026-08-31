@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 interface TujuanPembelajaran {
   id?: string;
   guru_id?: string;
@@ -36,6 +36,7 @@ export default function ATPPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTP, setNewTP] = useState<TujuanPembelajaran>({ kode: '', tujuan: '', jp: 8, semester: 1, elemen_terkait: '', urutan: 0 });
   const [filterSemester, setFilterSemester] = useState<string>('all');
+  const [generateBatch, setGenerateBatch] = useState<string>('TP 1-4');
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -49,18 +50,20 @@ export default function ATPPage() {
         .maybeSingle();
       if (pgData) setPengaturan(pgData);
 
-      const { data: atpData } = await supabase
-        .from('atp')
-        .select('*')
-        .eq('guru_id', uid)
-        .order('urutan', { ascending: true });
-      if (atpData) setAtpList(atpData);
+      if (activeMapel) {
+        const { data: atpData } = await supabase
+          .from('atp')
+          .select('*')
+          .eq('pengaturan_guru_id', activeMapel.id)
+          .order('urutan', { ascending: true });
+        if (atpData) setAtpList(atpData);
+      }
     } catch (err) {
       console.error('Error fetching ATP data', err);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, activeMapel]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -73,6 +76,7 @@ export default function ATPPage() {
       const uid = user.db_id || user.id;
       const { error } = await supabase.from('atp').insert({
         guru_id: uid,
+        pengaturan_guru_id: activeMapel?.id,
         kode: newTP.kode,
         tujuan: newTP.tujuan,
         jp: newTP.jp,
@@ -125,11 +129,12 @@ export default function ATPPage() {
   const handleGenerateAI = async () => {
     if (!user) return;
     if (!activeMapel) return toast({ title: '⚠️ Pilih atau Buat Mata Pelajaran terlebih dahulu', variant: 'destructive' });
-    if (atpList.length > 0) {
-      if (!confirm('⚠️ Generate AI akan MENGGANTI seluruh ATP yang sudah ada.\n\nLanjutkan?')) return;
-    }
+    
+    // We don't wipe everything anymore, we just append to the existing ATPs!
+    // This allows generating 1-4, then 5-8, etc.
+
     setGenerating(true);
-    toast({ title: '🤖 Sedang men-generate ATP...', description: 'AI sedang menyusun Alur Tujuan Pembelajaran. Mohon tunggu 15-30 detik.' });
+    toast({ title: `🤖 Sedang men-generate ATP (${generateBatch})...`, description: 'Mohon tunggu 15-30 detik.' });
 
     try {
       const uid = user.db_id || user.id;
@@ -141,6 +146,7 @@ export default function ATPPage() {
           mataPelajaran: activeMapel?.mata_pelajaran || 'Informatika',
           fase: activeMapel?.fase || 'Fase E (Kelas 10)',
           jenjang: activeMapel?.jenjang_sekolah || 'SMK',
+          batch: generateBatch,
         }),
       });
       const result = await res.json();
@@ -148,16 +154,26 @@ export default function ATPPage() {
 
       const aiData = result.data;
       if (aiData.alur && aiData.alur.length > 0) {
-        await supabase.from('atp').delete().eq('guru_id', uid);
+        // Find current max order to append properly
+        const maxUrutan = atpList.length > 0 ? Math.max(...atpList.map(a => a.urutan || 0)) : 0;
+        
         const insertData = aiData.alur.map((tp: any, idx: number) => ({
           guru_id: uid,
-          kode: String(tp.kode || `TP${idx+1}`),
+          pengaturan_guru_id: activeMapel.id,
+          kode: String(tp.kode || `TP${maxUrutan + idx + 1}`),
           tujuan: String(tp.tujuan || ''),
           jp: parseInt(tp.jp) || 8,
-          semester: parseInt(tp.semester) || 1,
+          semester: parseInt(tp.semester) || (generateBatch.includes('1-4') ? 1 : (generateBatch.includes('9-12') ? 2 : 1)),
           elemen_terkait: String(tp.elemen_terkait || ''),
-          urutan: idx + 1,
+          urutan: maxUrutan + idx + 1,
         }));
+        
+        // Remove old TPs that might have the exact same kode if re-generating a batch
+        const codesToDelete = insertData.map((d: any) => d.kode);
+        if (codesToDelete.length > 0) {
+          await supabase.from('atp').delete().eq('pengaturan_guru_id', activeMapel.id).in('kode', codesToDelete);
+        }
+
         const { error } = await supabase.from('atp').insert(insertData);
         if (error) throw error;
       }
@@ -199,15 +215,26 @@ export default function ATPPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={handleGenerateAI} disabled={generating} className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md disabled:opacity-70">
+          <Select value={generateBatch} onValueChange={setGenerateBatch}>
+            <SelectTrigger className="w-[140px] h-9 text-sm">
+              <SelectValue placeholder="Pilih Bagian" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="TP 1-4">TP 1-4</SelectItem>
+              <SelectItem value="TP 5-8">TP 5-8</SelectItem>
+              <SelectItem value="TP 9-12">TP 9-12</SelectItem>
+              <SelectItem value="TP 13-16">TP 13-16</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={handleGenerateAI} disabled={generating} className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md disabled:opacity-70 h-9">
             {generating ? (
-              <><div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div> Generating...</>
+              <><div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div> AI...</>
             ) : (
-              <><Sparkles className="w-4 h-4 mr-2" /> Generate ATP (AI)</>
+              <><Sparkles className="w-4 h-4 mr-1" /> Generate</>
             )}
           </Button>
-          <Button onClick={() => window.print()} variant="outline" className="border-slate-300">
-            <Printer className="w-4 h-4 mr-2" /> Cetak ATP
+          <Button onClick={() => window.print()} variant="outline" className="border-slate-300 h-9">
+            <Printer className="w-4 h-4 mr-2" /> Cetak
           </Button>
         </div>
       </div>
@@ -312,11 +339,26 @@ export default function ATPPage() {
         </Card>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden print:shadow-none print:border-none print:rounded-none">
+          <div className="hidden print:block w-full">
+            <KopSurat />
+            <div className="pb-4 pt-2 text-center">
+              <h2 className="text-xl font-bold uppercase underline pb-2">Alur Tujuan Pembelajaran (ATP)</h2>
+              <p className="text-sm font-medium">Mata Pelajaran: {activeMapel?.mata_pelajaran || 'Mata Pelajaran'}</p>
+            </div>
+          </div>
           <div className="overflow-x-auto print:overflow-visible">
             <table id="atp-table" className="w-full text-sm print:text-base print:border-collapse print-table">
+              <colgroup>
+                <col className="w-[70px]" />
+                <col className="w-full" />
+                <col className="w-[60px]" />
+                <col className="w-[90px]" />
+                <col className="w-[80px]" />
+                <col className="w-[80px] no-print" />
+              </colgroup>
               <thead>
                 <tr className="hidden print:table-row print:border-transparent print:border-none">
-                  <td colSpan={6} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                  <td colSpan={5} style={{ height: '1.5cm' }} className="print:border-none print:border-transparent bg-white"></td>
                 </tr>
                 <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 print:bg-gray-100 print:border-black">
                   <th style={{ padding: '16px' }} className="p-4 text-left font-bold text-slate-600 w-[70px] print:text-black print:border print:border-black print:text-center align-middle">Kode</th>
@@ -387,7 +429,7 @@ export default function ATPPage() {
               </tbody>
               <tfoot className="hidden print:table-footer-group print:border-none print:border-transparent">
                 <tr className="print:border-none print:border-transparent">
-                  <td colSpan={6} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
+                  <td colSpan={5} style={{ height: '1cm' }} className="print:border-none print:border-transparent bg-white"></td>
                 </tr>
               </tfoot>
             </table>

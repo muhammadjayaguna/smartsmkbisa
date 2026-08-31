@@ -7,7 +7,37 @@ import { Button } from '@/components/ui/button';
 import { FileEdit, Sparkles, BookOpen, ChevronDown, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
-import PrintHeader from '@/components/common/PrintHeader';
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
+
+const formatText = (text: any) => {
+  if (!text) return null;
+  
+  // If it's already an array (due to some DB magic fetching as JSONB)
+  if (Array.isArray(text)) {
+    return (
+      <ul className="list-disc pl-4 space-y-1.5 mt-1">
+        {text.map((item, idx) => <li key={idx} className="leading-relaxed">{item}</li>)}
+      </ul>
+    );
+  }
+
+  // If it's a string, try to parse it
+  try {
+    if (typeof text === 'string') {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) {
+        return (
+          <ul className="list-disc pl-4 space-y-1.5 mt-1">
+            {parsed.map((item, idx) => <li key={idx} className="leading-relaxed">{item}</li>)}
+          </ul>
+        );
+      }
+    }
+  } catch (e) {
+    // Not a JSON array
+  }
+  return <span className="whitespace-pre-wrap leading-relaxed">{typeof text === 'string' ? text : JSON.stringify(text)}</span>;
+};
 
 export default function ModulAjarPage() {
   const { user } = useAuth();
@@ -23,13 +53,15 @@ export default function ModulAjarPage() {
     if (!user) return;
     try {
       const uid = user.db_id || user.id;
-      const { data: atpData } = await supabase.from('atp').select('*').eq('guru_id', uid).order('urutan', { ascending: true });
-      if (atpData) setAtpList(atpData);
-      
-      const { data: maData } = await supabase.from('modul_ajar').select('*').eq('guru_id', uid).order('created_at', { ascending: false });
-      if (maData) setModulList(maData);
+      if (activeMapel) {
+        const { data: atpData } = await supabase.from('atp').select('*').eq('pengaturan_guru_id', activeMapel.id).order('urutan', { ascending: true });
+        if (atpData) setAtpList(atpData);
+        
+        const { data: maData } = await supabase.from('modul_ajar').select('*').eq('pengaturan_guru_id', activeMapel.id).order('created_at', { ascending: false });
+        if (maData) setModulList(maData);
+      }
     } catch (err) { console.error(err); } finally { setLoading(false); }
-  }, [user]);
+  }, [user, activeMapel]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -62,15 +94,16 @@ export default function ModulAjarPage() {
       
       const { error } = await supabase.from('modul_ajar').insert({
         guru_id: uid,
+        pengaturan_guru_id: activeMapel.id,
         tp_kode: tp.kode,
         judul: aiData.judul || 'Modul Pembelajaran',
-        pemahaman_bermakna: aiData.pemahaman_bermakna || '',
-        pertanyaan_pemantik: aiData.pertanyaan_pemantik || '',
-        kegiatan_pendahuluan: aiData.kegiatan_pendahuluan || '',
-        kegiatan_inti: aiData.kegiatan_inti || '',
-        kegiatan_penutup: aiData.kegiatan_penutup || '',
-        asesmen_jenis: aiData.asesmen_jenis || '',
-        asesmen_deskripsi: aiData.asesmen_deskripsi || ''
+        pemahaman_bermakna: typeof aiData.pemahaman_bermakna === 'object' ? JSON.stringify(aiData.pemahaman_bermakna) : (aiData.pemahaman_bermakna || ''),
+        pertanyaan_pemantik: typeof aiData.pertanyaan_pemantik === 'object' ? JSON.stringify(aiData.pertanyaan_pemantik) : (aiData.pertanyaan_pemantik || ''),
+        kegiatan_pendahuluan: typeof aiData.kegiatan_pendahuluan === 'object' ? JSON.stringify(aiData.kegiatan_pendahuluan) : (aiData.kegiatan_pendahuluan || ''),
+        kegiatan_inti: typeof aiData.kegiatan_inti === 'object' ? JSON.stringify(aiData.kegiatan_inti) : (aiData.kegiatan_inti || ''),
+        kegiatan_penutup: typeof aiData.kegiatan_penutup === 'object' ? JSON.stringify(aiData.kegiatan_penutup) : (aiData.kegiatan_penutup || ''),
+        asesmen_jenis: typeof aiData.asesmen_jenis === 'object' ? JSON.stringify(aiData.asesmen_jenis) : (aiData.asesmen_jenis || ''),
+        asesmen_deskripsi: typeof aiData.asesmen_deskripsi === 'object' ? JSON.stringify(aiData.asesmen_deskripsi) : (aiData.asesmen_deskripsi || '')
       });
 
       if (error) throw error;
@@ -98,7 +131,7 @@ export default function ModulAjarPage() {
   if (loading || contextLoading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20">
+    <div className="max-w-6xl mx-auto space-y-6 pb-20 print-container print:max-w-none print:w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600"><FileEdit className="w-5 h-5" /></div>
@@ -146,7 +179,7 @@ export default function ModulAjarPage() {
           </div>
         ) : (
           modulList.map((ma, idx) => (
-            <Card key={ma.id} className="overflow-hidden border-slate-200 print-card-reset break-inside-avoid print:mb-12 print:break-after-page">
+            <Card key={ma.id} className="overflow-hidden border-slate-200 print-card-reset print:mb-12 print:break-after-page">
               <div className="bg-gradient-to-r from-slate-100 to-white px-5 py-3 border-b border-slate-200 flex justify-between items-center no-print">
                 <div className="flex items-center gap-3">
                   <span className="bg-orange-100 text-orange-700 font-bold text-xs px-2.5 py-1 rounded-md">{ma.tp_kode}</span>
@@ -154,44 +187,198 @@ export default function ModulAjarPage() {
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => deleteModul(ma.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50 no-print">Hapus</Button>
               </div>
-              <CardContent className="p-5 print:p-0 space-y-5">
-                <PrintHeader title={`MODUL AJAR (${ma.tp_kode})`} />
-                <div className="hidden print-only mb-6 text-center -mt-4">
-                  <h3 className="font-bold text-xl uppercase">{ma.judul}</h3>
-                </div>
+              <CardContent className="p-0">
+                {/* Print View & Screen View matching PDF */}
+                <div className="bg-white p-6 md:p-10 print:p-0">
+                  <div className="text-center mb-8 pb-4 border-b-2 border-black">
+                    <h3 className="font-bold text-xl uppercase underline underline-offset-4 decoration-2">MODUL AJAR KURIKULUM MERDEKA</h3>
+                    <h4 className="font-bold text-lg uppercase mt-2">MODUL AJAR {ma.judul.toUpperCase()}</h4>
+                    <p className="font-bold text-base mt-1">Kurikulum Merdeka — Fase {activeMapel.fase || 'E'} (Kelas {activeMapel.tingkat || '10'})</p>
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 print:grid-cols-2">
-                  <div className="space-y-3">
+                  <div className="space-y-8 text-sm print:text-[13px] text-black">
+                    
+                    {/* I. INFORMASI UMUM */}
                     <div>
-                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Pemahaman Bermakna</h4>
-                      <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">{ma.pemahaman_bermakna}</p>
+                      <h4 className="font-bold text-blue-700 uppercase mb-2">I. INFORMASI UMUM</h4>
+                      <table className="w-full border-collapse border border-black">
+                        <tbody>
+                          <tr>
+                            <td className="border border-black p-2 font-bold w-1/4 bg-slate-50 print:bg-transparent">Nama Penyusun</td>
+                            <td className="border border-black p-2 w-1/4">{activeMapel.nama_guru || user?.nama || 'Nama Guru, S.Pd'}</td>
+                            <td className="border border-black p-2 font-bold w-1/4 bg-slate-50 print:bg-transparent">Mata Pelajaran/Materi Pokok</td>
+                            <td className="border border-black p-2 w-1/4">{activeMapel.mata_pelajaran} / {ma.judul}</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Instansi / Tahun</td>
+                            <td className="border border-black p-2">SMK Negeri 1 / 2026/2027</td>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Jenjang/Fase/Kelas</td>
+                            <td className="border border-black p-2">SMK / {activeMapel.fase || 'Fase E'} (Kelas {activeMapel.tingkat || '10'})</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Alokasi Waktu</td>
+                            <td className="border border-black p-2">6 JP</td>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Pertemuan Ke-</td>
+                            <td className="border border-black p-2">1</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Kompetensi Awal</td>
+                            <td className="border border-black p-2" colSpan={3}>Peserta didik telah memahami konsep dasar terkait kompetensi yang akan diajarkan.</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Sarana & Prasarana</td>
+                            <td className="border border-black p-2" colSpan={3}>
+                              Alat: Laptop/komputer siswa, proyektor/LCD, papan tulis.<br/>
+                              Digital: Akses internet untuk pencarian sumber data.
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Target Peserta Didik</td>
+                            <td className="border border-black p-2">Reguler (dapat dimodifikasi)</td>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Model/Pendekatan Pembelajaran</td>
+                            <td className="border border-black p-2">Project Based Learning (PjBL)</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
+
+                    {/* II. KOMPONEN INTI */}
                     <div>
-                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Pertanyaan Pemantik</h4>
-                      <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">{ma.pertanyaan_pemantik}</p>
+                      <h4 className="font-bold text-blue-700 uppercase mb-2">II. KOMPONEN INTI</h4>
+                      <table className="w-full border-collapse border border-black">
+                        <tbody>
+                          <tr>
+                            <td className="border border-black p-2 font-bold w-1/4 bg-slate-50 print:bg-transparent">1. Capaian / Tujuan Pembelajaran (TP)</td>
+                            <td className="border border-black p-2 w-3/4">
+                              <span className="font-bold">[{ma.tp_kode}]</span> Siswa mampu mendefinisikan, mengidentifikasi, dan menganalisis materi {ma.judul}.
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">2. Pemahaman Bermakna</td>
+                            <td className="border border-black p-2">{formatText(ma.pemahaman_bermakna)}</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Pertanyaan Pemantik</td>
+                            <td className="border border-black p-2">{formatText(ma.pertanyaan_pemantik)}</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">3. Dimensi Profil Lulusan</td>
+                            <td className="border border-black p-2">Penalaran Kritis, Kolaborasi, Kreativitas</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Asesmen ({ma.asesmen_jenis})</h4>
-                    <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">{ma.asesmen_deskripsi}</p>
-                  </div>
-                </div>
-                
-                <div className="border-t border-slate-100 pt-5">
-                  <h4 className="text-sm font-bold text-slate-800 mb-3">Langkah Kegiatan Pembelajaran</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
-                      <h5 className="font-bold text-emerald-800 text-xs mb-2">1. Pendahuluan</h5>
-                      <p className="text-xs text-slate-700 whitespace-pre-wrap">{ma.kegiatan_pendahuluan}</p>
+
+                    {/* Langkah Pembelajaran */}
+                    <div className="print:break-inside-avoid pt-2">
+                      <h4 className="font-bold text-base mb-4">4. Pengalaman Belajar & Langkah-Langkah Pembelajaran:</h4>
+                      
+                      <div className="mb-4">
+                        <h5 className="font-bold mb-1 uppercase">A. PENDAHULUAN (15 Menit)</h5>
+                        <div className="pl-4">{formatText(ma.kegiatan_pendahuluan)}</div>
+                      </div>
+
+                      <div className="mb-4">
+                        <h5 className="font-bold mb-1 uppercase">B. KEGIATAN INTI (150 Menit)</h5>
+                        <div className="pl-4">{formatText(ma.kegiatan_inti)}</div>
+                      </div>
+
+                      <div className="mb-4">
+                        <h5 className="font-bold mb-1 uppercase">C. PENUTUP (15 Menit)</h5>
+                        <div className="pl-4">{formatText(ma.kegiatan_penutup)}</div>
+                      </div>
                     </div>
-                    <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                      <h5 className="font-bold text-blue-800 text-xs mb-2">2. Kegiatan Inti</h5>
-                      <p className="text-xs text-slate-700 whitespace-pre-wrap">{ma.kegiatan_inti}</p>
+
+                    {/* 5. ASESMEN */}
+                    <div className="print:break-before-page pt-2">
+                      <h4 className="font-bold text-base mb-2 uppercase">5. ASESMEN PEMBELAJARAN</h4>
+                      <table className="w-full border-collapse border border-black">
+                        <tbody>
+                          <tr>
+                            <td className="border border-black p-2 font-bold w-1/4 bg-slate-50 print:bg-transparent">Asesmen Awal (Diagnostik)</td>
+                            <td className="border border-black p-2 w-3/4">Pertanyaan lisan singkat mengenai pemahaman awal {ma.judul}.</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Asesmen Proses (Formatif)</td>
+                            <td className="border border-black p-2">Pengamatan terhadap partisipasi dan kemampuan komunikasi siswa saat diskusi kelompok.</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Asesmen Akhir (Sumatif)</td>
+                            <td className="border border-black p-2">{formatText(ma.asesmen_deskripsi)}</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Pengayaan</td>
+                            <td className="border border-black p-2">Untuk siswa pencapaian tinggi: Tambahkan tugas menganalisis kompleksitas lebih dalam dan presentasi.</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Remedial</td>
+                            <td className="border border-black p-2">Untuk siswa yang kesulitan: Guru menyediakan penjelasan ulang dengan pendekatan visual dan tutor sebaya.</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
-                    <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-100">
-                      <h5 className="font-bold text-amber-800 text-xs mb-2">3. Penutup</h5>
-                      <p className="text-xs text-slate-700 whitespace-pre-wrap">{ma.kegiatan_penutup}</p>
+
+                    {/* III. LAMPIRAN */}
+                    <div className="print:break-before-page space-y-8 pt-2">
+                      <div>
+                        <h4 className="font-bold text-blue-700 uppercase mb-2">III. LAMPIRAN</h4>
+                        <table className="w-full border-collapse border border-black">
+                          <tbody>
+                            <tr>
+                              <td className="border border-black p-2 font-bold w-1/4 bg-slate-50 print:bg-transparent">Bahan Bacaan Guru & Peserta Didik</td>
+                              <td className="border border-black p-2 w-3/4">
+                                1. Modul Pembelajaran Kurikulum Merdeka<br/>
+                                2. Buku Teks Utama dari Kemendikbud<br/>
+                                3. Jurnal online terakreditasi dan Video tutorial referensi
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="border border-black p-2 font-bold bg-slate-50 print:bg-transparent">Media & Alat Pembelajaran</td>
+                              <td className="border border-black p-2">
+                                Alat: Laptop/komputer siswa, proyektor/LCD, papan tulis.<br/>
+                                Bahan: LKPD cetak, sticky note, kertas plano.
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* LKPD */}
+                      <div className="print:break-before-page">
+                        <h4 className="font-bold text-blue-700 uppercase mb-4 text-center">LAMPIRAN: LEMBAR KERJA PESERTA DIDIK (LKPD)</h4>
+                        <div className="border border-black p-5 min-h-[350px]">
+                          <p className="font-bold mb-4">LEMBAR KERJA PESERTA DIDIK (LKPD)</p>
+                          <p className="mb-2">PETUNJUK KERJA:</p>
+                          <ol className="list-decimal pl-5 mb-6 space-y-1">
+                            <li>Kerjakan LKPD ini secara berkelompok (4-5 orang).</li>
+                            <li>Bacalah setiap instruksi dengan cermat.</li>
+                            <li>Setiap anggota wajib berkontribusi aktif dalam diskusi.</li>
+                            <li>Siapkan diri untuk mempresentasikan hasil diskusi di depan kelas.</li>
+                          </ol>
+                          <p className="font-bold mb-2">SOAL / KASUS DISKUSI:</p>
+                          <p className="italic text-slate-500">(Ruang untuk guru mendiktekan soal/studi kasus khusus terkait {ma.judul})</p>
+                        </div>
+                      </div>
+
+                      {/* Tanda Tangan */}
+                      <div className="pt-16 pb-8 flex justify-between text-sm print:text-[13px] print:break-inside-avoid">
+                        <div className="text-center w-64">
+                          <p>Mengetahui,</p>
+                          <p>Kepala {activeMapel.nama_sekolah || 'SMKN 1 Banjarmasin'}</p>
+                          <div className="h-24"></div>
+                          <p className="font-bold underline">{activeMapel.nama_kepala_sekolah || 'Agustin Purnomosari, S.Pd, M.Pd'}</p>
+                          <p>NIP. {activeMapel.nip_kepala_sekolah || '197208211998032007'}</p>
+                        </div>
+                        <div className="text-center w-64">
+                          <p>{activeMapel.lokasi_penetapan || 'Banjarmasin'}, 13 Juli 2026</p>
+                          <p>Guru Pengajar</p>
+                          <div className="h-24"></div>
+                          <p className="font-bold underline">{activeMapel.nama_guru || user?.nama || 'Muhammad Jayaguna, S.Pd'}</p>
+                          <p>NIP. {activeMapel.nip_guru || '199307102019031007'}</p>
+                        </div>
+                      </div>
                     </div>
+
                   </div>
                 </div>
               </CardContent>

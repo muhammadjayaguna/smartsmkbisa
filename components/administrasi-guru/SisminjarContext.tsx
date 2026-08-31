@@ -12,6 +12,7 @@ export interface PengaturanGuru {
   kkm: number;
   url_logo: string;
   url_kop_surat: string;
+  nama_guru?: string;
   nip_guru: string;
   nama_kepala_sekolah: string;
   nip_kepala_sekolah: string;

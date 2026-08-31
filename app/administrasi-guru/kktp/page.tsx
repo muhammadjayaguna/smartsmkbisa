@@ -49,7 +49,7 @@ export default function KKTPPage() {
     try {
       const uid = user.db_id || user.id;
       // 1. Ambil ATP
-      const { data: atpData, error: atpError } = await supabase.from('atp').select('*').eq('guru_id', uid).order('urutan', { ascending: true });
+      const { data: atpData, error: atpError } = await supabase.from('atp').select('*').eq('pengaturan_guru_id', activeMapel.id).order('urutan', { ascending: true });
       
       if (atpError) throw atpError;
       if (!atpData || atpData.length === 0) {
@@ -96,6 +96,7 @@ export default function KKTPPage() {
           currentIndex++;
           return {
             guru_id: uid,
+            pengaturan_guru_id: activeMapel.id,
             tp_kode: item.tp_kode,
             tujuan: atpData.find(a => a.kode === item.tp_kode)?.tujuan || item.tujuan || '',
             kriteria_tercapai: item.kriteria_tercapai,
@@ -110,7 +111,7 @@ export default function KKTPPage() {
       }
 
       // 3. Hapus KKTP lama
-      await supabase.from('kktp').delete().eq('guru_id', uid);
+      await supabase.from('kktp').delete().eq('pengaturan_guru_id', activeMapel.id);
 
       // 4. Insert KKTP baru
       const { error: insertError } = await supabase.from('kktp').insert(allNewKktp);
@@ -133,10 +134,12 @@ export default function KKTPPage() {
       // const { data: pgData } = await supabase.from('pengaturan_guru').select('*').eq('guru_id', uid).maybeSingle();
       // if (pgData) setPengaturan(pgData);
 
-      const { data } = await supabase.from('kktp').select('*').eq('guru_id', uid).order('urutan', { ascending: true });
-      if (data) setKktpList(data);
+      if (activeMapel) {
+        const { data } = await supabase.from('kktp').select('*').eq('pengaturan_guru_id', activeMapel.id).order('urutan', { ascending: true });
+        if (data) setKktpList(data);
+      }
     } catch (err) { console.error(err); } finally { setLoading(false); }
-  }, [user]);
+  }, [user, activeMapel]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -146,7 +149,7 @@ export default function KKTPPage() {
     }
     try {
       const uid = user.db_id || user.id;
-      await supabase.from('kktp').insert({ ...newItem, guru_id: uid, urutan: kktpList.length + 1 });
+      await supabase.from('kktp').insert({ ...newItem, guru_id: uid, pengaturan_guru_id: activeMapel?.id, urutan: kktpList.length + 1 });
       toast({ title: `KKTP ${newItem.tp_kode} berhasil ditambahkan!` });
       setNewItem({ tp_kode: '', tujuan: '', kriteria_tercapai: '', kriteria_berkembang: '', kriteria_mulai: '', kriteria_belum: '', urutan: 0 });
       setShowAddForm(false);

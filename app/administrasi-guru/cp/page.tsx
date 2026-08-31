@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 
 interface ElemenCP {
   id?: string;
@@ -88,21 +89,25 @@ export default function CapaianPembelajaranPage() {
       }
 
       // Fetch elemen CP
-      const { data: cpData } = await supabase
-        .from('elemen_cp')
-        .select('*')
-        .eq('guru_id', uid)
-        .order('urutan', { ascending: true });
+      if (activeMapel) {
+        const { data: cpData } = await supabase
+          .from('elemen_cp')
+          .select('*')
+          .eq('pengaturan_guru_id', activeMapel.id)
+          .order('urutan', { ascending: true });
 
-      if (cpData) {
-        setElemenList(cpData);
+        if (cpData) {
+          setElemenList(cpData);
+        }
+      } else {
+        setElemenList([]);
       }
     } catch (err) {
       console.error('Error fetching CP data', err);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, activeMapel]);
 
   useEffect(() => {
     if (!contextLoading) {
@@ -140,6 +145,7 @@ export default function CapaianPembelajaranPage() {
         .from('elemen_cp')
         .insert({
           guru_id: uid,
+          pengaturan_guru_id: activeMapel.id,
           kode: newElemen.kode,
           judul: newElemen.judul,
           fase: newElemen.fase || activeMapel?.fase || 'Fase E (Kelas 10)',
@@ -261,10 +267,11 @@ export default function CapaianPembelajaranPage() {
 
       // 2. Delete old elemen then insert new ones
       if (aiData.elemen && aiData.elemen.length > 0) {
-        await supabase.from('elemen_cp').delete().eq('guru_id', uid);
+        await supabase.from('elemen_cp').delete().eq('pengaturan_guru_id', activeMapel.id);
 
         const insertData = aiData.elemen.map((el: any, idx: number) => ({
           guru_id: uid,
+          pengaturan_guru_id: activeMapel.id,
           kode: el.kode,
           judul: el.judul,
           fase: el.fase || faseVal,
@@ -310,7 +317,16 @@ export default function CapaianPembelajaranPage() {
   const fase = activeMapel?.fase || 'Fase E (Kelas 10)';
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20 print-container print:p-12 print:max-w-none print:w-full">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 print-container print:max-w-none print:w-full">
+      {/* Print Header */}
+      <div className="hidden print:block w-full">
+        <KopSurat />
+        <div className="pb-4 pt-2 text-center">
+          <h2 className="text-xl font-bold uppercase underline pb-2">Capaian Pembelajaran (CP)</h2>
+          <p className="text-sm font-medium">Mata Pelajaran: {mataPelajaran}</p>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">

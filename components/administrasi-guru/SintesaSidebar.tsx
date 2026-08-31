@@ -39,7 +39,6 @@ const guruMenu: MenuGroup[] = [
   ]},
   { group: 'DOKUMEN MENGAJAR', items: [
     { name: 'Modul Ajar (MA)', path: '/administrasi-guru/ma', icon: FileEdit },
-    { name: 'Modul Projek P5', path: '/administrasi-guru/p5', icon: Sprout },
     { name: 'Bahan Ajar', path: '/administrasi-guru/bahan-ajar', icon: BookOpen },
     { name: 'Instrumen Asesmen', path: '/administrasi-guru/asesmen', icon: ClipboardList },
   ]},
