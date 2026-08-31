@@ -71,17 +71,17 @@ export const SisminjarProvider = ({ children }: { children: React.ReactNode }) =
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
 
   const fetchPengaturan = async () => {
-    if (!user) {
+    if (!user || !user.db_id) {
       setLoading(false);
       return;
     }
     setLoading(true);
     try {
-      // @ts-ignore - Supabase type definitions might not be updated
+      // @ts-ignore
       const { data, error } = await supabase
         .from('pengaturan_guru')
         .select('*')
-        .eq('guru_id', user.db_id || user.id)
+        .eq('guru_id', user.db_id)
         .order('created_at', { ascending: true });
 
       const { data: appData, error: appError } = await supabase

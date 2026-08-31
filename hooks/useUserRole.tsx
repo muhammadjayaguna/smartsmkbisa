@@ -46,11 +46,17 @@ export const useUserRole = () => {
     }
 
     try {
-      // Fetch role with timeout. Use db_id if available, otherwise id.
+      if (!user.db_id) {
+        setRole(null);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch role with timeout
       const fetchPromise = supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', user.db_id || user.id)
+        .eq('user_id', user.db_id)
         .maybeSingle();
 
       const timeoutPromise = new Promise<null>((resolve) => 
