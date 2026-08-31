@@ -46,8 +46,6 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [sellerProducts, setSellerProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-  const [adding, setAdding] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
@@ -125,39 +123,6 @@ const ProductDetail = () => {
       return { ...r, profiles: profile ?? null };
     });
     setReviews(normalized);
-  };
-
-  const addToCart = async () => {
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    if (!product) return;
-    setAdding(true);
-
-    const { error } = await supabase
-      .from('cart_items')
-      .upsert({
-        user_id: user.db_id || user.id,
-        product_id: product.id,
-        quantity,
-      }, { onConflict: 'user_id,product_id' });
-
-    if (error) {
-      toast.error('Gagal menambahkan ke keranjang');
-    } else {
-      toast.success('Berhasil ditambahkan ke keranjang!');
-    }
-    setAdding(false);
-  };
-
-  const buyNow = async () => {
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    await addToCart();
-    router.push('/cart');
   };
 
   if (loading) {
@@ -278,44 +243,21 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Quantity */}
-              <div className="mb-4">
-                <p className="mb-2 text-xs text-muted-foreground">Jumlah</p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="flex h-8 w-8 items-center justify-center rounded-sm border border-border hover:bg-secondary"
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <span className="w-10 text-center text-sm font-semibold">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                    className="flex h-8 w-8 items-center justify-center rounded-sm border border-border hover:bg-secondary"
-                  >
-                    <Plus size={14} />
-                  </button>
-                  <span className="text-xs text-muted-foreground">Stok: {product.stock}</span>
-                </div>
-              </div>
-
               {/* Actions - hidden on mobile, shown as sticky bottom bar instead */}
-              <div className="hidden gap-2 sm:flex">
-                <button
-                  onClick={addToCart}
-                  disabled={adding || product.stock === 0}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-sm border border-primary py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
-                >
-                  <ShoppingCart size={16} />
-                  Keranjang
-                </button>
-                <button
-                  onClick={buyNow}
-                  disabled={adding || product.stock === 0}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-                >
-                  Beli Sekarang
-                </button>
+              <div className="hidden sm:block mt-4">
+                {user?.id !== product.seller_id ? (
+                  <Link
+                    href={`/chat?to=${product.seller_id}&product=${product.id}`}
+                    className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                  >
+                    <MessageCircle size={18} />
+                    Hubungi untuk Membeli
+                  </Link>
+                ) : (
+                  <div className="flex w-full items-center justify-center gap-2 rounded-sm bg-secondary py-3 text-sm font-semibold text-muted-foreground">
+                    Ini adalah produk Anda
+                  </div>
+                )}
               </div>
 
               {/* Guarantees */}
@@ -437,21 +379,19 @@ const ProductDetail = () => {
           <span className="text-[10px] text-muted-foreground">Harga</span>
           <span className="font-display text-sm font-bold text-primary">{formatPrice(product.price)}</span>
         </div>
-        <button
-          onClick={addToCart}
-          disabled={adding || product.stock === 0}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-primary py-2 text-xs font-semibold text-primary disabled:opacity-50"
-        >
-          <ShoppingCart size={14} />
-          Keranjang
-        </button>
-        <button
-          onClick={buyNow}
-          disabled={adding || product.stock === 0}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
-        >
-          Beli Sekarang
-        </button>
+        {user?.id !== product.seller_id ? (
+          <Link
+            href={`/chat?to=${product.seller_id}&product=${product.id}`}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground"
+          >
+            <MessageCircle size={14} />
+            Hubungi untuk Membeli
+          </Link>
+        ) : (
+          <div className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-secondary py-2 text-xs font-semibold text-muted-foreground">
+            Produk Anda
+          </div>
+        )}
       </div>
 
       {/* Report Modal */}
