@@ -292,7 +292,7 @@ PENTING: Pastikan semua TP_KODE yang ada di daftar ATP masuk ke dalam array hasi
     }
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const successfulModel = 'gemini-2.5-flash';
+    const successfulModel = 'gemini-3.6-flash';
     const model = genAI.getGenerativeModel({ 
       model: successfulModel,
       systemInstruction: systemPrompt,
