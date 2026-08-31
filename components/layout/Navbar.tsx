@@ -3,15 +3,25 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, User, GraduationCap, Bot, MessageSquare, Settings } from 'lucide-react';
+import { LogOut, User, GraduationCap, Bot, MessageSquare, Settings, Users, Megaphone } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 import { useDirectMessages } from '@/hooks/useDirectMessages';
 import { Badge } from '@/components/ui/badge';
+import { useUserRole } from '@/hooks/useUserRole';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { unreadCounts } = useDirectMessages(null);
@@ -85,14 +95,48 @@ const Navbar = () => {
                 </div>
               </Button>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/settings')}
-                className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full h-10 w-10 p-0 transition-colors"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
+              {isAdmin && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full h-10 w-10 p-0 transition-colors"
+                    >
+                      <Settings className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Administrasi Sistem</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push('/manage-rombel')} className="cursor-pointer">
+                      <GraduationCap className="h-4 w-4 mr-2 text-green-600" />
+                      Manajemen Rombel
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/manage-siswa')} className="cursor-pointer">
+                      <Users className="h-4 w-4 mr-2 text-orange-600" />
+                      Manajemen Siswa
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/manage-users')} className="cursor-pointer">
+                      <Settings className="h-4 w-4 mr-2 text-indigo-600" />
+                      Manajemen Pengguna
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/manage-pemberitahuan')} className="cursor-pointer">
+                      <Megaphone className="h-4 w-4 mr-2 text-pink-600" />
+                      Manajemen Info
+                    </DropdownMenuItem>
+                    {user?.email === 'kunbobo42@gmail.com' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => router.push('/admin/pengaturan')} className="cursor-pointer">
+                          <Settings className="h-4 w-4 mr-2 text-slate-600" />
+                          Pengaturan Aplikasi
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
 
               {user.email === 'kunbobo42@gmail.com' && (
                 <Button

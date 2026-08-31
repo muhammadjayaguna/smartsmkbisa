@@ -108,16 +108,6 @@ const Dashboard = () => {
       ]
     },
     {
-      category: "Administrasi Sistem",
-      items: [
-        { title: 'Manajemen Rombel', description: 'Kelola data rombel dan kelas', icon: GraduationCap, color: 'from-green-500 to-green-600', path: '/manage-rombel' },
-        { title: 'Manajemen Siswa', description: 'Kelola data siswa', icon: Users, color: 'from-orange-500 to-orange-600', path: '/manage-siswa' },
-        { title: 'Manajemen Pengguna', description: 'Kelola data pengguna sistem', icon: Settings, color: 'from-indigo-500 to-indigo-600', path: '/manage-users' },
-        { title: 'Manajemen Info', description: 'Kelola pengumuman untuk semua pengguna', icon: Megaphone, color: 'from-purple-500 to-pink-600', path: '/manage-pemberitahuan' },
-        ...(user?.email === 'kunbobo42@gmail.com' ? [{ title: 'Pengaturan Aplikasi', description: 'Kelola logo dan kop surat sekolah', icon: Settings, color: 'from-slate-500 to-slate-600', path: '/admin/pengaturan' }] : []),
-      ]
-    },
-    {
       category: "Asisten Cerdas",
       items: [
         { title: 'AI Chat Admin', description: 'Tanya jawab data dengan asisten AI', icon: Bot, color: 'from-blue-600 to-indigo-700', path: '/admin/chat' }
