@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const DAHL_API_KEY = process.env.DAHL_API_KEY || 'dahl_NkdUvWMdHxCAs1aYHzoNu8SQGfe1EXd53';
-const DAHL_API_URL = 'https://inference.dahl.global/v1/chat/completions';
-const DAHL_MODELS = [
-  'deepseek-ai/DeepSeek-V4-Flash-0731',
-  'moonshotai/Kimi-K2.6',
-  'MiniMaxAI/MiniMax-M2.7'
-];
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
 export async function POST(request: NextRequest) {
   try {
@@ -288,113 +283,79 @@ Berikan output dalam JSON valid dengan struktur persis seperti ini (return HANYA
 
 PENTING: Pastikan semua TP_KODE yang ada di daftar ATP masuk ke dalam array hasil. Tentukan bulan_pelaksanaan (array of string bulan) berdasarkan nilai "semester" pada ATP tersebut!`;
 
-    } else {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    } else if (!systemPrompt || !userPrompt) {
+      return NextResponse.json({ error: 'Aksi tidak dikenali' }, { status: 400 });
     }
 
-    let lastError = 'Unknown error';
-    let lastStatus = 500;
-    let parsed;
-    let successfulModel = '';
-    
-    // Loop through fallback models to handle 429 errors from DAHL API
-    for (const currentModel of DAHL_MODELS) {
-      console.log(`Mencoba generate dengan model: ${currentModel}`);
-      
-      const response = await fetch(DAHL_API_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${DAHL_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: currentModel,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.7,
-          max_tokens: 4096,
-          response_format: { type: 'json_object' }
-        }),
-      });
+    if (!GEMINI_API_KEY) {
+      return NextResponse.json({ error: 'API Key Gemini tidak ditemukan.' }, { status: 500 });
+    }
 
-      if (!response.ok) {
-        const rawErrorText = await response.text();
-        const errorText = rawErrorText.trim().startsWith('<') 
-          ? 'Cloudflare / API Offline (Server merespons dengan HTML)' 
-          : rawErrorText.slice(0, 500); // Truncate long errors
-          
-        console.warn(`DAHL API Error [${currentModel}]:`, response.status, errorText);
-        lastError = errorText;
-        lastStatus = response.status;
-        
-        // If it's a rate limit or server error, try the next model
-        if ([429, 400, 524, 500, 502, 503, 403].includes(response.status)) {
-          continue;
-        }
-        
-        // If it's a different error (e.g. 401 Unauthorized), return immediately
-        return NextResponse.json(
-          { error: `AI API error: ${response.status} - ${errorText}` },
-          { status: response.status }
-        );
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    const successfulModel = 'gemini-1.5-flash';
+    const model = genAI.getGenerativeModel({ 
+      model: successfulModel,
+      systemInstruction: systemPrompt,
+      generationConfig: {
+        responseMimeType: "application/json",
       }
+    });
 
-      const data = await response.json();
-      const aiContent = data.choices?.[0]?.message?.content;
+    let parsed: any = null;
+
+    try {
+      console.log(`Mencoba generate dengan model: ${successfulModel}`);
+      const result = await model.generateContent(userPrompt);
+      const aiContent = result.response.text();
 
       if (!aiContent) {
-        lastError = 'No response content';
-        continue;
+        throw new Error('Tidak ada respons dari Gemini API.');
       }
 
-      try {
-        let cleanContent = aiContent;
-        if (cleanContent.includes('```json')) {
-          cleanContent = cleanContent.split('```json')[1].split('```')[0].trim();
-        } else if (cleanContent.includes('```')) {
-          cleanContent = cleanContent.split('```')[1].split('```')[0].trim();
-        }
-        
-        // Try parsing directly first
-        try {
-          parsed = JSON.parse(cleanContent);
-        } catch (initialErr) {
-          // Fallback: Find the first { and attempt to parse from there.
-          const startIdx = cleanContent.indexOf('{');
-          if (startIdx !== -1) {
-            let currentEndIdx = cleanContent.lastIndexOf('}');
-            let success = false;
-            
-            while (currentEndIdx > startIdx) {
-              try {
-                const candidate = cleanContent.substring(startIdx, currentEndIdx + 1);
-                parsed = JSON.parse(candidate);
-                success = true;
-                break;
-              } catch (e) {
-                currentEndIdx = cleanContent.lastIndexOf('}', currentEndIdx - 1);
-              }
-            }
-            if (!success) throw initialErr;
-          } else {
-            throw initialErr;
-          }
-        }
-        successfulModel = currentModel;
-        break; // If successful, break the loop
-      } catch (parseErr: any) {
-        console.error(`Failed to parse AI JSON for [${currentModel}]:`, parseErr, aiContent);
-        lastError = 'Format output AI bukan JSON valid';
-        continue;
+      let cleanContent = aiContent;
+      if (cleanContent.includes('```json')) {
+        cleanContent = cleanContent.split('```json')[1].split('```')[0].trim();
+      } else if (cleanContent.includes('```')) {
+        cleanContent = cleanContent.split('```')[1].split('```')[0].trim();
       }
+      
+      // Try parsing directly first
+      try {
+        parsed = JSON.parse(cleanContent);
+      } catch (initialErr) {
+        // Fallback: Find the first { and attempt to parse from there.
+        const startIdx = cleanContent.indexOf('{');
+        if (startIdx !== -1) {
+          let currentEndIdx = cleanContent.lastIndexOf('}');
+          let success = false;
+          
+          while (currentEndIdx > startIdx) {
+            try {
+              const candidate = cleanContent.substring(startIdx, currentEndIdx + 1);
+              parsed = JSON.parse(candidate);
+              success = true;
+              break;
+            } catch (e) {
+              currentEndIdx = cleanContent.lastIndexOf('}', currentEndIdx - 1);
+            }
+          }
+          if (!success) throw initialErr;
+        } else {
+          throw initialErr;
+        }
+      }
+    } catch (apiError: any) {
+      console.error(`Gemini API Error:`, apiError);
+      return NextResponse.json(
+        { error: `Google Gemini Error: ${apiError.message}` },
+        { status: 502 }
+      );
     }
 
     if (!parsed) {
       return NextResponse.json(
-        { error: `Gagal menggunakan semua model AI. Error terakhir: ${lastStatus} - ${lastError}` },
-        { status: lastStatus }
+        { error: `Gagal memparsing output AI menjadi format JSON yang valid.` },
+        { status: 500 }
       );
     }
 
