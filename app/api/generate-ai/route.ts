@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODELS = [
+  'gemini-3.6-flash',
+  'gemini-3.7-flash',
+  'gemini-3.5-flash',
+  'gemini-flash-latest'
+];
 
 export async function POST(request: NextRequest) {
   try {
@@ -292,63 +298,93 @@ PENTING: Pastikan semua TP_KODE yang ada di daftar ATP masuk ke dalam array hasi
     }
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const successfulModel = 'gemini-3.6-flash';
-    const model = genAI.getGenerativeModel({ 
-      model: successfulModel,
-      systemInstruction: systemPrompt,
-      generationConfig: {
-        responseMimeType: "application/json",
-      }
-    });
-
+    
     let parsed: any = null;
+    let successfulModel = '';
+    let lastError = '';
 
-    try {
-      console.log(`Mencoba generate dengan model: ${successfulModel}`);
-      const result = await model.generateContent(userPrompt);
-      const aiContent = result.response.text();
-
-      if (!aiContent) {
-        throw new Error('Tidak ada respons dari Gemini API.');
-      }
-
-      let cleanContent = aiContent;
-      if (cleanContent.includes('```json')) {
-        cleanContent = cleanContent.split('```json')[1].split('```')[0].trim();
-      } else if (cleanContent.includes('```')) {
-        cleanContent = cleanContent.split('```')[1].split('```')[0].trim();
-      }
-      
-      // Try parsing directly first
+    for (const currentModel of GEMINI_MODELS) {
+      console.log(`Mencoba generate dengan model: ${currentModel}`);
       try {
-        parsed = JSON.parse(cleanContent);
-      } catch (initialErr) {
-        // Fallback: Find the first { and attempt to parse from there.
-        const startIdx = cleanContent.indexOf('{');
-        if (startIdx !== -1) {
-          let currentEndIdx = cleanContent.lastIndexOf('}');
-          let success = false;
-          
-          while (currentEndIdx > startIdx) {
-            try {
-              const candidate = cleanContent.substring(startIdx, currentEndIdx + 1);
-              parsed = JSON.parse(candidate);
-              success = true;
-              break;
-            } catch (e) {
-              currentEndIdx = cleanContent.lastIndexOf('}', currentEndIdx - 1);
-            }
+        const model = genAI.getGenerativeModel({ 
+          model: currentModel,
+          systemInstruction: systemPrompt,
+          generationConfig: {
+            responseMimeType: "application/json",
           }
-          if (!success) throw initialErr;
-        } else {
-          throw initialErr;
+        });
+
+        const result = await model.generateContent(userPrompt);
+        const aiContent = result.response.text();
+
+        if (!aiContent) {
+          lastError = 'Tidak ada respons dari Gemini API.';
+          continue;
         }
+
+        let cleanContent = aiContent;
+        if (cleanContent.includes('```json')) {
+          cleanContent = cleanContent.split('```json')[1].split('```')[0].trim();
+        } else if (cleanContent.includes('```')) {
+          cleanContent = cleanContent.split('```')[1].split('```')[0].trim();
+        }
+        
+        // Try parsing directly first
+        try {
+          parsed = JSON.parse(cleanContent);
+        } catch (initialErr) {
+          // Fallback: Find the first { and attempt to parse from there.
+          const startIdx = cleanContent.indexOf('{');
+          if (startIdx !== -1) {
+            let currentEndIdx = cleanContent.lastIndexOf('}');
+            let success = false;
+            
+            while (currentEndIdx > startIdx) {
+              try {
+                const candidate = cleanContent.substring(startIdx, currentEndIdx + 1);
+                parsed = JSON.parse(candidate);
+                success = true;
+                break;
+              } catch (e) {
+                currentEndIdx = cleanContent.lastIndexOf('}', currentEndIdx - 1);
+              }
+            }
+            if (!success) throw initialErr;
+          } else {
+            throw initialErr;
+          }
+        }
+        
+        // If successful, save the model name and break the loop
+        successfulModel = currentModel;
+        break;
+      } catch (apiError: any) {
+        console.warn(`Gemini API Error [${currentModel}]:`, apiError.message);
+        lastError = apiError.message;
+        
+        // If it's a 503, 429, or 404, try the next model
+        if (
+          apiError.message.includes('503') || 
+          apiError.message.includes('429') || 
+          apiError.message.includes('404') ||
+          apiError.message.includes('not found') ||
+          apiError.message.includes('overloaded')
+        ) {
+          continue;
+        }
+        
+        // For other unrecoverable errors (like 400 Bad Request / 403 Forbidden Key), throw immediately
+        return NextResponse.json(
+          { error: `Google Gemini Error: ${apiError.message}` },
+          { status: 502 }
+        );
       }
-    } catch (apiError: any) {
-      console.error(`Gemini API Error:`, apiError);
+    }
+
+    if (!parsed) {
       return NextResponse.json(
-        { error: `Google Gemini Error: ${apiError.message}` },
-        { status: 502 }
+        { error: `Semua model AI sedang sibuk/gagal. Error terakhir: ${lastError}` },
+        { status: 503 }
       );
     }
 
