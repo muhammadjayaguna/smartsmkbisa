@@ -223,28 +223,37 @@ Berikan output dalam JSON valid dengan struktur:
 
     } else if (action === 'generate_bahan') {
       const { topik, gayaBahasa } = body;
-      systemPrompt = `Kamu adalah guru teladan dan ahli materi pelajaran Kurikulum Merdeka.
+      systemPrompt = `Kamu adalah guru teladan dan pembuat modul/LKPD handal untuk Kurikulum Merdeka.
 ATURAN PENTING:
-- SANGAT PENTING: Kamu WAJIB menggunakan nama Mata Pelajaran yang diminta secara spesifik. DILARANG menggantinya menjadi "Informatika" atau mapel lain secara sepihak.
+- SANGAT PENTING: Kamu WAJIB menggunakan nama Mata Pelajaran yang diminta secara spesifik.
 - Output HANYA JSON valid.
-- JAWAB SEPENUHNYA DALAM BAHASA INDONESIA. DILARANG KERAS MENGGUNAKAN BAHASA/AKSARA ASING SEPERTI MANDARIN/HANZI.
-- JANGAN PERNAH menyingkat atau memakai "...". Tulis secara lengkap.
-- Gunakan Markdown formatting tebal/miring di dalam teks konten agar lebih menarik.
+- JAWAB SEPENUHNYA DALAM BAHASA INDONESIA.
+- Susun materi dalam format PRESENTASI SLIDE yang berurut.
+- Gunakan Markdown formatting tebal/miring/tabel di dalam teks konten agar menarik.
 - Sesuaikan gaya bahasa dengan instruksi user.`;
 
-      userPrompt = `Buatkan materi Bahan Ajar lengkap untuk:
+      userPrompt = `Buatkan materi Bahan Ajar / LKPD berformat presentasi slide untuk:
 Mata Pelajaran: ${mataPelajaran}
 Topik/Materi: ${topik}
 Fase/Kelas: ${fase}
 Gaya Bahasa: ${gayaBahasa || 'Baku dan akademis'}
 
-Berikan output dalam JSON valid dengan struktur:
+Berikan output dalam JSON valid dengan struktur array of slides:
 {
-  "judul_materi": "Judul Menarik untuk Materi Ini",
-  "peta_konsep": "Ringkasan poin-poin penting dalam bentuk bullet points (gunakan markdown)",
-  "konten_materi": "Penjabaran isi materi inti secara ringkas (maksimal 150 kata, gunakan markdown untuk subjudul)",
-  "latihan_soal": "3 soal latihan untuk menguji pemahaman siswa"
-}`;
+  "slides": [
+    {
+      "judul_slide": "Judul Slide (Maks 10 kata)",
+      "konten_markdown": "Isi slide menggunakan markdown. Bisa berupa teks penjelasan, poin-poin, tabel, atau soal latihan. Maksimal 150 kata per slide."
+    }
+  ]
+}
+
+PANDUAN STRUKTUR SLIDE (Buat minimal 8-10 slide):
+- Slide 1: Judul Materi & Pertanyaan Pemantik
+- Slide 2: Pendahuluan & Tujuan Pembelajaran
+- Slide 3 dst: Isi Materi Inti (gunakan poin-poin/tabel yang mudah dibaca)
+- Slide sebelum terakhir: Ringkasan & Kesimpulan
+- Slide terakhir: Uji Pemahaman / Latihan Soal / Penugasan`;
 
     } else if (action === 'generate_promes') {
       const { atpList } = body;

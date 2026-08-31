@@ -137,8 +137,13 @@ export default function BahanAjarPage() {
     try {
       const uid = user?.db_id || user?.id;
       
-      // Susun konten markdown dari JSON AI
-      const fullContent = `## Peta Konsep\n${generatedData.peta_konsep}\n\n## Materi Utama\n${generatedData.konten_materi}\n\n## Latihan Soal\n${generatedData.latihan_soal}`;
+      // Susun konten markdown dari JSON AI (Array of Slides)
+      let fullContent = '';
+      if (generatedData.slides && Array.isArray(generatedData.slides)) {
+        fullContent = generatedData.slides.map((s: any, i: number) => `## Slide ${i+1}: ${s.judul_slide}\n\n${s.konten_markdown}`).join('\n\n---\n\n');
+      } else {
+        fullContent = generatedData.konten_materi || 'Tidak ada konten';
+      }
       
       const { error } = await supabase.from('bahan_ajar').insert({
         guru_id: uid,
@@ -166,13 +171,19 @@ export default function BahanAjarPage() {
       topik: item.topik,
       gaya_bahasa: item.gaya_bahasa || 'Baku dan akademis'
     });
-    // Parse the full content back to the view if possible, or just show it raw
-    // For simplicity, we just format it as a single chunk
+    // Parse the full content back to the view
+    // Since it's saved as a big markdown text with "---" separators, we can split it to preview it as slides
+    const rawContent = item.konten_materi || '';
+    const splitted = rawContent.split('\n\n---\n\n');
+    const mockSlides = splitted.map((text: string, idx: number) => {
+      return {
+        judul_slide: `Slide ${idx+1}`,
+        konten_markdown: text
+      };
+    });
+
     setGeneratedData({
-      judul_materi: item.topik,
-      konten_materi: item.konten_materi,
-      peta_konsep: "*(Sudah tergabung di Materi)*",
-      latihan_soal: "*(Sudah tergabung di Materi)*"
+      slides: mockSlides
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -296,7 +307,7 @@ export default function BahanAjarPage() {
                 <div className="print:text-black">
                   {/* Header Dokumen */}
                   <div className="text-center border-b-2 border-slate-800 pb-6 mb-8">
-                    <h1 className="text-3xl font-black text-slate-900 mb-2 uppercase">{generatedData.judul_materi || formData.topik}</h1>
+                    <h1 className="text-3xl font-black text-slate-900 mb-2 uppercase">{formData.topik || 'BAHAN AJAR / LKPD'}</h1>
                     <div className="flex justify-center items-center gap-4 text-sm font-medium text-slate-600">
                       <span>Mata Pelajaran: {formData.mata_pelajaran}</span>
                       <span>•</span>
@@ -304,26 +315,24 @@ export default function BahanAjarPage() {
                     </div>
                   </div>
 
-                  {/* Konten Utama Markdown */}
-                  {generatedData.peta_konsep && generatedData.peta_konsep !== "*(Sudah tergabung di Materi)*" && (
-                    <div className="mb-8 p-6 bg-slate-50 border border-slate-100 rounded-xl print:bg-white print:border-black">
-                      <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                        <span className="w-2 h-2 rounded-full bg-indigo-500 mr-2"></span> Peta Konsep
-                      </h2>
-                      <MarkdownRenderer content={generatedData.peta_konsep} />
-                    </div>
-                  )}
-
-                  <div className="mb-10">
-                    <MarkdownRenderer content={generatedData.konten_materi} />
+                  {/* Render Slides */}
+                  <div className="space-y-12">
+                    {generatedData.slides && Array.isArray(generatedData.slides) ? (
+                      generatedData.slides.map((slide: any, idx: number) => (
+                        <div key={idx} className="slide-card bg-white p-8 rounded-xl border border-slate-200 shadow-sm print:shadow-none print:border-b print:border-slate-800 print:rounded-none print:break-inside-avoid">
+                          <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b border-slate-100 flex items-center">
+                            <span className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm mr-3">{idx + 1}</span>
+                            {slide.judul_slide}
+                          </h2>
+                          <div className="prose prose-slate max-w-none prose-h3:text-lg prose-h3:mt-0 prose-p:leading-relaxed prose-li:my-1">
+                            <MarkdownRenderer content={slide.konten_markdown} />
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                       <div className="prose prose-slate max-w-none"><MarkdownRenderer content={generatedData.konten_materi || ''} /></div>
+                    )}
                   </div>
-
-                  {generatedData.latihan_soal && generatedData.latihan_soal !== "*(Sudah tergabung di Materi)*" && (
-                    <div className="mt-12 pt-8 border-t-2 border-dashed border-slate-200 print:border-black">
-                      <h2 className="text-xl font-black text-slate-800 mb-6">Uji Pemahaman</h2>
-                      <MarkdownRenderer content={generatedData.latihan_soal} />
-                    </div>
-                  )}
                 </div>
               )}
             </div>
