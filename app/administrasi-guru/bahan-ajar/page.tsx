@@ -65,6 +65,7 @@ export default function BahanAjarPage() {
     topik: '',
     gaya_bahasa: 'Baku dan akademis'
   });
+  const [tpList, setTpList] = useState<string[]>([]);
 
   // Result State
   const [isGenerating, setIsGenerating] = useState(false);
@@ -74,17 +75,22 @@ export default function BahanAjarPage() {
   const fetchData = useCallback(async () => {
     if (!user) return;
     try {
-      const uid = user.db_id || user.id;
+      const uid = user.db_id;
+      if (!uid) return;
       
-      // Get Pengaturan for default Mapel
-      const { data: pengData } = await supabase.from('pengaturan_guru').select('*').eq('guru_id', uid).single();
-      if (pengData) {
-        setPengaturan(pengData);
+      // Update form data from active Mapel
+      if (activeMapel) {
         setFormData(prev => ({
           ...prev,
-          mata_pelajaran: pengData.mata_pelajaran || '',
-          fase_kelas: pengData.fase || ''
+          mata_pelajaran: activeMapel.mata_pelajaran || '',
+          fase_kelas: activeMapel.fase || ''
         }));
+        
+        // Fetch TP Elements for this Mapel
+        const { data: tpData } = await supabase.from('atp').select('tujuan').eq('pengaturan_guru_id', activeMapel.id).order('urutan', { ascending: true });
+        if (tpData) setTpList(tpData.map(c => c.tujuan));
+      } else {
+        setTpList([]);
       }
 
       // Get History
@@ -95,7 +101,7 @@ export default function BahanAjarPage() {
       
       if (histData) setHistoryList(histData);
     } catch (err) { console.error(err); } finally { setLoading(false); }
-  }, [user]);
+  }, [user, activeMapel]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -135,7 +141,8 @@ export default function BahanAjarPage() {
     if (!generatedData) return;
     setIsSaving(true);
     try {
-      const uid = user?.db_id || user?.id;
+      const uid = user?.db_id;
+      if (!uid) throw new Error("ID Pengguna tidak valid. Silakan muat ulang halaman.");
       
       // Susun konten markdown dari JSON AI (Array of Slides)
       let fullContent = '';
@@ -218,8 +225,23 @@ export default function BahanAjarPage() {
                   <Input required value={formData.fase_kelas} onChange={e => setFormData({...formData, fase_kelas: e.target.value})} placeholder="Cth: Fase E (Kelas 10)" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Topik / Judul Materi</label>
-                  <Input required value={formData.topik} onChange={e => setFormData({...formData, topik: e.target.value})} placeholder="Cth: Sistem Persamaan Linear" className="border-indigo-200 focus-visible:ring-indigo-500" />
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Topik / Judul Materi (Dari Tujuan Pembelajaran)</label>
+                  <Select 
+                    value={formData.topik} 
+                    onValueChange={val => setFormData({...formData, topik: val})}
+                  >
+                    <SelectTrigger className="border-indigo-200 focus-visible:ring-indigo-500">
+                      <SelectValue placeholder="Pilih Topik / Tujuan Pembelajaran" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tpList.length === 0 && !formData.topik && (
+                        <SelectItem value="-" disabled>Belum ada TP (Buat di menu Tujuan Pembelajaran)</SelectItem>
+                      )}
+                      {Array.from(new Set([...tpList, formData.topik].filter(Boolean))).map((t, idx) => (
+                        <SelectItem key={idx} value={t}>{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 uppercase">Gaya Bahasa AI</label>

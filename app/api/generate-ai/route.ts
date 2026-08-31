@@ -320,13 +320,17 @@ PENTING: Pastikan semua TP_KODE yang ada di daftar ATP masuk ke dalam array hasi
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
+        const rawErrorText = await response.text();
+        const errorText = rawErrorText.trim().startsWith('<') 
+          ? 'Cloudflare / API Offline (Server merespons dengan HTML)' 
+          : rawErrorText.slice(0, 500); // Truncate long errors
+          
         console.warn(`DAHL API Error [${currentModel}]:`, response.status, errorText);
         lastError = errorText;
         lastStatus = response.status;
         
-        // If it's a rate limit (429) or model unsupported (400), try the next model
-        if (response.status === 429 || response.status === 400 || response.status === 524 || response.status === 500) {
+        // If it's a rate limit or server error, try the next model
+        if ([429, 400, 524, 500, 502, 503, 403].includes(response.status)) {
           continue;
         }
         
