@@ -96,7 +96,7 @@ export default function WaliSiswaPage() {
                   <th className="px-6 py-4 font-bold">L/P</th>
                   <th className="px-6 py-4 font-bold">Status</th>
                   <th className="px-6 py-4 font-bold">Kontak</th>
-                  <th className="px-6 py-4 text-center font-bold">Aksi</th>
+                  <th className="px-6 py-4 font-bold">Kontak 2</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -122,13 +122,13 @@ export default function WaliSiswaPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center text-slate-600 gap-2">
-                          <Phone className="w-3.5 h-3.5" /> {student.hp || student.telepon || '-'}
+                          <Phone className="w-3.5 h-3.5" /> {student.hp || '-'}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center">
-                        <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100">
-                          Detail
-                        </Button>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-slate-600 gap-2">
+                          <Phone className="w-3.5 h-3.5" /> {student.telepon || '-'}
+                        </div>
                       </td>
                     </tr>
                   ))
