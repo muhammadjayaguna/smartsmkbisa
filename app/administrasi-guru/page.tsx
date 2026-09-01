@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 // ─── Guru Dashboard (existing) ────────────────────────────────────
 
@@ -75,7 +76,18 @@ function GuruDashboard() {
             </div>
           </div>
         </div>
-        <Monitor className="w-24 h-24 text-white opacity-10 absolute right-8" />
+        
+        {/* Karakter Animasi */}
+        <div className="absolute right-4 -bottom-6 w-32 h-40 md:w-48 md:h-56 z-0 opacity-90 drop-shadow-2xl">
+          <Image 
+            src="/animasi/KARAKTER-GURU-LAKI-VERS-2.webp" 
+            alt="Guru Mengajar" 
+            fill 
+            className="object-contain object-bottom"
+            unoptimized
+          />
+        </div>
+        <Monitor className="w-24 h-24 text-white opacity-10 absolute right-8 z-0 hidden md:block" />
       </div>
 
       {/* Stats Cards */}
