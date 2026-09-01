@@ -95,7 +95,7 @@ const Navbar = () => {
                 </div>
               </Button>
 
-              {isAdmin ? (
+              {isAdmin && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -136,15 +136,6 @@ const Navbar = () => {
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push('/settings')}
-                  className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full h-10 w-10 p-0 transition-colors"
-                >
-                  <Settings className="h-5 w-5" />
-                </Button>
               )}
 
               {user.email === 'kunbobo42@gmail.com' && (
