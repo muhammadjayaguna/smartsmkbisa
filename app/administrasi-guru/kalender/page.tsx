@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Printer } from 'lucide-react';
+import { Calendar, ChevronRight, Info, AlertCircle, Printer } from 'lucide-react';
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 import { Button } from '@/components/ui/button';
 
 // Helper to generate calendar matrix
@@ -208,7 +209,8 @@ export default function KalenderPendidikanPage() {
       </div>
 
       <div className="hidden print:block w-full mb-6 text-center">
-        <h3 className="font-bold text-xl uppercase underline underline-offset-4 decoration-2 text-black">
+        <KopSurat />
+        <h3 className="font-bold text-xl uppercase underline underline-offset-4 decoration-2 text-black mt-6">
           {activeTab === 'visual' ? 'KALENDER PENDIDIKAN' : 'RINCIAN MINGGU EFEKTIF'}
         </h3>
         <h4 className="font-bold text-sm uppercase mt-1 text-black">Tahun Ajaran 2026/2027</h4>

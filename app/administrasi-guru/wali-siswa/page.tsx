@@ -5,6 +5,7 @@ import { Users, Search, Filter, Phone, Mail, MoreVertical } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase/client';
 import { useWali } from '@/components/administrasi-guru/WaliContext';
@@ -45,8 +46,14 @@ export default function WaliSiswaPage() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
+    <div className="max-w-6xl mx-auto space-y-6 pb-20 print-container print:max-w-none print:w-full">
+      <div className="hidden print:block w-full">
+        <KopSurat />
+        <div className="pb-4 pt-2 text-center">
+          <h2 className="text-xl font-bold uppercase underline pb-2">Data Siswa Bimbingan</h2>
+        </div>
+      </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
             <Users className="w-5 h-5" />

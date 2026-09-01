@@ -190,6 +190,9 @@ export default function ModulAjarPage() {
               <CardContent className="p-0">
                 {/* Print View & Screen View matching PDF */}
                 <div className="bg-white p-6 md:p-10 print:p-0">
+                  <div className="hidden print:block w-full">
+                    <KopSurat />
+                  </div>
                   <div className="text-center mb-8 pb-4 border-b-2 border-black">
                     <h3 className="font-bold text-xl uppercase underline underline-offset-4 decoration-2">MODUL AJAR KURIKULUM MERDEKA</h3>
                     <h4 className="font-bold text-lg uppercase mt-2">MODUL AJAR {ma.judul.toUpperCase()}</h4>

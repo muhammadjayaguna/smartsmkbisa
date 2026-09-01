@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -194,7 +196,13 @@ export default function JurnalMengajarSintesaPage() {
           </TabsList>
         </div>
 
-        <TabsContent value="jurnal" className="space-y-6 mt-0">
+        <TabsContent value="jurnal" className="space-y-6 mt-0 print-container print:max-w-none print:w-full">
+          <div className="hidden print:block w-full">
+            <KopSurat />
+            <div className="pb-4 pt-2 text-center">
+              <h2 className="text-xl font-bold uppercase underline pb-2">Jurnal Mengajar & Absensi Kelas</h2>
+            </div>
+          </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
             <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600"><Book className="w-5 h-5" /></div>

@@ -8,6 +8,7 @@ import { FlaskConical, TrendingUp, TrendingDown, Award, AlertCircle, Printer } f
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 import { Badge } from '@/components/ui/badge';
 
 interface SiswaScore {
@@ -141,7 +142,13 @@ export default function AnalisisKompetensiPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20">
+    <div className="max-w-6xl mx-auto space-y-6 pb-20 print-container print:max-w-none print:w-full">
+      <div className="hidden print:block w-full">
+        <KopSurat />
+        <div className="pb-4 pt-2 text-center">
+          <h2 className="text-xl font-bold uppercase underline pb-2">Analisis Kompetensi</h2>
+        </div>
+      </div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">

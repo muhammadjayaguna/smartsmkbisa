@@ -6,7 +6,9 @@ import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 import { BookOpen, Sparkles, Save, Printer, Loader2, ChevronDown, AlignLeft, Layers, PenTool } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -198,7 +200,13 @@ export default function BahanAjarPage() {
   if (loading || contextLoading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20">
+    <div className="max-w-7xl mx-auto space-y-6 pb-20 print-container print:max-w-none print:w-full">
+      <div className="hidden print:block w-full">
+        <KopSurat />
+        <div className="pb-4 pt-2 text-center">
+          <h2 className="text-xl font-bold uppercase underline pb-2">Bahan Ajar</h2>
+        </div>
+      </div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60 no-print">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600"><BookOpen className="w-5 h-5" /></div>
