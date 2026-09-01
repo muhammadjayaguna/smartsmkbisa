@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckSquare, Camera, CheckCircle2, Clock, Calendar, Upload } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CheckSquare, Camera, CheckCircle2, Clock, Calendar, Upload, FileText } from 'lucide-react';
+import GuruAbsensiReport from '@/components/reports/GuruAbsensiReport';
 import { useToast } from '@/hooks/use-toast';
 import { compressImage } from '@/utils/imageCompression';
 import { getLocalDateString } from '@/lib/utils';
@@ -104,8 +106,19 @@ export default function KehadiranGuruPage() {
         <div><h2 className="font-bold text-lg text-slate-800">Kehadiran Guru (Absen)</h2><p className="text-xs text-slate-500">Rekam absensi mengajar harian Anda</p></div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-slate-50 border-slate-200 shadow-sm">
+      <Tabs defaultValue="isi-kehadiran" className="space-y-4">
+        <TabsList className="bg-white border border-slate-200/60 shadow-sm p-1 rounded-lg">
+          <TabsTrigger value="isi-kehadiran" className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 data-[state=active]:shadow-none rounded-md px-4 py-2 text-sm font-medium transition-all">
+            <CheckSquare className="w-4 h-4 mr-2" /> Isi Kehadiran Harian
+          </TabsTrigger>
+          <TabsTrigger value="laporan" className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 data-[state=active]:shadow-none rounded-md px-4 py-2 text-sm font-medium transition-all">
+            <FileText className="w-4 h-4 mr-2" /> Laporan & Rekap
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="isi-kehadiran" className="space-y-4 outline-none">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-slate-50 border-slate-200 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
             <Calendar className="w-8 h-8 text-slate-400" />
             <div>
@@ -238,6 +251,18 @@ export default function KehadiranGuruPage() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+        <TabsContent value="laporan" className="space-y-4 outline-none">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200/60">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-slate-800">Laporan Absensi Guru (Mengajar)</h1>
+              <p className="text-slate-500 mt-1">Lihat dan ekspor data kehadiran guru.</p>
+            </div>
+            
+            <GuruAbsensiReport />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

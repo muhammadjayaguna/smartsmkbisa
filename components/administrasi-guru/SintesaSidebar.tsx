@@ -45,7 +45,6 @@ const guruMenu: MenuGroup[] = [
   { group: 'ADMINISTRASI KELAS', items: [
     { name: 'Absensi Siswa', path: '/administrasi-guru/absensi-siswa', icon: Users },
     { name: 'Absensi Guru Mengajar', path: '/administrasi-guru/absensi', icon: CheckSquare },
-    { name: 'Laporan Absensi Guru', path: '/administrasi-guru/laporan-absensi', icon: FileCheck },
     { name: 'Jurnal Mengajar', path: '/administrasi-guru/jurnal', icon: Book },
     { name: 'Penilaian Tugas', path: '/administrasi-guru/penilaian', icon: Trophy },
     { name: 'Program Remedial', path: '/administrasi-guru/remedial', icon: Activity },
@@ -88,7 +87,6 @@ const kepalaSekolahMenu: MenuGroup[] = [
   ]},
   { group: 'REKAP DATA', items: [
     { name: 'Rekap Absensi', path: '/administrasi-guru/rekap-absen', icon: FileCheck },
-    { name: 'Laporan Absensi Guru', path: '/administrasi-guru/laporan-absensi', icon: CheckSquare },
     { name: 'Analisis Kompetensi', path: '/administrasi-guru/analisis', icon: FlaskConical },
   ]},
 ];
