@@ -230,9 +230,6 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="hidden md:block relative">
-              <div className="absolute -left-32 -bottom-24 w-32 h-44 z-0 drop-shadow-2xl animate-[float_3s_ease-in-out_infinite] hover:scale-110 transition-transform cursor-pointer">
-                <Image src="/animasi/KARAKTER-SOEKARNO.gif" alt="Selamat Datang" fill className="object-contain object-bottom" unoptimized />
-              </div>
               <div className="bg-white/10 p-2 rounded-2xl backdrop-blur-xl border border-white/20 shadow-xl relative z-10">
                 <img
                   src="https://smkn1bjm.sch.id/wp-content/uploads/2016/07/Logo-SMKN-1-Fix.png"
