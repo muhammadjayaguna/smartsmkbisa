@@ -495,7 +495,7 @@ function AdminDashboard() {
         
         {/* Animated Character */}
         <div className="hidden md:block absolute right-8 -bottom-4 w-40 h-52 z-10 animate-[float_3s_ease-in-out_infinite] hover:scale-110 transition-transform cursor-pointer">
-          <Image src="/animasi/KARAKTER-BATIK-PR.gif" alt="Admin" fill className="object-contain object-bottom drop-shadow-2xl" unoptimized />
+          <Image src="/animasi/KARAKTER-GURU-LK-PAKAI-KOPIAH.gif" alt="Admin" fill className="object-contain object-bottom drop-shadow-2xl" unoptimized />
         </div>
       </div>
 

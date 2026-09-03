@@ -47,7 +47,7 @@ const FloatingMascot = () => {
               <div className="absolute -bottom-2 right-4 md:left-24 w-4 h-4 bg-white transform rotate-45 border-r border-b border-slate-100"></div>
             </div>
             <Image 
-              src="/animasi/KARAKTER-BATIK-PR.gif" // Menggunakan karakter ibu guru (Batik Perempuan)
+              src="/animasi/Melambai-5.gif" // Menggunakan karakter SMA melambai
               alt="Asisten SMK" 
               fill 
               className="object-contain object-bottom drop-shadow-xl"

@@ -206,7 +206,7 @@ const AuthPage = () => {
         {/* Karakter Animasi Menarik */}
         <div className="absolute right-0 bottom-0 w-64 h-80 z-10 drop-shadow-2xl opacity-90 translate-x-8">
           <Image 
-            src="/animasi/SMA_menyapa_sebentar.GIF" 
+            src="/animasi/SMA_PR_1.gif" 
             alt="Siswa Menyapa" 
             fill 
             className="object-contain object-bottom"

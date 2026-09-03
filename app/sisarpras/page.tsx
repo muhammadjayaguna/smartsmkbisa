@@ -95,8 +95,8 @@ export default function SisarprasDashboard() {
             <div className="mt-3 inline-flex items-center bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/20">🔧 Teknisi</div>
           </div>
           
-          <div className="absolute right-4 -bottom-4 w-32 h-40 z-10 drop-shadow-xl">
-            <Image src="/animasi/menggaruk-kepala-4.webp" alt="Teknisi" fill className="object-contain object-bottom" unoptimized />
+          <div className="absolute right-0 bottom-0 w-32 h-40 md:w-48 md:h-56 z-10 animate-[float_4s_ease-in-out_infinite]">
+            <Image src="/animasi/MENJELASKAN-BERDIRI-MENYAMPING8.webp" alt="Teknisi" fill className="object-contain object-bottom" unoptimized />
           </div>
         </div>
       ) : (role === 'admin' || role === 'waka_sarpras') ? (

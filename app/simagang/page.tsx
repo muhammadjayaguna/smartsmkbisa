@@ -59,8 +59,9 @@ export default function SimagangDashboard() {
           </div>
         </div>
         
-        <div className="absolute right-4 -bottom-4 w-32 h-40 z-10 drop-shadow-xl">
-          <Image src="/animasi/Melambai-4.webp" alt="Melambai" fill className="object-contain object-bottom" unoptimized />
+        {/* Animated Character */}
+        <div className="absolute right-0 bottom-0 w-32 h-40 md:w-48 md:h-56 z-10 animate-[float_4s_ease-in-out_infinite]">
+          <Image src="/animasi/Melambai-6.webp" alt="Melambai" fill className="object-contain object-bottom" unoptimized />
         </div>
       </div>
 
