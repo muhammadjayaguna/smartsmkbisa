@@ -74,40 +74,49 @@ export default function SisarprasDashboard() {
       
       {/* Role-aware banner */}
       {role === 'siswa' ? (
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white relative overflow-hidden h-40">
-          <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Ruangan" fill className="object-cover opacity-30 mix-blend-overlay z-0" />
-          <div className="relative z-10">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl text-white relative h-40">
+          <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
+            <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Ruangan" fill className="object-cover opacity-30 mix-blend-overlay" />
+          </div>
+          <div className="relative z-10 p-6">
             <h2 className="text-2xl font-bold">Hai, {user?.nama || 'Siswa'}! 👋</h2>
             <p className="text-blue-50 text-sm mt-1">Pinjam barang, booking ruangan, atau laporkan kerusakan fasilitas sekolah.</p>
             <div className="mt-3 inline-flex items-center bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/20">🎓 Siswa</div>
           </div>
           
-          <div className="absolute right-4 -bottom-4 w-32 h-40 z-10 drop-shadow-xl">
+          <div className="absolute right-4 -bottom-0 w-32 h-48 md:w-40 md:h-52 z-10 drop-shadow-xl">
             <Image src="/animasi/SMA_LK2.webp" alt="Siswa" fill className="object-contain object-bottom" unoptimized />
           </div>
         </div>
       ) : role === 'teknisi' ? (
-        <div className="bg-gradient-to-r from-cyan-600 to-teal-600 rounded-2xl p-6 text-white relative overflow-hidden h-40">
-          <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Ruangan" fill className="object-cover opacity-30 mix-blend-overlay z-0" />
-          <div className="relative z-10">
+        <div className="bg-gradient-to-r from-cyan-600 to-teal-600 rounded-2xl text-white relative h-40">
+          <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
+            <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Ruangan" fill className="object-cover opacity-30 mix-blend-overlay" />
+          </div>
+          <div className="relative z-10 p-6">
             <h2 className="text-2xl font-bold">Panel Teknisi 🔧</h2>
             <p className="text-cyan-50 text-sm mt-1">Kelola laporan kerusakan dan maintenance fasilitas sekolah.</p>
             <div className="mt-3 inline-flex items-center bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/20">🔧 Teknisi</div>
           </div>
           
-          <div className="absolute right-0 bottom-0 w-32 h-40 md:w-48 md:h-56 z-10 animate-[float_4s_ease-in-out_infinite]">
+          <div className="absolute right-0 bottom-0 w-32 h-44 md:w-48 md:h-56 z-10 animate-[float_4s_ease-in-out_infinite]">
             <Image src="/animasi/MENJELASKAN-BERDIRI-MENYAMPING8.webp" alt="Teknisi" fill className="object-contain object-bottom" unoptimized />
           </div>
         </div>
       ) : (role === 'admin' || role === 'waka_sarpras') ? (
-        <div className="bg-gradient-to-r from-indigo-600 to-violet-700 rounded-2xl p-6 text-white relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-500/10 blur-3xl"></div>
-          <div className="relative z-10">
-            <h2 className="text-2xl font-bold">{role === 'admin' ? 'Admin SiSarpras' : 'Waka Sarpras'} ⚙️</h2>
-            <p className="text-slate-300 text-sm mt-1">Akses penuh ke manajemen inventaris, peminjaman, dan pengadaan.</p>
-            <div className="mt-3 inline-flex items-center bg-red-500/20 px-3 py-1 rounded-full text-xs font-bold text-red-300 border border-red-500/20">{role === 'admin' ? '⚙️ Super Admin' : '🏫 Waka Sarpras'}</div>
+        <div className="bg-gradient-to-r from-indigo-600 to-violet-700 rounded-2xl text-white relative h-40">
+          <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
+            <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Ruangan" fill className="object-cover opacity-30 mix-blend-overlay" />
           </div>
-          <Activity className="w-20 h-20 text-white opacity-5 absolute right-6 top-2" />
+          <div className="relative z-10 p-6">
+            <h2 className="text-2xl font-bold">{role === 'admin' ? 'Admin SiSarpras' : 'Waka Sarpras'} ⚙️</h2>
+            <p className="text-indigo-100 text-sm mt-1">Akses penuh ke manajemen inventaris, peminjaman, dan pengadaan.</p>
+            <div className="mt-3 inline-flex items-center bg-red-500/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-red-500/30">{role === 'admin' ? '⚙️ Super Admin' : '🏫 Waka Sarpras'}</div>
+          </div>
+          
+          <div className="absolute right-4 bottom-0 w-32 h-44 md:w-40 md:h-52 z-10 animate-[float_4s_ease-in-out_infinite]">
+            <Image src="/animasi/KARAKTER-GURU-LAKI-VERS-2.gif" alt="Admin Sarpras" fill className="object-contain object-bottom" unoptimized />
+          </div>
         </div>
       ) : (
         <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">

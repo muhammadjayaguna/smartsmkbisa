@@ -58,9 +58,12 @@ export default function SipoinDashboard() {
     <div className="space-y-6 max-w-6xl mx-auto pb-20">
       <PageBreadcrumb currentPage="Beranda SiPoin" className="mb-2" />
 
-      <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-6 text-white relative overflow-hidden h-40 shadow-sm border border-slate-200/60">
-        <Image src="/animasi/5_BACKGROUND_TAMAN_DAN_KOTA.webp" alt="Taman dan Kota" fill className="object-cover opacity-20 mix-blend-overlay z-0" />
-        <div className="relative z-10 flex items-center h-full gap-4">
+      <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl text-white relative h-40 shadow-sm border border-slate-200/60">
+        <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
+          <Image src="/animasi/5_BACKGROUND_TAMAN_DAN_KOTA.webp" alt="Taman dan Kota" fill className="object-cover opacity-20 mix-blend-overlay" />
+        </div>
+        
+        <div className="relative z-10 flex items-center h-full gap-4 p-6">
           <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/20">
             <Award className="w-6 h-6" />
           </div>
@@ -70,7 +73,7 @@ export default function SipoinDashboard() {
           </div>
         </div>
         
-        <div className="absolute right-4 -bottom-4 w-32 h-44 z-10 drop-shadow-xl">
+        <div className="absolute right-4 -bottom-0 w-32 h-48 md:w-40 md:h-52 z-10 drop-shadow-xl animate-[float_4s_ease-in-out_infinite]">
           <Image src="/animasi/SMA_LK2.webp" alt="Siswa Disiplin" fill className="object-contain object-bottom" unoptimized />
         </div>
       </div>
