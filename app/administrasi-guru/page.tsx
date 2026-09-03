@@ -352,7 +352,10 @@ function KepalaSekolahDashboard() {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Banner */}
       <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-3xl p-8 border-0 shadow-lg shadow-amber-900/10 relative overflow-hidden">
-        <div className="relative z-10">
+        {/* Background Image */}
+        <Image src="/animasi/12_BACKGROUND_KELAS.webp" alt="Background Kelas" fill className="object-cover opacity-20 mix-blend-overlay" priority />
+        
+        <div className="relative z-10 w-full md:w-2/3">
           <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Selamat Datang, {user?.nama || 'Kepala Sekolah'}</h2>
           <p className="text-amber-100 text-sm">Pantau kinerja guru dan perkembangan akademik sekolah.</p>
           <div className="flex flex-wrap items-center gap-3 mt-4">
@@ -364,7 +367,11 @@ function KepalaSekolahDashboard() {
             </div>
           </div>
         </div>
-        <Shield className="w-24 h-24 text-white opacity-10 absolute right-8 top-4" />
+        
+        {/* Animated Character */}
+        <div className="hidden md:block absolute right-8 -bottom-4 w-40 h-52 z-10 animate-[float_3s_ease-in-out_infinite] hover:scale-110 transition-transform cursor-pointer">
+          <Image src="/animasi/KARAKTER-GURU-LAKI-VERS-2.gif" alt="Kepala Sekolah" fill className="object-contain object-bottom drop-shadow-2xl" unoptimized />
+        </div>
       </div>
 
       {/* Stats */}
@@ -463,9 +470,13 @@ function AdminDashboard() {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Banner */}
       <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 rounded-3xl p-8 border-0 shadow-lg shadow-slate-900/20 relative overflow-hidden">
+        {/* Background Image */}
+        <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Background Ruangan" fill className="object-cover opacity-20 mix-blend-overlay" priority />
+        
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-red-500/10 blur-3xl"></div>
         <div className="absolute -bottom-10 left-10 h-32 w-32 rounded-full bg-indigo-500/10 blur-3xl"></div>
-        <div className="relative z-10">
+        
+        <div className="relative z-10 w-full md:w-2/3">
           <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Admin Sisminjar</h2>
           <p className="text-slate-300 text-sm">Akses penuh ke seluruh fitur administrasi mengajar.</p>
           <div className="flex flex-wrap items-center gap-3 mt-4">
@@ -481,7 +492,11 @@ function AdminDashboard() {
             </div>
           </div>
         </div>
-        <Shield className="w-24 h-24 text-white opacity-5 absolute right-8 top-4" />
+        
+        {/* Animated Character */}
+        <div className="hidden md:block absolute right-8 -bottom-4 w-40 h-52 z-10 animate-[float_3s_ease-in-out_infinite] hover:scale-110 transition-transform cursor-pointer">
+          <Image src="/animasi/KARAKTER-BATIK-PR.gif" alt="Admin" fill className="object-contain object-bottom drop-shadow-2xl" unoptimized />
+        </div>
       </div>
 
       {/* Info */}
