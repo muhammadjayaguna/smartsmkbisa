@@ -30,15 +30,6 @@ const Dashboard = () => {
     absensiHariIni: 0
   });
   const [loading, setLoading] = useState(true);
-  const [timeOfDay, setTimeOfDay] = useState<'pagi' | 'siang' | 'sore' | 'malam'>('siang');
-
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 10) setTimeOfDay('pagi');
-    else if (hour >= 10 && hour < 15) setTimeOfDay('siang');
-    else if (hour >= 15 && hour < 18) setTimeOfDay('sore');
-    else setTimeOfDay('malam');
-  }, []);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -214,17 +205,13 @@ const Dashboard = () => {
     );
   }
 
-  const bgAsset = timeOfDay === 'malam' ? '/animasi/8_BACKGROUND_NATURE_(MALAM).webp' : '/animasi/7_BACKGROUND_NATURE_(SIANG).webp';
-  const bgGradient = timeOfDay === 'malam' 
-    ? 'from-indigo-900 via-slate-800 to-indigo-950'
-    : timeOfDay === 'sore'
-      ? 'from-orange-500 via-amber-600 to-orange-700'
-      : 'from-sky-600 via-cyan-700 to-sky-800';
+  const bgAsset = '/animasi/7_BACKGROUND_NATURE_(SIANG).webp';
+  const bgGradient = 'from-sky-600 via-cyan-700 to-sky-800';
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 md:pb-0 relative">
-      <div className={`absolute top-0 left-0 w-full h-80 bg-gradient-to-br ${bgGradient} z-0 rounded-b-[40px] shadow-lg overflow-hidden transition-colors duration-1000`}>
-        <Image src={bgAsset} alt={`Background Alam ${timeOfDay}`} fill className="object-cover opacity-20 mix-blend-overlay transition-opacity duration-1000" priority />
+      <div className={`absolute top-0 left-0 w-full h-80 bg-gradient-to-br ${bgGradient} z-0 rounded-b-[40px] shadow-lg overflow-hidden`}>
+        <Image src={bgAsset} alt="Background Ceria" fill className="object-cover opacity-20 mix-blend-overlay" priority />
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-8 pt-8 md:pt-12 relative z-10">
