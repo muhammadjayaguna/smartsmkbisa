@@ -4,6 +4,7 @@ import MobileHeader from './MobileHeader';
 import MobileNavbar from './MobileNavbar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import BackgroundMusic from '../common/BackgroundMusic';
+import FloatingMascot from '../common/FloatingMascot';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -34,6 +35,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Background Music Player */}
       <BackgroundMusic />
+
+      {/* Global Animated Mascot */}
+      <FloatingMascot />
     </div>
   );
 };
