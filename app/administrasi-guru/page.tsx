@@ -469,7 +469,7 @@ function AdminDashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Banner */}
-      <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 rounded-3xl p-8 border-0 shadow-lg shadow-slate-900/20 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-sky-600 via-cyan-700 to-sky-800 rounded-3xl p-8 border-0 shadow-lg shadow-sky-900/20 relative overflow-hidden">
         {/* Background Image */}
         <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Background Ruangan" fill className="object-cover opacity-20 mix-blend-overlay" priority />
         
