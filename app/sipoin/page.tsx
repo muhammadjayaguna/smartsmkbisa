@@ -8,6 +8,7 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { useRouter } from 'next/navigation';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/hooks/useAuth';
+import Image from 'next/image';
 
 export default function SipoinDashboard() {
   const router = useRouter();
@@ -57,13 +58,20 @@ export default function SipoinDashboard() {
     <div className="space-y-6 max-w-6xl mx-auto pb-20">
       <PageBreadcrumb currentPage="Beranda SiPoin" className="mb-2" />
 
-      <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
-        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600">
-          <Award className="w-5 h-5" />
+      <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-6 text-white relative overflow-hidden h-40 shadow-sm border border-slate-200/60">
+        <Image src="/animasi/5_BACKGROUND_TAMAN_DAN_KOTA.webp" alt="Taman dan Kota" fill className="object-cover opacity-20 mix-blend-overlay z-0" />
+        <div className="relative z-10 flex items-center h-full gap-4">
+          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/20">
+            <Award className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="font-bold text-2xl text-white">Dashboard SiPoin</h2>
+            <p className="text-amber-50 text-sm mt-1">Sistem Pencatatan Poin Prestasi & Pelanggaran Siswa</p>
+          </div>
         </div>
-        <div>
-          <h2 className="font-bold text-lg text-slate-800">Dashboard SiPoin</h2>
-          <p className="text-xs text-slate-500">Sistem Pencatatan Poin Prestasi & Pelanggaran Siswa</p>
+        
+        <div className="absolute right-4 -bottom-4 w-32 h-44 z-10 drop-shadow-xl">
+          <Image src="/animasi/KARAKTER-GURU-LK-PAKAI-KOPIAH.webp" alt="Guru Disiplin" fill className="object-contain object-bottom" unoptimized />
         </div>
       </div>
 

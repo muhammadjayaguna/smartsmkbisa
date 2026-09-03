@@ -8,6 +8,7 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { getLocalDateString } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import EarlyWarningSystem from '@/components/simagang/EarlyWarningSystem';
+import Image from 'next/image';
 
 export default function SimagangDashboard() {
   const router = useRouter();
@@ -46,13 +47,20 @@ export default function SimagangDashboard() {
       
       <EarlyWarningSystem />
 
-      <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
-        <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center text-teal-600">
-          <Briefcase className="w-5 h-5" />
+      <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-2xl p-6 text-white relative overflow-hidden h-40 shadow-sm border border-slate-200/60">
+        <Image src="/animasi/BACKGROUND_JEMBATAN_TINGGI.webp" alt="Background Jembatan" fill className="object-cover opacity-30 mix-blend-overlay z-0" />
+        <div className="relative z-10 flex items-center h-full gap-4">
+          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/20">
+            <Briefcase className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="font-bold text-2xl text-white">Dashboard SiMagang</h2>
+            <p className="text-teal-50 text-sm mt-1">Pusat kendali Praktik Kerja Lapangan / Prakerin</p>
+          </div>
         </div>
-        <div>
-          <h2 className="font-bold text-lg text-slate-800">Dashboard SiMagang</h2>
-          <p className="text-xs text-slate-500">Pusat kendali Praktik Kerja Lapangan / Prakerin</p>
+        
+        <div className="absolute right-4 -bottom-4 w-32 h-40 z-10 drop-shadow-xl">
+          <Image src="/animasi/Melambai-4.webp" alt="Melambai" fill className="object-contain object-bottom" unoptimized />
         </div>
       </div>
 

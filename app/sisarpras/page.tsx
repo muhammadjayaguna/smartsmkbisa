@@ -9,6 +9,7 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
+import Image from 'next/image';
 export default function SisarprasDashboard() {
   const { role } = useUserRole();
   const { user } = useAuth();
@@ -73,22 +74,30 @@ export default function SisarprasDashboard() {
       
       {/* Role-aware banner */}
       {role === 'siswa' ? (
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white relative overflow-hidden h-40">
+          <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Ruangan" fill className="object-cover opacity-30 mix-blend-overlay z-0" />
           <div className="relative z-10">
             <h2 className="text-2xl font-bold">Hai, {user?.nama || 'Siswa'}! 👋</h2>
-            <p className="text-blue-100 text-sm mt-1">Pinjam barang, booking ruangan, atau laporkan kerusakan fasilitas sekolah.</p>
-            <div className="mt-3 inline-flex items-center bg-white/10 px-3 py-1 rounded-full text-xs font-bold text-blue-100">🎓 Siswa</div>
+            <p className="text-blue-50 text-sm mt-1">Pinjam barang, booking ruangan, atau laporkan kerusakan fasilitas sekolah.</p>
+            <div className="mt-3 inline-flex items-center bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/20">🎓 Siswa</div>
           </div>
-          <Package className="w-20 h-20 text-white opacity-10 absolute right-6 top-2" />
+          
+          <div className="absolute right-4 -bottom-4 w-32 h-40 z-10 drop-shadow-xl">
+            <Image src="/animasi/SMA_LK2.webp" alt="Siswa" fill className="object-contain object-bottom" unoptimized />
+          </div>
         </div>
       ) : role === 'teknisi' ? (
-        <div className="bg-gradient-to-r from-cyan-600 to-teal-600 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-cyan-600 to-teal-600 rounded-2xl p-6 text-white relative overflow-hidden h-40">
+          <Image src="/animasi/13_BACKGROUND_RUANGAN.webp" alt="Ruangan" fill className="object-cover opacity-30 mix-blend-overlay z-0" />
           <div className="relative z-10">
             <h2 className="text-2xl font-bold">Panel Teknisi 🔧</h2>
-            <p className="text-cyan-100 text-sm mt-1">Kelola laporan kerusakan dan maintenance fasilitas sekolah.</p>
-            <div className="mt-3 inline-flex items-center bg-white/10 px-3 py-1 rounded-full text-xs font-bold text-cyan-100">🔧 Teknisi</div>
+            <p className="text-cyan-50 text-sm mt-1">Kelola laporan kerusakan dan maintenance fasilitas sekolah.</p>
+            <div className="mt-3 inline-flex items-center bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/20">🔧 Teknisi</div>
           </div>
-          <Wrench className="w-20 h-20 text-white opacity-10 absolute right-6 top-2" />
+          
+          <div className="absolute right-4 -bottom-4 w-32 h-40 z-10 drop-shadow-xl">
+            <Image src="/animasi/menggaruk-kepala-4.webp" alt="Teknisi" fill className="object-contain object-bottom" unoptimized />
+          </div>
         </div>
       ) : (role === 'admin' || role === 'waka_sarpras') ? (
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-6 text-white relative overflow-hidden">

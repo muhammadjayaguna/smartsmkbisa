@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -207,7 +208,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 md:pb-0 relative">
       <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-sky-600 via-cyan-700 to-sky-800 z-0 rounded-b-[40px] shadow-lg overflow-hidden">
-        {/* Decorative background removed for performance */}
+        <Image src="/animasi/7_BACKGROUND_NATURE_(SIANG).webp" alt="Background Alam Siang" fill className="object-cover opacity-20 mix-blend-overlay" priority />
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-8 pt-8 md:pt-12 relative z-10">
@@ -225,8 +226,11 @@ const Dashboard = () => {
                 <span>{currentDate}</span>
               </div>
             </div>
-            <div className="hidden md:block">
-              <div className="bg-white/10 p-2 rounded-2xl backdrop-blur-xl border border-white/20 shadow-xl">
+            <div className="hidden md:block relative">
+              <div className="absolute -left-32 -bottom-24 w-32 h-44 z-0 drop-shadow-2xl">
+                <Image src="/animasi/Baju_adat_kalsel_cewe_senyum.webp" alt="Selamat Datang" fill className="object-contain object-bottom" unoptimized />
+              </div>
+              <div className="bg-white/10 p-2 rounded-2xl backdrop-blur-xl border border-white/20 shadow-xl relative z-10">
                 <img
                   src="https://smkn1bjm.sch.id/wp-content/uploads/2016/07/Logo-SMKN-1-Fix.png"
                   alt="Logo SMKN 1 Banjarmasin"

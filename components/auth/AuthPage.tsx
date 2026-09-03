@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { signInWithPopup } from 'firebase/auth';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { GraduationCap } from 'lucide-react';
+import Image from 'next/image';
 
 const AuthPage = () => {
   const { signIn, signUp, user } = useAuth();
@@ -19,7 +19,6 @@ const AuthPage = () => {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({ nama: '', email: '', password: '' });
-  
 
   if (user) {
     if (typeof window !== 'undefined') {
@@ -164,10 +163,18 @@ const AuthPage = () => {
     return (
     <div className="min-h-screen flex w-full">
       {/* Kiri: Ilustrasi & Branding (Desktop Only) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-sky-600 via-cyan-600 to-sky-800 p-12 flex-col justify-between overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          {/* Decorative background removed for performance */}
+      <div className="hidden lg:flex lg:w-1/2 relative p-12 flex-col justify-between overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/animasi/12_BACKGROUND_KELAS.webp" 
+            alt="Background Kelas" 
+            fill 
+            className="object-cover object-center"
+            priority
+          />
+          {/* Overlay gradient untuk memastikan teks terbaca */}
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-900/80 via-cyan-900/70 to-sky-900/90 mix-blend-multiply"></div>
         </div>
 
         <div className="relative z-10">
@@ -194,6 +201,17 @@ const AuthPage = () => {
         <div className="relative z-10 flex items-center gap-4 text-sky-100 font-medium">
           <GraduationCap className="h-6 w-6" />
           <span>© {new Date().getFullYear()} SMK Negeri 1 Banjarmasin</span>
+        </div>
+
+        {/* Karakter Animasi Menarik */}
+        <div className="absolute right-0 bottom-0 w-64 h-80 z-10 drop-shadow-2xl opacity-90 translate-x-8">
+          <Image 
+            src="/animasi/SMA_menyapa_sebentar.GIF" 
+            alt="Siswa Menyapa" 
+            fill 
+            className="object-contain object-bottom"
+            unoptimized
+          />
         </div>
       </div>
 
