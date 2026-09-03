@@ -71,7 +71,7 @@ export default function SipoinDashboard() {
         </div>
         
         <div className="absolute right-4 -bottom-4 w-32 h-44 z-10 drop-shadow-xl">
-          <Image src="/animasi/KARAKTER-GURU-LK-PAKAI-KOPIAH.webp" alt="Guru Disiplin" fill className="object-contain object-bottom" unoptimized />
+          <Image src="/animasi/SMA_LK2.webp" alt="Siswa Disiplin" fill className="object-contain object-bottom" unoptimized />
         </div>
       </div>
 

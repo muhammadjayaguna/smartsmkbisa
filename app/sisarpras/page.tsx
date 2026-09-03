@@ -100,7 +100,7 @@ export default function SisarprasDashboard() {
           </div>
         </div>
       ) : (role === 'admin' || role === 'waka_sarpras') ? (
-        <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-indigo-600 to-violet-700 rounded-2xl p-6 text-white relative overflow-hidden">
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-500/10 blur-3xl"></div>
           <div className="relative z-10">
             <h2 className="text-2xl font-bold">{role === 'admin' ? 'Admin SiSarpras' : 'Waka Sarpras'} ⚙️</h2>
