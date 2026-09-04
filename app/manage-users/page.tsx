@@ -222,9 +222,9 @@ const ManageUsers = () => {
     }
     setDeleteLoading(userId);
     try {
-      const { data: result, error: invokeError } = await supabase.functions.invoke('delete-user', { body: { userId: authId } });
-      if (invokeError) throw new Error(invokeError.message || 'Gagal menghapus user via Edge Function');
-      if (result?.error) throw new Error(result.error);
+      const { data: result, error: invokeError } = await supabase.rpc('delete_user', { target_user_id: authId });
+      if (invokeError) throw new Error(invokeError.message || 'Gagal menghapus user');
+      
       toast({ title: "Berhasil", description: `Pengguna ${nama} (${email}) berhasil dihapus sepenuhnya dari sistem.` });
       await fetchUsers();
       if (currentUser && currentUser.id === authId) {
@@ -406,7 +406,7 @@ const ManageUsers = () => {
                     </Button>
                     <Button onClick={() => setIsReactivateDialogOpen(true)} variant="outline" className="flex items-center space-x-2">
                       <UserCheck className="h-4 w-4" />
-                      <span>Aktifkan Email</span>
+                      <span>Tambah Pengguna</span>
                     </Button>
                   </div>
                 </div>
@@ -562,8 +562,8 @@ const ManageUsers = () => {
           <Dialog open={isReactivateDialogOpen} onOpenChange={setIsReactivateDialogOpen}>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Daftarkan Ulang Email</DialogTitle>
-                <DialogDescription>Daftarkan ulang email yang sebelumnya dihapus dengan password baru</DialogDescription>
+                <DialogTitle>Tambah Pengguna Manual</DialogTitle>
+                <DialogDescription>Daftarkan pengguna baru dengan email dan password secara manual</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
