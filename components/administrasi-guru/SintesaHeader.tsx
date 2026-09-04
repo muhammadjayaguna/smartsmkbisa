@@ -84,7 +84,7 @@ export default function SintesaHeader({ title, subtitle }: SintesaHeaderProps) {
           <div className="flex items-center text-[10px] text-slate-400 font-semibold mb-0.5 space-x-1 tracking-wide uppercase">
             <Link href="/" className="hover:text-teal-600 transition-colors">Dasbor</Link>
             <ChevronRight className="w-3 h-3 text-slate-300" />
-            <Link href="/administrasi-guru" className="hover:text-teal-600 transition-colors">Sisminjar</Link>
+            <Link href="/administrasi-guru" className="hover:text-teal-600 transition-colors">SiAjar</Link>
             <ChevronRight className="w-3 h-3 text-slate-300" />
             <span className="text-teal-600">{pageInfo.group}</span>
           </div>

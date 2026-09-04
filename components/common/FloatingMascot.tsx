@@ -73,7 +73,7 @@ const FloatingMascot = () => {
               <Settings className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-slate-800">Sisminjar (Administrasi Guru)</h4>
+              <h4 className="font-bold text-slate-800">SiAjar (Administrasi Guru)</h4>
               <p className="text-sm text-slate-600 mt-1 leading-relaxed">Sistem administrasi mengajar untuk mengelola Capaian Pembelajaran, ATP, Modul Ajar, hingga Presensi dan Jurnal Harian.</p>
             </div>
           </div>

@@ -62,7 +62,7 @@ export default function WaliMindsetPage() {
           <Brain className="w-12 h-12 text-slate-300 mx-auto mb-4" />
           <h4 className="font-bold text-slate-700 text-lg">Modul Pemetaan Psikologis Segera Hadir</h4>
           <p className="text-slate-500 text-sm mt-2 max-w-lg mx-auto">
-            Sisminjar akan segera menghadirkan fitur asesmen psikologi otomatis bekerja sama dengan instrumen bimbingan konseling tersertifikasi.
+            SiAjar akan segera menghadirkan fitur asesmen psikologi otomatis bekerja sama dengan instrumen bimbingan konseling tersertifikasi.
           </p>
         </CardContent>
       </Card>

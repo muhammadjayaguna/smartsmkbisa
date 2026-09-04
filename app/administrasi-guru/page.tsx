@@ -240,7 +240,7 @@ function SiswaDashboard() {
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-3xl p-8 border-0 shadow-lg shadow-blue-900/10 relative overflow-hidden">
         <div className="relative z-10">
           <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Hai, {user?.nama || 'Siswa'}! 👋</h2>
-          <p className="text-blue-100 text-sm">Selamat datang di Sisminjar — pantau akademikmu di sini.</p>
+          <p className="text-blue-100 text-sm">Selamat datang di SiAjar — pantau akademikmu di sini.</p>
           <div className="flex flex-wrap items-center gap-3 mt-4">
             <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full text-xs text-blue-50">
               TA: <span className="font-bold text-white">2026/2027</span>
@@ -477,7 +477,7 @@ function AdminDashboard() {
         <div className="absolute -bottom-10 left-10 h-32 w-32 rounded-full bg-indigo-500/10 blur-3xl"></div>
         
         <div className="relative z-10 w-full md:w-2/3">
-          <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Admin Sisminjar</h2>
+          <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Admin SiAjar</h2>
           <p className="text-slate-300 text-sm">Akses penuh ke seluruh fitur administrasi mengajar.</p>
           <div className="flex flex-wrap items-center gap-3 mt-4">
             <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full text-xs text-slate-200">
@@ -505,7 +505,7 @@ function AdminDashboard() {
           <AlertCircle className="w-5 h-5 text-slate-500 mt-0.5 shrink-0" />
           <div>
             <h4 className="font-bold text-slate-800 text-sm">Mode Administrator</h4>
-            <p className="text-xs text-slate-500 mt-1">Anda memiliki akses penuh ke semua fitur Sisminjar termasuk fitur guru, monitoring, dan administrasi. Gunakan sidebar untuk navigasi ke menu yang diinginkan.</p>
+            <p className="text-xs text-slate-500 mt-1">Anda memiliki akses penuh ke semua fitur SiAjar termasuk fitur guru, monitoring, dan administrasi. Gunakan sidebar untuk navigasi ke menu yang diinginkan.</p>
           </div>
         </div>
       </div>

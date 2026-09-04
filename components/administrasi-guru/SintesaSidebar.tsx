@@ -137,7 +137,7 @@ export default function SintesaSidebar() {
       <div className="p-6 flex justify-center items-center border-b border-slate-200">
         <div className="flex flex-col items-center">
           <div className="w-24 h-24 rounded-full border-4 border-teal-600 flex items-center justify-center p-2 mb-2 bg-white shadow-sm hover:shadow-md transition-shadow">
-            <span className="text-teal-700 font-bold text-lg text-center leading-tight">Sisminjar</span>
+            <span className="text-teal-700 font-bold text-lg text-center leading-tight">SiAjar</span>
           </div>
           <span className="text-[10px] text-slate-500 font-medium tracking-widest uppercase text-center">Sistem Administrasi<br/>Mengajar</span>
           {/* Role Badge */}
@@ -184,7 +184,7 @@ export default function SintesaSidebar() {
           </span>
         </div>
         <div className="text-center mt-4">
-          <p className="text-[10px] text-slate-400">© 2026 Sisminjar</p>
+          <p className="text-[10px] text-slate-400">© 2026 SiAjar</p>
         </div>
       </div>
     </aside>

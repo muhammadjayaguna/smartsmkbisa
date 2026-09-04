@@ -79,7 +79,7 @@ const Dashboard = () => {
     {
       category: "Akademik & Operasional",
       items: [
-        { title: 'Sisminjar', description: 'Sistem Administrasi Mengajar', icon: Settings, color: 'from-teal-500 to-emerald-600', path: '/administrasi-guru' },
+        { title: 'SiAjar', description: 'Sistem Administrasi Mengajar', icon: Settings, color: 'from-teal-500 to-emerald-600', path: '/administrasi-guru' },
       ]
     },
     {
@@ -121,7 +121,7 @@ const Dashboard = () => {
     {
       category: "Akademik & Operasional",
       items: [
-        { title: 'Sisminjar', description: 'Sistem Administrasi Mengajar', icon: Settings, color: 'from-teal-500 to-emerald-600', path: '/administrasi-guru' },
+        { title: 'SiAjar', description: 'Sistem Administrasi Mengajar', icon: Settings, color: 'from-teal-500 to-emerald-600', path: '/administrasi-guru' },
       ]
     },
     {
