@@ -203,16 +203,30 @@ const AuthPage = () => {
           <span>© {new Date().getFullYear()} SMK Negeri 1 Banjarmasin</span>
         </div>
 
-        {/* Karakter Animasi Menarik */}
-        <div className="absolute right-32 bottom-0 w-52 h-72 z-10 drop-shadow-2xl opacity-90">
+        {/* Karakter Animasi Menarik - Group */}
+        {/* Karakter 1: Siswi Berhijab (Kiri) */}
+        <div className="absolute right-[22rem] bottom-0 w-52 h-72 z-10 drop-shadow-2xl opacity-90">
           <Image 
-            src="/animasi/SMA_LK2.webp" 
-            alt="Siswa Laki" 
+            src="/animasi/SMA_PR_HIJAB_1.gif" 
+            alt="Siswi Hijab" 
             fill 
             className="object-contain object-bottom"
             unoptimized
           />
         </div>
+        
+        {/* Karakter 2: Siswa Melambai (Tengah) */}
+        <div className="absolute right-[11rem] bottom-0 w-56 h-[19rem] z-15 drop-shadow-2xl opacity-95">
+          <Image 
+            src="/animasi/Melambai-6.webp" 
+            alt="Siswa Melambai" 
+            fill 
+            className="object-contain object-bottom"
+            unoptimized
+          />
+        </div>
+
+        {/* Karakter 3: Siswi Original (Kanan) */}
         <div className="absolute right-0 bottom-0 w-64 h-80 z-20 drop-shadow-2xl opacity-95 translate-x-8">
           <Image 
             src="/animasi/SMA_PR_1.gif" 
