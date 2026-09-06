@@ -9,6 +9,7 @@ import { Loader2, Search, BarChart3, TrendingUp, TrendingDown, Eye } from 'lucid
 import { Button } from '@/components/ui/button';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { useRouter } from 'next/navigation';
+import AiSipoinInsights from '@/components/ai/AiSipoinInsights';
 
 interface SiswaRekap {
   siswa_id: string;
@@ -111,14 +112,17 @@ export default function RekapPoinPage() {
 
       <Card className="border-slate-200/60 shadow-sm">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-100 rounded-full text-emerald-600">
-              <BarChart3 className="h-5 w-5" />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                <BarChart3 className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Rekap Poin Per Siswa</CardTitle>
+                <CardDescription>Rangkuman saldo poin seluruh siswa (Positif - Negatif).</CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-xl">Rekap Poin Per Siswa</CardTitle>
-              <CardDescription>Rangkuman saldo poin seluruh siswa (Positif - Negatif).</CardDescription>
-            </div>
+            <AiSipoinInsights dataSiswa={filteredData} />
           </div>
         </CardHeader>
         <CardContent>

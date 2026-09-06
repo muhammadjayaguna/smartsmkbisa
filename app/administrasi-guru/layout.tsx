@@ -3,6 +3,7 @@ import SintesaSidebar from '@/components/administrasi-guru/SintesaSidebar';
 import SintesaHeader from '@/components/administrasi-guru/SintesaHeader';
 import { SisminjarProvider } from '@/components/administrasi-guru/SisminjarContext';
 import { WaliProvider } from '@/components/administrasi-guru/WaliContext';
+import SiAjarChatbot from '@/components/ai/SiAjarChatbot';
 
 export default function AdministrasiGuruLayout({
   children,
@@ -26,6 +27,11 @@ export default function AdministrasiGuruLayout({
                 {children}
               </div>
             </main>
+          </div>
+          
+          {/* AI Chatbot Assistant */}
+          <div className="print:hidden">
+            <SiAjarChatbot />
           </div>
         </div>
       </WaliProvider>
