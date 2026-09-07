@@ -103,9 +103,9 @@ const Dashboard = () => {
     {
       category: "Kewirausahaan",
       items: [
-        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
+        { title: 'SMKMarket', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
         { title: 'Toko Saya', description: 'Kelola produk dan pesanan toko Anda', icon: Store, color: 'from-blue-500 to-cyan-600', path: '/marketplace/seller/dashboard' },
-        { title: 'Admin SMKmart', description: 'Kelola data toko dan produk', icon: Settings, color: 'from-slate-600 to-slate-800', path: '/admin/marketplace' }
+        { title: 'Admin SMKMarket', description: 'Kelola data toko dan produk', icon: Settings, color: 'from-slate-600 to-slate-800', path: '/admin/marketplace' }
       ]
     }
   ], [user?.email]);
@@ -139,7 +139,7 @@ const Dashboard = () => {
     {
       category: "Kewirausahaan",
       items: [
-        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
+        { title: 'SMKMarket', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
         { title: 'Toko Saya', description: 'Kelola produk dan pesanan toko Anda', icon: Store, color: 'from-blue-500 to-cyan-600', path: '/marketplace/seller/dashboard' }
       ]
     }
@@ -167,7 +167,7 @@ const Dashboard = () => {
     {
       category: "Kewirausahaan",
       items: [
-        { title: 'SMKmart', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
+        { title: 'SMKMarket', description: 'Pusat jual beli karya siswa & produk sekolah', icon: Package, color: 'from-pink-500 to-rose-600', path: '/marketplace' },
         { title: 'Toko Saya', description: 'Kelola produk dan pesanan toko Anda', icon: Store, color: 'from-blue-500 to-cyan-600', path: '/marketplace/seller/dashboard' }
       ]
     }

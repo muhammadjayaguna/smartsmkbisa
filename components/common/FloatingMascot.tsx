@@ -113,7 +113,7 @@ const FloatingMascot = () => {
               <Package className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-slate-800">SMKmart (Marketplace)</h4>
+              <h4 className="font-bold text-slate-800">SMKMarket (Marketplace)</h4>
               <p className="text-sm text-slate-600 mt-1 leading-relaxed">Pusat jual beli karya siswa dan produk unit produksi sekolah (Teaching Factory).</p>
             </div>
           </div>
