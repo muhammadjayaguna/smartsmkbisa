@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODELS = [
-  'gemini-3.6-flash',
-  'gemini-3.7-flash',
-  'gemini-3.5-flash',
-  'gemini-flash-latest'
-];
+import { generateContentWithFallback, ChatMessage } from '@/lib/ai/fallback-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,10 +8,6 @@ export async function POST(request: NextRequest) {
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'Format pesan tidak valid' }, { status: 400 });
-    }
-
-    if (!GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'API Key Gemini tidak ditemukan.' }, { status: 500 });
     }
 
     const systemPrompt = `Kamu adalah SiAjar, Asisten AI cerdas untuk aplikasi "Smart SMK Bisa" (atau SynapseSMK).
@@ -38,54 +26,26 @@ Gaya Komunikasi:
 - Jangan memberikan jawaban yang terlalu panjang kecuali diminta. Gunakan poin-poin agar mudah dibaca.
 - JANGAN gunakan format Markdown yang terlalu kompleks, gunakan format teks biasa, bold, italic, dan list saja.`;
 
-    // Convert OpenAI style messages to Gemini style
-    const geminiHistory = messages.slice(0, -1).map(msg => ({
+    const history: ChatMessage[] = messages.slice(0, -1).map((msg: any) => ({
       role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }],
+      content: msg.content
     }));
     
     const lastUserMessage = messages[messages.length - 1].content;
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    
-    let aiResponseText = '';
-    let lastError = '';
+    // Gunakan fallback router
+    const aiResponse = await generateContentWithFallback(systemPrompt, lastUserMessage, 'text', history);
 
-    for (const currentModel of GEMINI_MODELS) {
-      try {
-        const model = genAI.getGenerativeModel({ 
-          model: currentModel,
-          systemInstruction: systemPrompt,
-        });
-
-        const chat = model.startChat({
-          history: geminiHistory,
-        });
-
-        const result = await chat.sendMessage(lastUserMessage);
-        aiResponseText = result.response.text();
-        break; // Success, break the loop
-      } catch (apiError: any) {
-        console.warn(`Gemini API Error [${currentModel}]:`, apiError.message);
-        lastError = apiError.message;
-        if (
-          apiError.message.includes('503') || 
-          apiError.message.includes('429') || 
-          apiError.message.includes('404') ||
-          apiError.message.includes('not found') ||
-          apiError.message.includes('overloaded')
-        ) {
-          continue;
-        }
-        return NextResponse.json({ error: `Google Gemini Error: ${apiError.message}` }, { status: 502 });
-      }
+    if (!aiResponse.success || !aiResponse.content) {
+      return NextResponse.json({ error: aiResponse.error }, { status: 503 });
     }
 
-    if (!aiResponseText) {
-      return NextResponse.json({ error: `Semua model AI sedang sibuk/gagal. Error terakhir: ${lastError}` }, { status: 503 });
-    }
-
-    return NextResponse.json({ success: true, text: aiResponseText });
+    return NextResponse.json({ 
+      success: true, 
+      text: aiResponse.content,
+      model: aiResponse.model,
+      provider: aiResponse.provider 
+    });
 
   } catch (error: any) {
     console.error('Chat Assistant Error:', error);

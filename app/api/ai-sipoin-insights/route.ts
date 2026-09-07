@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODELS = [
-  'gemini-3.6-flash',
-  'gemini-3.7-flash',
-  'gemini-3.5-flash',
-  'gemini-flash-latest'
-];
+import { generateContentWithFallback } from '@/lib/ai/fallback-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,10 +8,6 @@ export async function POST(request: NextRequest) {
 
     if (!dataSiswa || !Array.isArray(dataSiswa)) {
       return NextResponse.json({ error: 'Data siswa tidak valid' }, { status: 400 });
-    }
-
-    if (!GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'API Key Gemini tidak ditemukan.' }, { status: 500 });
     }
 
     const systemPrompt = `Kamu adalah AI Konselor Sekolah (Guru BK) yang ahli menganalisis perilaku siswa SMK.
@@ -57,62 +45,35 @@ Tolong berikan analisis mendalam. Format output JSON yang diminta:
   "rekomendasi_umum": "Rekomendasi umum untuk sekolah/kepala sekolah berdasarkan tren data ini"
 }`;
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    // Gunakan fallback router yang baru dibuat
+    const aiResponse = await generateContentWithFallback(systemPrompt, userPrompt, 'json');
+
+    if (!aiResponse.success || !aiResponse.content) {
+      return NextResponse.json({ error: aiResponse.error }, { status: 503 });
+    }
+
+    let cleanContent = aiResponse.content;
+    if (cleanContent.includes('\`\`\`json')) {
+      cleanContent = cleanContent.split('\`\`\`json')[1].split('\`\`\`')[0].trim();
+    } else if (cleanContent.includes('\`\`\`')) {
+      cleanContent = cleanContent.split('\`\`\`')[1].split('\`\`\`')[0].trim();
+    }
     
     let parsed: any = null;
-    let successfulModel = '';
-    let lastError = '';
-
-    for (const currentModel of GEMINI_MODELS) {
-      console.log(`Mencoba generate SiPoin Insights dengan model: ${currentModel}`);
-      try {
-        const model = genAI.getGenerativeModel({ 
-          model: currentModel,
-          systemInstruction: systemPrompt,
-          generationConfig: {
-            responseMimeType: "application/json",
-          }
-        });
-
-        const result = await model.generateContent(userPrompt);
-        const aiContent = result.response.text();
-
-        if (!aiContent) {
-          lastError = 'Tidak ada respons dari Gemini API.';
-          continue;
-        }
-
-        let cleanContent = aiContent;
-        if (cleanContent.includes('\`\`\`json')) {
-          cleanContent = cleanContent.split('\`\`\`json')[1].split('\`\`\`')[0].trim();
-        } else if (cleanContent.includes('\`\`\`')) {
-          cleanContent = cleanContent.split('\`\`\`')[1].split('\`\`\`')[0].trim();
-        }
-        
-        parsed = JSON.parse(cleanContent);
-        successfulModel = currentModel;
-        break;
-      } catch (apiError: any) {
-        console.warn(`Gemini API Error [${currentModel}]:`, apiError.message);
-        lastError = apiError.message;
-        if (
-          apiError.message.includes('503') || 
-          apiError.message.includes('429') || 
-          apiError.message.includes('404') ||
-          apiError.message.includes('not found') ||
-          apiError.message.includes('overloaded')
-        ) {
-          continue;
-        }
-        return NextResponse.json({ error: `Google Gemini Error: ${apiError.message}` }, { status: 502 });
-      }
+    try {
+      parsed = JSON.parse(cleanContent);
+    } catch (parseError) {
+      console.error('Failed to parse AI JSON:', cleanContent);
+      return NextResponse.json({ error: 'AI mengembalikan format JSON yang tidak valid.' }, { status: 500 });
     }
 
-    if (!parsed) {
-      return NextResponse.json({ error: `Semua model AI sedang sibuk/gagal. Error terakhir: ${lastError}` }, { status: 503 });
-    }
-
-    return NextResponse.json({ success: true, data: parsed, model: successfulModel });
+    // Kembalikan metadata provider yang digunakan (Gemini/Dahl/Grok) untuk indikasi di UI
+    return NextResponse.json({ 
+      success: true, 
+      data: parsed, 
+      model: aiResponse.model,
+      provider: aiResponse.provider 
+    });
 
   } catch (error: any) {
     console.error('AI SiPoin Insights Error:', error);

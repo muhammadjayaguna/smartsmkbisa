@@ -16,16 +16,17 @@ interface LaporanFormProps {
   onClose: () => void;
   onSuccess: () => void;
   editData?: any;
+  prefillData?: any;
   isAdmin?: boolean;
 }
 
-export default function LaporanKerusakanForm({ isOpen, onClose, onSuccess, editData, isAdmin }: LaporanFormProps) {
+export default function LaporanKerusakanForm({ isOpen, onClose, onSuccess, editData, prefillData, isAdmin }: LaporanFormProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [inventaris, setInventaris] = useState<any[]>([]);
 
   const [formData, setFormData] = useState(
-    editData || {
+    editData || prefillData || {
       jenis_kerusakan: 'Kerusakan Barang',
       barang_id: 'none',
       lokasi: '',
@@ -70,7 +71,7 @@ export default function LaporanKerusakanForm({ isOpen, onClose, onSuccess, editD
         payload.tanggapan = formData.tanggapan;
       }
 
-      if (editData) {
+      if (editData && editData.id) {
         const { error } = await supabase.from('laporan_kerusakan').update(payload).eq('id', editData.id);
         if (error) throw error;
         toast({ title: 'Sukses', description: 'Laporan berhasil diperbarui' });

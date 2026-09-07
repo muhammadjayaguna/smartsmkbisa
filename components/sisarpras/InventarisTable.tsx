@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus, Search, Edit2, Trash2, Package, QrCode, Camera, Download, FileText, FileSpreadsheet } from 'lucide-react';
 import InventarisForm from './InventarisForm';
+import LaporanKerusakanForm from './LaporanKerusakanForm';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import QRCode from 'react-qr-code';
@@ -23,6 +24,7 @@ export default function InventarisTable() {
   const [search, setSearch] = useState('');
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [scannedItem, setScannedItem] = useState<any>(null);
+  const [isLaporOpen, setIsLaporOpen] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -306,15 +308,40 @@ export default function InventarisTable() {
               </div>
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setScannedItem(null)}>Tutup</Button>
-                <Button onClick={() => { 
-                  setEditingItem(scannedItem); 
-                  setIsFormOpen(true); 
-                  setScannedItem(null); 
-                }}>Edit Data</Button>
+                <Button variant="destructive" onClick={() => {
+                  setIsLaporOpen(true);
+                }}>Lapor Rusak</Button>
+                {isManager && (
+                  <Button onClick={() => { 
+                    setEditingItem(scannedItem); 
+                    setIsFormOpen(true); 
+                    setScannedItem(null); 
+                  }}>Edit Data</Button>
+                )}
               </div>
             </div>
           </DialogContent>
         </Dialog>
+      )}
+
+      {isLaporOpen && scannedItem && (
+        <LaporanKerusakanForm
+          isOpen={isLaporOpen}
+          onClose={() => setIsLaporOpen(false)}
+          onSuccess={() => {
+            setIsLaporOpen(false);
+            setScannedItem(null);
+          }}
+          prefillData={{
+            jenis_kerusakan: 'Kerusakan Barang',
+            barang_id: scannedItem.id,
+            lokasi: scannedItem.lokasi || '',
+            deskripsi: '',
+            tingkat_urgensi: 'Sedang',
+            status: 'Menunggu',
+            tanggapan: ''
+          }}
+        />
       )}
     </div>
   );
