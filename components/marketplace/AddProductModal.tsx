@@ -13,22 +13,23 @@ interface Props {
   onSuccess: () => void;
   initialDescription?: string;
   initialImageUrl?: string;
+  initialProduct?: any;
 }
 
 const CATEGORIES = ['Barang', 'Jasa'];
 const AI_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/ai-assistant`;
 
-const AddProductModal = ({ onClose, onSuccess, initialDescription = '', initialImageUrl = '' }: Props) => {
+const AddProductModal = ({ onClose, onSuccess, initialDescription = '', initialImageUrl = '', initialProduct = null }: Props) => {
   const { user } = useAuth();
   const [form, setForm] = useState({
-    title: '',
-    description: initialDescription,
-    price: '',
-    category: 'Barang',
-    stock: '1',
+    title: initialProduct?.title || '',
+    description: initialProduct?.description || initialDescription,
+    price: initialProduct?.price ? String(initialProduct.price) : '',
+    category: initialProduct?.category || 'Barang',
+    stock: initialProduct?.stock ? String(initialProduct.stock) : '1',
   });
   const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(initialProduct?.image_url || null);
   const [loading, setLoading] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
 
@@ -130,7 +131,7 @@ const AddProductModal = ({ onClose, onSuccess, initialDescription = '', initialI
     if (!user) return;
     setLoading(true);
 
-    let imageUrl = '';
+    let finalImageUrl = initialProduct?.image_url || '';
 
     if (image) {
       const compressedBlob = await compressImage(image);
@@ -141,23 +142,35 @@ const AddProductModal = ({ onClose, onSuccess, initialDescription = '', initialI
       });
       if (uploadError) { toast.error('Gagal upload gambar'); setLoading(false); return; }
       const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(path);
-      imageUrl = urlData.publicUrl;
+      finalImageUrl = urlData.publicUrl;
     }
 
-    const { error } = await supabase.from('products').insert({
-      seller_id: user.db_id || user.id,
+    const payload = {
       title: form.title,
       description: form.description,
       price: parseInt(form.price),
       category: form.category,
       stock: parseInt(form.stock),
-      image_url: imageUrl,
-    });
+      image_url: finalImageUrl,
+    };
+
+    let error = null;
+
+    if (initialProduct) {
+      const res = await supabase.from('products').update(payload).eq('id', initialProduct.id);
+      error = res.error;
+    } else {
+      const res = await supabase.from('products').insert({
+        ...payload,
+        seller_id: user.db_id || user.id,
+      });
+      error = res.error;
+    }
 
     if (error) {
-      toast.error('Gagal menambahkan produk');
+      toast.error(initialProduct ? 'Gagal mengubah produk' : 'Gagal menambahkan produk');
     } else {
-      toast.success('Produk berhasil ditambahkan!');
+      toast.success(initialProduct ? 'Produk berhasil diubah!' : 'Produk berhasil ditambahkan!');
       onSuccess();
     }
     setLoading(false);
@@ -168,7 +181,7 @@ const AddProductModal = ({ onClose, onSuccess, initialDescription = '', initialI
       <div className="w-full max-w-md rounded-sm bg-card shadow-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="font-display text-sm font-bold text-foreground">
-            {initialDescription ? (
+            {initialProduct ? 'Edit Produk' : initialDescription ? (
               <span className="flex items-center gap-1.5"><Sparkles size={14} className="text-primary" /> Buat Produk dari AI</span>
             ) : 'Tambah Produk Baru'}
           </h2>
@@ -248,7 +261,7 @@ const AddProductModal = ({ onClose, onSuccess, initialDescription = '', initialI
           </div>
 
           <button type="submit" disabled={loading} className="w-full rounded-sm bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
-            {loading ? 'Menyimpan...' : 'Tambah Produk'}
+            {loading ? 'Menyimpan...' : initialProduct ? 'Simpan Perubahan' : 'Tambah Produk'}
           </button>
         </form>
       </div>

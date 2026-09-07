@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import {
-  Plus, Package, TrendingUp, ShoppingBag, Trash2, Eye, EyeOff, Home, ChevronRight,
+  Plus, Package, TrendingUp, ShoppingBag, Trash2, Eye, EyeOff, Home, ChevronRight, Edit2,
   Clock, CheckCircle, XCircle, Truck, PackageCheck, AlertCircle,
   Wallet, ExternalLink, Info, ChevronDown, ChevronUp, DollarSign
 } from 'lucide-react';
@@ -106,6 +106,7 @@ const SellerDashboard = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'earnings'>('orders');
   const [orderFilter, setOrderFilter] = useState('');
   const [showWithdrawGuide, setShowWithdrawGuide] = useState(false);
@@ -475,6 +476,16 @@ const SellerDashboard = () => {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button
+                      onClick={() => {
+                        setEditingProduct(product);
+                        setShowAddModal(true);
+                      }}
+                      className="rounded-sm p-1.5 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                      title="Edit Produk"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
                       onClick={() => toggleActive(product.id, product.is_active)}
                       className={`rounded-sm p-1.5 ${product.is_active ? 'text-success hover:bg-success/10' : 'text-muted-foreground hover:bg-muted'}`}
                       title={product.is_active ? 'Nonaktifkan' : 'Aktifkan'}
@@ -617,8 +628,16 @@ const SellerDashboard = () => {
 
       {showAddModal && (
         <AddProductModal
-          onClose={() => setShowAddModal(false)}
-          onSuccess={() => { setShowAddModal(false); fetchData(); }}
+          initialProduct={editingProduct}
+          onClose={() => {
+            setShowAddModal(false);
+            setEditingProduct(null);
+          }}
+          onSuccess={() => {
+            setShowAddModal(false);
+            setEditingProduct(null);
+            fetchData();
+          }}
         />
       )}
     </div>
