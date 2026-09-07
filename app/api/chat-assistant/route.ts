@@ -78,6 +78,31 @@ Gaya Komunikasi:
         dbContext += `\n\n[DATA REAL-TIME DATABASE: SISARPRAS]
 - Total transaksi peminjaman barang: ${totalPinjam || 0}`;
       }
+
+      if (userMessageLower.includes('nilai') || userMessageLower.includes('rapor') || userMessageLower.includes('asesmen') || userMessageLower.includes('kelas') || userMessageLower.includes('pelajaran')) {
+        // Ambil data dari buku_nilai (karena ternyata tabelnya ada, meski tidak ada di types.ts generated)
+        const { data: nilaiData } = await supabase
+          .from('buku_nilai')
+          .select(`
+            nilai,
+            mata_pelajaran,
+            materi_topik,
+            jenis_penilaian,
+            siswa (
+              nama,
+              rombel ( nama_rombel )
+            )
+          `)
+          .order('tanggal', { ascending: false })
+          .limit(20);
+          
+        const { count: totalNilai } = await supabase.from('buku_nilai').select('*', { count: 'exact', head: true });
+          
+        dbContext += `\n\n[DATA REAL-TIME DATABASE: AKADEMIK & NILAI]
+- Total entri nilai yang sudah diinput guru: ${totalNilai || 0}
+- Berikut adalah 20 data nilai terbaru (buku_nilai) dari database: ${JSON.stringify(nilaiData)}
+TUGAS ANDA: Jika pengguna menanyakan nilai untuk kelas atau mapel tertentu, cari datanya di JSON di atas. Jika data JSON di atas berisi nilai yang diminta, sebutkan nilainya. Jika tidak ada di 20 data terbaru tersebut, katakan bahwa "Berdasarkan 20 data nilai terbaru yang saya akses, nilai untuk (kelas/mapel) tersebut belum terlihat, namun total ada ${totalNilai || 0} data nilai di sistem."`;
+      }
     } catch (dbErr) {
       console.warn("Gagal mengambil konteks DB:", dbErr);
       // Lanjut saja tanpa context DB jika gagal
