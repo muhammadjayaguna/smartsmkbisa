@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'model';
@@ -115,7 +116,18 @@ export default function SiAjarChatbot() {
                       ? 'bg-blue-600 text-white rounded-tr-sm' 
                       : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm'
                   }`}>
-                    {msg.content}
+                    <ReactMarkdown
+                      components={{
+                        p: ({node, ...props}) => <p className="mb-2 last:mb-0 leading-relaxed" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                        li: ({node, ...props}) => <li className="" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+                        em: ({node, ...props}) => <em className="italic" {...props} />
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ))}

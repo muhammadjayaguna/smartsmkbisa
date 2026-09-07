@@ -103,6 +103,42 @@ Gaya Komunikasi:
 - Berikut adalah 20 data nilai terbaru (buku_nilai) dari database: ${JSON.stringify(nilaiData)}
 TUGAS ANDA: Jika pengguna menanyakan nilai untuk kelas atau mapel tertentu, cari datanya di JSON di atas. Jika data JSON di atas berisi nilai yang diminta, sebutkan nilainya. Jika tidak ada di 20 data terbaru tersebut, katakan bahwa "Berdasarkan 20 data nilai terbaru yang saya akses, nilai untuk (kelas/mapel) tersebut belum terlihat, namun total ada ${totalNilai || 0} data nilai di sistem."`;
       }
+
+      if (userMessageLower.includes('absen') || userMessageLower.includes('kehadiran') || userMessageLower.includes('bolos') || userMessageLower.includes('hadir') || userMessageLower.includes('alfa')) {
+        const { data: absensiData } = await supabase
+          .from('absensi')
+          .select('tanggal, status, keterangan, siswa(nama)')
+          .order('tanggal', { ascending: false })
+          .limit(5);
+        const { count: totalAbsen } = await supabase.from('absensi').select('*', { count: 'exact', head: true });
+        
+        dbContext += `\n\n[DATA REAL-TIME DATABASE: ABSENSI SISWA]
+- Total rekam absensi di database: ${totalAbsen || 0}
+- Berikut 5 data absensi terbaru: ${JSON.stringify(absensiData)}`;
+      }
+
+      if (userMessageLower.includes('pengumuman') || userMessageLower.includes('pemberitahuan') || userMessageLower.includes('informasi')) {
+        const { data: pengumumanData } = await supabase
+          .from('pemberitahuan')
+          .select('judul, isi, tanggal_mulai, tipe')
+          .eq('aktif', true)
+          .order('tanggal_mulai', { ascending: false })
+          .limit(3);
+          
+        dbContext += `\n\n[DATA REAL-TIME DATABASE: PEMBERITAHUAN (PENGUMUMAN)]
+- Berikut 3 pengumuman aktif terbaru di sistem: ${JSON.stringify(pengumumanData)}`;
+      }
+
+      if (userMessageLower.includes('jurnal') || userMessageLower.includes('mengajar') || userMessageLower.includes('guru') || userMessageLower.includes('materi')) {
+        const { data: jurnalData } = await supabase
+          .from('jurnal_mengajar')
+          .select('mata_pelajaran, kelas, nama_guru, materi, tanggal')
+          .order('tanggal', { ascending: false })
+          .limit(5);
+          
+        dbContext += `\n\n[DATA REAL-TIME DATABASE: JURNAL MENGAJAR GURU]
+- Berikut 5 aktivitas mengajar terbaru dari para guru: ${JSON.stringify(jurnalData)}`;
+      }
     } catch (dbErr) {
       console.warn("Gagal mengambil konteks DB:", dbErr);
       // Lanjut saja tanpa context DB jika gagal
