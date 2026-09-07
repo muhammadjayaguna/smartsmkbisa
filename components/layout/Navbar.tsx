@@ -138,18 +138,6 @@ const Navbar = () => {
                 </DropdownMenu>
               )}
 
-              {user.email === 'kunbobo42@gmail.com' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push('/admin/chat')}
-                  className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full h-10 px-3 md:px-4 transition-colors"
-                >
-                  <Bot className="h-5 w-5 md:mr-2" />
-                  <span className="hidden md:block font-medium">AI Chat</span>
-                </Button>
-              )}
-
               <div className="w-px h-6 bg-slate-200 mx-2"></div>
 
               <Button

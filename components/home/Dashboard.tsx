@@ -107,6 +107,7 @@ const Dashboard = () => {
         { title: 'Toko Saya', description: 'Kelola produk dan pesanan toko Anda', icon: Store, color: 'from-blue-500 to-cyan-600', path: '/marketplace/seller/dashboard' },
         { title: 'Admin SMKmart', description: 'Kelola data toko dan produk', icon: Settings, color: 'from-slate-600 to-slate-800', path: '/admin/marketplace' }
       ]
+    }
   ], [user?.email]);
 
   const guruMenuItems = useMemo(() => [
