@@ -29,6 +29,7 @@ interface Rombel {
 }
 
 interface AbsensiData {
+  id?: string;
   siswa_id: string;
   status: string;
   jam_1: boolean;
@@ -158,6 +159,7 @@ export default function AbsensiSiswaPage() {
       data?.forEach((absen: any) => {
         existingAbsensi[absen.siswa_id] = {
           ...existingAbsensi[absen.siswa_id],
+          id: absen.id,
           status: absen.status || 'hadir',
           jam_1: Boolean(absen.jam_1),
           jam_2: Boolean(absen.jam_2),
@@ -200,7 +202,7 @@ export default function AbsensiSiswaPage() {
     try {
       const absensiRecords = siswaList.map(siswa => {
         const data = absensiData[siswa.id];
-        return {
+        const record: any = {
           siswa_id: siswa.id,
           tanggal: today,
           status: data?.status || 'hadir',
@@ -209,12 +211,17 @@ export default function AbsensiSiswaPage() {
           jam_9: Boolean(data?.jam_9), jam_10: Boolean(data?.jam_10), jam_11: Boolean(data?.jam_11), jam_12: Boolean(data?.jam_12),
           keterangan: data?.keterangan?.trim() || null
         };
+        if (data?.id) {
+          record.id = data.id;
+        }
+        return record;
       });
 
       const batchSize = 10;
       for (let i = 0; i < absensiRecords.length; i += batchSize) {
         const batch = absensiRecords.slice(i, i + batchSize);
-        const { error } = await supabase.from('absensi').upsert(batch, { onConflict: 'siswa_id,tanggal' });
+        // By omitting onConflict, Supabase will default to using the primary key (id) for conflict resolution
+        const { error } = await supabase.from('absensi').upsert(batch);
         if (error) throw error;
       }
 
