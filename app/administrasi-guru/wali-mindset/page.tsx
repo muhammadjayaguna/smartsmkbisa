@@ -5,6 +5,7 @@ import { Brain, Heart, Search, Target, Cpu } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWali } from '@/components/administrasi-guru/WaliContext';
+import Link from 'next/link';
 
 export default function WaliMindsetPage() {
   const { activeRombel } = useWali();
@@ -30,7 +31,9 @@ export default function WaliMindsetPage() {
             </div>
             <h3 className="font-bold text-slate-800 text-lg mb-2">Gaya Belajar (Learning Style)</h3>
             <p className="text-sm text-slate-500 mb-4 line-clamp-2">Peta persebaran gaya belajar Visual, Auditori, dan Kinestetik pada siswa di kelas Anda.</p>
-            <Button variant="outline" className="w-full border-orange-200 text-orange-700 hover:bg-orange-50">Mulai Asesmen</Button>
+            <Link href="/administrasi-guru/wali-mindset/gaya-belajar">
+              <Button variant="outline" className="w-full border-orange-200 text-orange-700 hover:bg-orange-50">Mulai Asesmen</Button>
+            </Link>
           </CardContent>
         </Card>
         
@@ -41,7 +44,9 @@ export default function WaliMindsetPage() {
             </div>
             <h3 className="font-bold text-slate-800 text-lg mb-2">Growth vs Fixed Mindset</h3>
             <p className="text-sm text-slate-500 mb-4 line-clamp-2">Tes psikologi ringan untuk mengetahui kecenderungan pola pikir siswa saat menghadapi tantangan.</p>
-            <Button variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-50">Mulai Asesmen</Button>
+            <Link href="/administrasi-guru/wali-mindset/growth-mindset">
+              <Button variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-50">Mulai Asesmen</Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -52,7 +57,9 @@ export default function WaliMindsetPage() {
             </div>
             <h3 className="font-bold text-slate-800 text-lg mb-2">Kesejahteraan Emosional</h3>
             <p className="text-sm text-slate-500 mb-4 line-clamp-2">Pantau tingkat stress, motivasi belajar, dan dukungan keluarga dari siswa binaan.</p>
-            <Button variant="outline" className="w-full border-rose-200 text-rose-700 hover:bg-rose-50">Mulai Asesmen</Button>
+            <Link href="/administrasi-guru/wali-mindset/kesejahteraan">
+              <Button variant="outline" className="w-full border-rose-200 text-rose-700 hover:bg-rose-50">Mulai Asesmen</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -60,9 +67,9 @@ export default function WaliMindsetPage() {
       <Card className="border-dashed border-2 border-slate-200 bg-slate-50">
         <CardContent className="p-12 text-center">
           <Brain className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-          <h4 className="font-bold text-slate-700 text-lg">Modul Pemetaan Psikologis Segera Hadir</h4>
+          <h4 className="font-bold text-slate-700 text-lg">Input Data Pemetaan</h4>
           <p className="text-slate-500 text-sm mt-2 max-w-lg mx-auto">
-            SiAjar akan segera menghadirkan fitur asesmen psikologi otomatis bekerja sama dengan instrumen bimbingan konseling tersertifikasi.
+            Silakan pilih kategori di atas untuk mulai melakukan penginputan hasil observasi maupun tes gaya belajar, pola pikir, dan kesejahteraan emosional siswa.
           </p>
         </CardContent>
       </Card>
