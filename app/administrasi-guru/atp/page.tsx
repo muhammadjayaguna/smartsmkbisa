@@ -128,7 +128,8 @@ export default function ATPPage() {
 
   const handleGenerateAI = async () => {
     if (!user) return;
-    if (!activeMapel) return toast({ title: '⚠️ Pilih atau Buat Mata Pelajaran terlebih dahulu', variant: 'destructive' });
+    if (!activeMapel) return toast({ title: '⚠️ Pilih Mata Pelajaran terlebih dahulu', variant: 'destructive' });
+    if (!confirm('Apakah Anda yakin ingin menggunakan AI untuk men-generate ini? Proses ini mungkin memerlukan waktu beberapa saat.')) return;
     
     // We don't wipe everything anymore, we just append to the existing ATPs!
     // This allows generating 1-4, then 5-8, etc.

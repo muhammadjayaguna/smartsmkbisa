@@ -40,6 +40,7 @@ export default function ProtaPromesPage() {
     if (!user) return;
     if (!activeMapel) return toast({ title: '⚠️ Pilih Mata Pelajaran', variant: 'destructive' });
     if (atpList.length === 0) return toast({ title: '⚠️ ATP Kosong', variant: 'destructive' });
+    if (!confirm('Apakah Anda yakin ingin menggunakan AI untuk men-generate ini? Proses ini mungkin memerlukan waktu beberapa saat.')) return;
 
     setGenerating(true);
     toast({ title: '🤖 Sedang men-generate Promes...', description: 'AI sedang mengalokasikan bulan. Mohon tunggu.' });

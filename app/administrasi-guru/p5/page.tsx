@@ -40,6 +40,7 @@ export default function P5Page() {
 
   const handleGenerateP5 = async () => {
     if (!selectedTema) return toast({ title: '⚠️ Pilih Tema P5 terlebih dahulu', variant: 'destructive' });
+    if (!confirm('Apakah Anda yakin ingin menggunakan AI untuk men-generate ini? Proses ini mungkin memerlukan waktu beberapa saat.')) return;
 
     setGenerating(true);
     try {

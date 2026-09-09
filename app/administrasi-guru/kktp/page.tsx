@@ -42,6 +42,7 @@ export default function KKTPPage() {
   const handleGenerateAI = async () => {
     if (!user) return;
     if (!activeMapel) return toast({ title: '⚠️ Pilih atau Buat Mata Pelajaran terlebih dahulu', variant: 'destructive' });
+    if (!confirm('Apakah Anda yakin ingin menggunakan AI untuk men-generate ini? Proses ini mungkin memerlukan waktu beberapa saat.')) return;
     
     setGenerating(true);
     toast({ title: '🤖 Mengambil data ATP...', description: 'Mohon tunggu sebentar.' });

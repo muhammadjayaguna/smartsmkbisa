@@ -112,6 +112,7 @@ export default function BahanAjarPage() {
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!confirm('Apakah Anda yakin ingin menggunakan AI untuk men-generate ini? Proses ini mungkin memerlukan waktu beberapa saat.')) return;
     if (!activeMapel) return toast({ title: '⚠️ Pilih atau Buat Mata Pelajaran terlebih dahulu', variant: 'destructive' });
     if (!formData.topik) return toast({ title: 'Topik harus diisi!', variant: 'destructive' });
     

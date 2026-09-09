@@ -85,6 +85,7 @@ export default function AsesmenPage() {
   const handleGenerateAsesmen = async () => {
     if (!activeMapel) return toast({ title: '⚠️ Pilih atau Buat Mata Pelajaran terlebih dahulu', variant: 'destructive' });
     if (!selectedTp) return toast({ title: '⚠️ Pilih Tujuan Pembelajaran (TP) terlebih dahulu', variant: 'destructive' });
+    if (!confirm('Apakah Anda yakin ingin menggunakan AI untuk men-generate ini? Proses ini mungkin memerlukan waktu beberapa saat.')) return;
     const tp = atpList.find(t => t.kode === selectedTp);
     if (!tp) return;
 
