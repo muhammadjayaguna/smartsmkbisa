@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
-import { FileEdit, Sparkles, BookOpen, ChevronDown, Printer } from 'lucide-react';
+import { FileEdit, Sparkles, BookOpen, ChevronDown, Printer, Edit3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { KopSurat } from '@/components/administrasi-guru/KopSurat';
@@ -48,6 +48,16 @@ export default function ModulAjarPage() {
   const [atpList, setAtpList] = useState<any[]>([]);
   const [modulList, setModulList] = useState<any[]>([]);
   const [selectedTp, setSelectedTp] = useState('');
+  const [inputMode, setInputMode] = useState<'ai' | 'manual'>('ai');
+  const [manualForm, setManualForm] = useState({
+    judul: '',
+    pemahaman_bermakna: '',
+    pertanyaan_pemantik: '',
+    kegiatan_pendahuluan: '',
+    kegiatan_inti: '',
+    kegiatan_penutup: '',
+    asesmen_deskripsi: ''
+  });
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -118,6 +128,45 @@ export default function ModulAjarPage() {
     }
   };
 
+  const handleSaveManual = async () => {
+    if (!activeMapel) return toast({ title: '⚠️ Pilih Mata Pelajaran terlebih dahulu', variant: 'destructive' });
+    if (!selectedTp) return toast({ title: '⚠️ Pilih Tujuan Pembelajaran (TP) terlebih dahulu', variant: 'destructive' });
+    if (!manualForm.judul) return toast({ title: '⚠️ Judul modul wajib diisi', variant: 'destructive' });
+    
+    const tp = atpList.find(t => t.kode === selectedTp);
+    if (!tp) return;
+
+    setGenerating(true);
+    try {
+      const uid = user?.db_id || user?.id;
+      
+      const { error } = await supabase.from('modul_ajar').insert({
+        guru_id: uid,
+        pengaturan_guru_id: activeMapel.id,
+        tp_kode: tp.kode,
+        judul: manualForm.judul,
+        pemahaman_bermakna: manualForm.pemahaman_bermakna,
+        pertanyaan_pemantik: manualForm.pertanyaan_pemantik,
+        kegiatan_pendahuluan: manualForm.kegiatan_pendahuluan,
+        kegiatan_inti: manualForm.kegiatan_inti,
+        kegiatan_penutup: manualForm.kegiatan_penutup,
+        asesmen_jenis: 'Sumatif, Formatif',
+        asesmen_deskripsi: manualForm.asesmen_deskripsi
+      });
+
+      if (error) throw error;
+      toast({ title: '✅ Modul Ajar berhasil disimpan!' });
+      fetchData();
+      setSelectedTp('');
+      setManualForm({ judul: '', pemahaman_bermakna: '', pertanyaan_pemantik: '', kegiatan_pendahuluan: '', kegiatan_inti: '', kegiatan_penutup: '', asesmen_deskripsi: '' });
+      setInputMode('ai');
+    } catch (err: any) {
+      toast({ title: '❌ Gagal menyimpan modul', description: err.message, variant: 'destructive' });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const deleteModul = async (id: string) => {
     if (!confirm('Hapus modul ajar ini?')) return;
     try {
@@ -145,28 +194,93 @@ export default function ModulAjarPage() {
       </div>
 
       <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200/50 no-print">
-        <CardContent className="p-5 flex flex-col md:flex-row items-center gap-4">
-          <div className="flex-1 w-full">
-            <label className="text-xs font-bold text-orange-800 mb-1.5 block">Pilih Tujuan Pembelajaran (Dari ATP)</label>
-            <div className="relative">
-              <select 
-                value={selectedTp} onChange={(e) => setSelectedTp(e.target.value)}
-                className="w-full p-2.5 bg-white border border-orange-200 rounded-lg text-sm appearance-none outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-              >
-                <option value="">-- Pilih Tujuan Pembelajaran --</option>
-                {atpList.map(tp => <option key={tp.id} value={tp.kode}>[{tp.kode}] {tp.tujuan.substring(0, 80)}...</option>)}
-              </select>
-              <ChevronDown className="w-4 h-4 text-orange-400 absolute right-3 top-3 pointer-events-none" />
-            </div>
-          </div>
-          <div className="w-full md:w-auto flex items-end h-full">
-            <Button 
-              onClick={handleGenerateMA} disabled={generating || !selectedTp}
-              className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 h-[42px]"
+        <CardContent className="p-5">
+          <div className="flex gap-2 bg-white/60 p-1 rounded-lg w-max mb-5 border border-orange-200/50 backdrop-blur-sm shadow-sm">
+            <Button
+              onClick={() => setInputMode('ai')}
+              variant="ghost"
+              className={`h-9 px-5 text-sm font-bold rounded-md transition-all ${inputMode === 'ai' ? 'bg-orange-500 shadow-sm text-white hover:text-white hover:bg-orange-600' : 'text-orange-700 hover:text-orange-900 hover:bg-orange-100/50'}`}
             >
-              {generating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Sparkles className="w-4 h-4 mr-2" />}
-              Generate Modul (AI)
+              <Sparkles className="w-4 h-4 mr-2" /> AI Generate
             </Button>
+            <Button
+              onClick={() => setInputMode('manual')}
+              variant="ghost"
+              className={`h-9 px-5 text-sm font-bold rounded-md transition-all ${inputMode === 'manual' ? 'bg-orange-500 shadow-sm text-white hover:text-white hover:bg-orange-600' : 'text-orange-700 hover:text-orange-900 hover:bg-orange-100/50'}`}
+            >
+              <Edit3 className="w-4 h-4 mr-2" /> Tulis Manual
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <div className="w-full">
+              <label className="text-xs font-bold text-orange-800 mb-1.5 block">Pilih Tujuan Pembelajaran (Dari ATP)</label>
+              <div className="relative">
+                <select 
+                  value={selectedTp} onChange={(e) => setSelectedTp(e.target.value)}
+                  className="w-full p-3 bg-white border border-orange-200 rounded-lg text-sm appearance-none outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 shadow-sm"
+                >
+                  <option value="">-- Pilih Tujuan Pembelajaran --</option>
+                  {atpList.map(tp => <option key={tp.id} value={tp.kode}>[{tp.kode}] {tp.tujuan.substring(0, 80)}...</option>)}
+                </select>
+                <ChevronDown className="w-4 h-4 text-orange-400 absolute right-3 top-3.5 pointer-events-none" />
+              </div>
+            </div>
+
+            {inputMode === 'manual' && (
+              <div className="space-y-4 bg-white/80 p-5 rounded-xl border border-orange-100 shadow-sm">
+                <div>
+                  <label className="text-xs font-bold text-orange-800 mb-1.5 block">Judul Modul/Materi Pokok *</label>
+                  <input type="text" value={manualForm.judul} onChange={e => setManualForm({...manualForm, judul: e.target.value})} className="w-full p-2.5 bg-white border border-orange-200 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="Contoh: Pengantar Algoritma Pemrograman" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-orange-800 mb-1.5 block">Pemahaman Bermakna</label>
+                    <textarea rows={3} value={manualForm.pemahaman_bermakna} onChange={e => setManualForm({...manualForm, pemahaman_bermakna: e.target.value})} className="w-full p-2.5 bg-white border border-orange-200 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="Pemahaman yang didapat siswa..." />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-orange-800 mb-1.5 block">Pertanyaan Pemantik</label>
+                    <textarea rows={3} value={manualForm.pertanyaan_pemantik} onChange={e => setManualForm({...manualForm, pertanyaan_pemantik: e.target.value})} className="w-full p-2.5 bg-white border border-orange-200 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="Pertanyaan untuk memantik rasa ingin tahu..." />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-orange-800 mb-1.5 block">Kegiatan Pendahuluan</label>
+                  <textarea rows={3} value={manualForm.kegiatan_pendahuluan} onChange={e => setManualForm({...manualForm, kegiatan_pendahuluan: e.target.value})} className="w-full p-2.5 bg-white border border-orange-200 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="Langkah pendahuluan..." />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-orange-800 mb-1.5 block">Kegiatan Inti</label>
+                  <textarea rows={4} value={manualForm.kegiatan_inti} onChange={e => setManualForm({...manualForm, kegiatan_inti: e.target.value})} className="w-full p-2.5 bg-white border border-orange-200 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="Langkah inti pembelajaran..." />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-orange-800 mb-1.5 block">Kegiatan Penutup</label>
+                  <textarea rows={3} value={manualForm.kegiatan_penutup} onChange={e => setManualForm({...manualForm, kegiatan_penutup: e.target.value})} className="w-full p-2.5 bg-white border border-orange-200 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="Langkah penutup..." />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-orange-800 mb-1.5 block">Asesmen (Sumatif)</label>
+                  <textarea rows={3} value={manualForm.asesmen_deskripsi} onChange={e => setManualForm({...manualForm, asesmen_deskripsi: e.target.value})} className="w-full p-2.5 bg-white border border-orange-200 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="Deskripsi asesmen yang akan diberikan..." />
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end mt-2">
+              {inputMode === 'ai' ? (
+                <Button 
+                  onClick={handleGenerateMA} disabled={generating || !selectedTp}
+                  className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 h-11 px-8 shadow-sm"
+                >
+                  {generating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Sparkles className="w-4 h-4 mr-2" />}
+                  Generate Modul (AI)
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSaveManual} disabled={generating || !selectedTp}
+                  className="w-full md:w-auto bg-orange-600 text-white hover:bg-orange-700 h-11 px-8 shadow-sm"
+                >
+                  {generating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <FileEdit className="w-4 h-4 mr-2" />}
+                  Simpan Modul Manual
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

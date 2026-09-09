@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ClipboardList, Sparkles, ChevronDown, Trash2, Printer, Plus } from 'lucide-react';
+import { ClipboardList, Sparkles, ChevronDown, Trash2, Printer, Plus, Edit3 } from 'lucide-react';
 import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
@@ -57,6 +57,16 @@ export default function AsesmenPage() {
   const [atpList, setAtpList] = useState<any[]>([]);
   const [asesmenList, setAsesmenList] = useState<any[]>([]);
   const [selectedTp, setSelectedTp] = useState('');
+  const [inputMode, setInputMode] = useState<'ai' | 'manual'>('ai');
+  const [manualForm, setManualForm] = useState({
+    jenis: '',
+    kisi_kisi: '',
+    rubrik_4: '',
+    rubrik_3: '',
+    rubrik_2: '',
+    rubrik_1: '',
+    soal_evaluasi: ''
+  });
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -131,6 +141,43 @@ export default function AsesmenPage() {
     }
   };
 
+  const handleSaveManual = async () => {
+    if (!activeMapel) return toast({ title: '⚠️ Pilih Mata Pelajaran terlebih dahulu', variant: 'destructive' });
+    if (!selectedTp) return toast({ title: '⚠️ Pilih Tujuan Pembelajaran (TP) terlebih dahulu', variant: 'destructive' });
+    if (!manualForm.jenis) return toast({ title: '⚠️ Jenis asesmen wajib diisi', variant: 'destructive' });
+    
+    const tp = atpList.find(t => t.kode === selectedTp);
+    if (!tp) return;
+
+    setGenerating(true);
+    try {
+      const uid = user?.db_id || user?.id;
+      
+      const { error } = await supabase.from('asesmen').insert({
+        guru_id: uid,
+        tp_kode: tp.kode,
+        jenis: manualForm.jenis,
+        kisi_kisi: manualForm.kisi_kisi,
+        rubrik_4: manualForm.rubrik_4,
+        rubrik_3: manualForm.rubrik_3,
+        rubrik_2: manualForm.rubrik_2,
+        rubrik_1: manualForm.rubrik_1,
+        soal_evaluasi: manualForm.soal_evaluasi
+      });
+
+      if (error) throw error;
+      toast({ title: '✅ Instrumen Asesmen berhasil disimpan!' });
+      fetchData();
+      setSelectedTp('');
+      setManualForm({ jenis: '', kisi_kisi: '', rubrik_4: '', rubrik_3: '', rubrik_2: '', rubrik_1: '', soal_evaluasi: '' });
+      setInputMode('ai');
+    } catch (err: any) {
+      toast({ title: '❌ Gagal menyimpan asesmen', description: err.message, variant: 'destructive' });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const deleteAsesmen = async (id: string) => {
     if (!confirm('Hapus instrumen asesmen ini?')) return;
     try {
@@ -164,28 +211,93 @@ export default function AsesmenPage() {
       </div>
 
       <Card className="bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200/50 no-print">
-        <CardContent className="p-5 flex flex-col md:flex-row items-center gap-4">
-          <div className="flex-1 w-full">
-            <label className="text-xs font-bold text-violet-800 mb-1.5 block">Pilih Tujuan Pembelajaran (Dari ATP)</label>
-            <div className="relative">
-              <select 
-                value={selectedTp} onChange={(e) => setSelectedTp(e.target.value)}
-                className="w-full p-2.5 bg-white border border-violet-200 rounded-lg text-sm appearance-none outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
-              >
-                <option value="">-- Pilih Tujuan Pembelajaran --</option>
-                {atpList.map(tp => <option key={tp.id} value={tp.kode}>[{tp.kode}] {tp.tujuan.substring(0, 80)}...</option>)}
-              </select>
-              <ChevronDown className="w-4 h-4 text-violet-400 absolute right-3 top-3 pointer-events-none" />
-            </div>
-          </div>
-          <div className="w-full md:w-auto flex items-end h-full">
-            <Button 
-              onClick={handleGenerateAsesmen} disabled={generating || !selectedTp}
-              className="w-full md:w-auto bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 h-[42px]"
+        <CardContent className="p-5">
+          <div className="flex gap-2 bg-white/60 p-1 rounded-lg w-max mb-5 border border-violet-200/50 backdrop-blur-sm shadow-sm">
+            <Button
+              onClick={() => setInputMode('ai')}
+              variant="ghost"
+              className={`h-9 px-5 text-sm font-bold rounded-md transition-all ${inputMode === 'ai' ? 'bg-violet-600 shadow-sm text-white hover:text-white hover:bg-violet-700' : 'text-violet-700 hover:text-violet-900 hover:bg-violet-100/50'}`}
             >
-              {generating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Sparkles className="w-4 h-4 mr-2" />}
-              Generate Asesmen (AI)
+              <Sparkles className="w-4 h-4 mr-2" /> AI Generate
             </Button>
+            <Button
+              onClick={() => setInputMode('manual')}
+              variant="ghost"
+              className={`h-9 px-5 text-sm font-bold rounded-md transition-all ${inputMode === 'manual' ? 'bg-violet-600 shadow-sm text-white hover:text-white hover:bg-violet-700' : 'text-violet-700 hover:text-violet-900 hover:bg-violet-100/50'}`}
+            >
+              <Edit3 className="w-4 h-4 mr-2" /> Tulis Manual
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <div className="w-full">
+              <label className="text-xs font-bold text-violet-800 mb-1.5 block">Pilih Tujuan Pembelajaran (Dari ATP)</label>
+              <div className="relative">
+                <select 
+                  value={selectedTp} onChange={(e) => setSelectedTp(e.target.value)}
+                  className="w-full p-3 bg-white border border-violet-200 rounded-lg text-sm appearance-none outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 shadow-sm"
+                >
+                  <option value="">-- Pilih Tujuan Pembelajaran --</option>
+                  {atpList.map(tp => <option key={tp.id} value={tp.kode}>[{tp.kode}] {tp.tujuan.substring(0, 80)}...</option>)}
+                </select>
+                <ChevronDown className="w-4 h-4 text-violet-400 absolute right-3 top-3.5 pointer-events-none" />
+              </div>
+            </div>
+
+            {inputMode === 'manual' && (
+              <div className="space-y-4 bg-white/80 p-5 rounded-xl border border-violet-100 shadow-sm">
+                <div>
+                  <label className="text-xs font-bold text-violet-800 mb-1.5 block">Jenis Asesmen *</label>
+                  <input type="text" value={manualForm.jenis} onChange={e => setManualForm({...manualForm, jenis: e.target.value})} className="w-full p-2.5 bg-white border border-violet-200 rounded-lg text-sm outline-none focus:border-violet-400" placeholder="Contoh: Penilaian Tertulis / Penugasan Proyek" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-violet-800 mb-1.5 block">Kisi-kisi Asesmen</label>
+                  <textarea rows={3} value={manualForm.kisi_kisi} onChange={e => setManualForm({...manualForm, kisi_kisi: e.target.value})} className="w-full p-2.5 bg-white border border-violet-200 rounded-lg text-sm outline-none focus:border-violet-400" placeholder="Deskripsi kisi-kisi asesmen..." />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-violet-800 mb-1.5 block">Rubrik Sangat Baik (4)</label>
+                    <textarea rows={2} value={manualForm.rubrik_4} onChange={e => setManualForm({...manualForm, rubrik_4: e.target.value})} className="w-full p-2.5 bg-white border border-violet-200 rounded-lg text-sm outline-none focus:border-violet-400" placeholder="Kriteria sangat baik..." />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-violet-800 mb-1.5 block">Rubrik Baik (3)</label>
+                    <textarea rows={2} value={manualForm.rubrik_3} onChange={e => setManualForm({...manualForm, rubrik_3: e.target.value})} className="w-full p-2.5 bg-white border border-violet-200 rounded-lg text-sm outline-none focus:border-violet-400" placeholder="Kriteria baik..." />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-violet-800 mb-1.5 block">Rubrik Cukup (2)</label>
+                    <textarea rows={2} value={manualForm.rubrik_2} onChange={e => setManualForm({...manualForm, rubrik_2: e.target.value})} className="w-full p-2.5 bg-white border border-violet-200 rounded-lg text-sm outline-none focus:border-violet-400" placeholder="Kriteria cukup..." />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-violet-800 mb-1.5 block">Rubrik Kurang (1)</label>
+                    <textarea rows={2} value={manualForm.rubrik_1} onChange={e => setManualForm({...manualForm, rubrik_1: e.target.value})} className="w-full p-2.5 bg-white border border-violet-200 rounded-lg text-sm outline-none focus:border-violet-400" placeholder="Kriteria kurang..." />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-violet-800 mb-1.5 block">Soal Evaluasi / Tugas</label>
+                  <textarea rows={4} value={manualForm.soal_evaluasi} onChange={e => setManualForm({...manualForm, soal_evaluasi: e.target.value})} className="w-full p-2.5 bg-white border border-violet-200 rounded-lg text-sm outline-none focus:border-violet-400" placeholder="Daftar soal atau instruksi tugas..." />
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end mt-2">
+              {inputMode === 'ai' ? (
+                <Button 
+                  onClick={handleGenerateAsesmen} disabled={generating || !selectedTp}
+                  className="w-full md:w-auto bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 h-11 px-8 shadow-sm"
+                >
+                  {generating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Sparkles className="w-4 h-4 mr-2" />}
+                  Generate Asesmen (AI)
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSaveManual} disabled={generating || !selectedTp}
+                  className="w-full md:w-auto bg-violet-600 text-white hover:bg-violet-700 h-11 px-8 shadow-sm"
+                >
+                  {generating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Edit3 className="w-4 h-4 mr-2" />}
+                  Simpan Asesmen Manual
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
