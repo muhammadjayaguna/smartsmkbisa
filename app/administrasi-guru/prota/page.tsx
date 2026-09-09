@@ -6,10 +6,11 @@ import { useSisminjar } from '@/components/administrasi-guru/SisminjarContext';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { KopSurat } from '@/components/administrasi-guru/KopSurat';
-import { Calendar, Printer, Save, Edit3, Sparkles } from 'lucide-react';
+import { Calendar, Printer, Save, Edit3, Sparkles, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 export default function ProtaPromesPage() {
   const { user } = useAuth();
@@ -18,6 +19,8 @@ export default function ProtaPromesPage() {
   const { activeMapel, loading: contextLoading } = useSisminjar();
   const [atpList, setAtpList] = useState<any[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTP, setNewTP] = useState({ kode: '', tujuan: '', jp: 8, semester: 1 });
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -101,6 +104,31 @@ export default function ProtaPromesPage() {
     }
   };
 
+  const handleAddManual = async () => {
+    if (!user || !newTP.kode || !newTP.tujuan) {
+      return toast({ title: 'Kode dan Tujuan wajib diisi!', variant: 'destructive' });
+    }
+    try {
+      const uid = user.db_id || user.id;
+      const { error } = await supabase.from('atp').insert({
+        guru_id: uid,
+        pengaturan_guru_id: activeMapel?.id,
+        kode: newTP.kode,
+        tujuan: newTP.tujuan,
+        jp: newTP.jp,
+        semester: newTP.semester,
+        urutan: atpList.length + 1
+      });
+      if (error) throw error;
+      toast({ title: 'Berhasil ditambahkan!' });
+      setNewTP({ kode: '', tujuan: '', jp: 8, semester: 1 });
+      setShowAddForm(false);
+      fetchData();
+    } catch (err) {
+      toast({ title: 'Gagal menambahkan', variant: 'destructive' });
+    }
+  };
+
   if (loading || contextLoading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>;
 
   const mapel = activeMapel?.mata_pelajaran || 'Mata Pelajaran';
@@ -125,6 +153,9 @@ export default function ProtaPromesPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button size="sm" onClick={() => setShowAddForm(!showAddForm)} variant={showAddForm ? 'destructive' : 'outline'} className="no-print">
+            {showAddForm ? 'Batal' : <><Plus className="w-4 h-4 mr-1" /> Tambah Manual</>}
+          </Button>
           <Button onClick={handleGeneratePromes} disabled={generating || atpList.length === 0} className="bg-amber-500 hover:bg-amber-600 text-white">
             <Sparkles className="w-4 h-4 mr-2" /> {generating ? 'Generating...' : 'Generate AI Promes'}
           </Button>
@@ -133,6 +164,44 @@ export default function ProtaPromesPage() {
           </Button>
         </div>
       </div>
+
+      {showAddForm && (
+        <Card className="border-dashed border-2 border-amber-300 bg-amber-50/30 no-print">
+          <CardContent className="p-5 space-y-4">
+            <h4 className="font-bold text-sm text-amber-700">Tambah Data Prota Secara Manual</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500">Kode *</label>
+                <Input value={newTP.kode} onChange={e => setNewTP({ ...newTP, kode: e.target.value })} placeholder="Cth: TP1" className="bg-white" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500">JP</label>
+                <Input type="number" value={newTP.jp} onChange={e => setNewTP({ ...newTP, jp: parseInt(e.target.value) || 0 })} className="bg-white" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500">Semester</label>
+                <select 
+                  className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={newTP.semester} 
+                  onChange={e => setNewTP({ ...newTP, semester: parseInt(e.target.value) })}
+                >
+                  <option value={1}>Semester 1</option>
+                  <option value={2}>Semester 2</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500">Tujuan Pembelajaran *</label>
+              <Textarea value={newTP.tujuan} onChange={e => setNewTP({ ...newTP, tujuan: e.target.value })} placeholder="Deskripsi materi/tujuan..." className="bg-white min-h-[60px]" />
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={handleAddManual} className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Plus className="w-4 h-4 mr-1" /> Simpan Data
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Info */}
       <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200/50 no-print">
@@ -147,8 +216,11 @@ export default function ProtaPromesPage() {
       {atpList.length === 0 ? (
         <Card className="bg-slate-50"><CardContent className="p-12 flex flex-col items-center text-center">
           <Calendar className="w-12 h-12 text-slate-300 mb-3" />
-          <h4 className="font-bold text-slate-700">Belum ada data ATP</h4>
-          <p className="text-sm text-slate-500 mt-1">Buat ATP terlebih dahulu di menu "Alur Tujuan Pemb." agar Prota & Promes bisa ditampilkan.</p>
+          <h4 className="font-bold text-slate-700">Belum ada data Prota & Promes</h4>
+          <p className="text-sm text-slate-500 mt-1 mb-5">Klik "Tambah Manual" di atas untuk menambahkan secara manual, atau gunakan menu "Alur Tujuan Pemb." untuk men-generate semua dengan AI.</p>
+          <Button onClick={() => setShowAddForm(true)} variant="outline" className="bg-white">
+            <Plus className="w-4 h-4 mr-2" /> Tambah Manual
+          </Button>
         </CardContent></Card>
       ) : (
         <>
