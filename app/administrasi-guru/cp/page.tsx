@@ -397,14 +397,31 @@ export default function CapaianPembelajaranPage() {
       <div className="space-y-4 print:space-y-8">
         <div className="flex items-center justify-between print:mb-4">
           <h3 className="font-bold text-slate-700 text-lg print:text-xl print:text-black print:uppercase print:tracking-wide">Elemen Capaian Pembelajaran</h3>
-          <Button
-            size="sm"
-            onClick={() => setShowAddForm(!showAddForm)}
-            variant={showAddForm ? 'destructive' : 'outline'}
-            className="no-print"
-          >
-            {showAddForm ? 'Tutup Form' : <><Plus className="w-4 h-4 mr-1" /> Tambah Elemen</>}
-          </Button>
+          <div className="flex items-center gap-2">
+            {elemenList.length > 0 && (
+              <Button
+                size="sm"
+                onClick={handleGenerateAI}
+                disabled={generating}
+                variant="outline"
+                className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:text-purple-700 no-print"
+              >
+                {generating ? (
+                  <><div className="animate-spin rounded-full h-3 w-3 border-2 border-purple-600 border-t-transparent mr-2"></div> Generating...</>
+                ) : (
+                  <><Sparkles className="w-4 h-4 mr-1" /> Generate AI</>
+                )}
+              </Button>
+            )}
+            <Button
+              size="sm"
+              onClick={() => setShowAddForm(!showAddForm)}
+              variant={showAddForm ? 'destructive' : 'outline'}
+              className="no-print"
+            >
+              {showAddForm ? 'Tutup Form' : <><Plus className="w-4 h-4 mr-1" /> Tambah Elemen</>}
+            </Button>
+          </div>
         </div>
 
         {/* Add New Form */}
@@ -445,7 +462,29 @@ export default function CapaianPembelajaranPage() {
             <CardContent className="p-12 flex flex-col items-center justify-center text-center">
               <BookOpen className="w-12 h-12 text-slate-300 mb-3" />
               <h4 className="font-bold text-slate-700">Belum ada Elemen CP</h4>
-              <p className="text-sm text-slate-500 mt-1">Klik tombol "+ Tambah Elemen" atau gunakan AI untuk men-generate</p>
+              <p className="text-sm text-slate-500 mt-1 mb-5">Klik tombol "+ Tambah Elemen" atau gunakan AI untuk men-generate</p>
+              
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setShowAddForm(true)} 
+                  variant="outline"
+                  className="bg-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Tambah Elemen
+                </Button>
+                <Button 
+                  onClick={handleGenerateAI} 
+                  disabled={generating} 
+                  className="bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200 shadow-sm"
+                >
+                  {generating ? (
+                    <><div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-700 border-t-transparent mr-2"></div> Generating...</>
+                  ) : (
+                    <><Sparkles className="w-4 h-4 mr-2" /> Generate dengan AI</>
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : (
