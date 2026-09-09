@@ -334,7 +334,29 @@ export default function ATPPage() {
           <CardContent className="p-12 flex flex-col items-center text-center">
             <FileText className="w-12 h-12 text-slate-300 mb-3" />
             <h4 className="font-bold text-slate-700">Belum ada Alur Tujuan Pembelajaran</h4>
-            <p className="text-sm text-slate-500 mt-1">Klik "+ Tambah TP" atau gunakan AI untuk men-generate</p>
+            <p className="text-sm text-slate-500 mt-1 mb-5">Klik tombol "+ Tambah TP" atau gunakan AI untuk men-generate</p>
+            
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => setShowAddForm(true)} 
+                variant="outline"
+                className="bg-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah TP
+              </Button>
+              <Button 
+                onClick={handleGenerateAI} 
+                disabled={generating} 
+                className="bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200 shadow-sm"
+              >
+                {generating ? (
+                  <><div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-700 border-t-transparent mr-2"></div> AI...</>
+                ) : (
+                  <><Sparkles className="w-4 h-4 mr-2" /> Generate dengan AI</>
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { KopSurat } from '@/components/administrasi-guru/KopSurat';
 import { BookOpen, Sparkles, Save, Printer, Loader2, ChevronDown, AlignLeft, Layers, PenTool } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -61,6 +62,8 @@ export default function BahanAjarPage() {
   const [historyList, setHistoryList] = useState<any[]>([]);
 
   // Form State
+  const [inputMode, setInputMode] = useState<'ai' | 'manual'>('ai');
+  const [manualContent, setManualContent] = useState('');
   const [formData, setFormData] = useState({
     mata_pelajaran: '',
     fase_kelas: '',
@@ -112,6 +115,12 @@ export default function BahanAjarPage() {
     if (!activeMapel) return toast({ title: '⚠️ Pilih atau Buat Mata Pelajaran terlebih dahulu', variant: 'destructive' });
     if (!formData.topik) return toast({ title: 'Topik harus diisi!', variant: 'destructive' });
     
+    if (inputMode === 'manual') {
+      if (!manualContent.trim()) return toast({ title: 'Konten materi tidak boleh kosong!', variant: 'destructive' });
+      setGeneratedData({ konten_materi: manualContent });
+      return;
+    }
+
     setIsGenerating(true);
     setGeneratedData(null);
     try {
@@ -223,6 +232,25 @@ export default function BahanAjarPage() {
               <h3 className="font-bold text-indigo-800 text-sm">Konfigurasi Materi</h3>
             </div>
             <CardContent className="p-5">
+              <div className="flex gap-2 mb-4 bg-slate-100 p-1 rounded-lg">
+                <Button 
+                  type="button"
+                  variant={inputMode === 'ai' ? 'default' : 'ghost'} 
+                  onClick={() => setInputMode('ai')}
+                  className={`flex-1 h-8 text-xs font-semibold ${inputMode === 'ai' ? 'bg-white text-indigo-600 shadow-sm hover:bg-white hover:text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 mr-1.5" /> AI Generate
+                </Button>
+                <Button 
+                  type="button"
+                  variant={inputMode === 'manual' ? 'default' : 'ghost'} 
+                  onClick={() => setInputMode('manual')}
+                  className={`flex-1 h-8 text-xs font-semibold ${inputMode === 'manual' ? 'bg-white text-emerald-600 shadow-sm hover:bg-white hover:text-emerald-700' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <PenTool className="w-3.5 h-3.5 mr-1.5" /> Tulis Manual
+                </Button>
+              </div>
+
               <form onSubmit={handleGenerate} className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 uppercase">Mata Pelajaran</label>
@@ -251,23 +279,39 @@ export default function BahanAjarPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Gaya Bahasa AI</label>
-                  <Select value={formData.gaya_bahasa} onValueChange={val => setFormData({...formData, gaya_bahasa: val})}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Baku dan akademis">Baku & Akademis (Resmi)</SelectItem>
-                      <SelectItem value="Santai dan komunikatif (Cocok untuk SMK)">Santai & Komunikatif</SelectItem>
-                      <SelectItem value="Bercerita / Storytelling">Bercerita (Storytelling)</SelectItem>
-                      <SelectItem value="Penuh Analogi sederhana">Penuh Analogi Sederhana</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                
+                {inputMode === 'ai' ? (
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Gaya Bahasa AI</label>
+                    <Select value={formData.gaya_bahasa} onValueChange={val => setFormData({...formData, gaya_bahasa: val})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Baku dan akademis">Baku & Akademis (Resmi)</SelectItem>
+                        <SelectItem value="Santai dan komunikatif (Cocok untuk SMK)">Santai & Komunikatif</SelectItem>
+                        <SelectItem value="Bercerita / Storytelling">Bercerita (Storytelling)</SelectItem>
+                        <SelectItem value="Penuh Analogi sederhana">Penuh Analogi Sederhana</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Konten Materi (Markdown Didukung)</label>
+                    <Textarea 
+                      required 
+                      value={manualContent} 
+                      onChange={e => setManualContent(e.target.value)} 
+                      placeholder="Ketik isi bahan ajar di sini..."
+                      className="min-h-[150px] border-emerald-200 focus-visible:ring-emerald-500"
+                    />
+                  </div>
+                )}
                 
                 <div className="pt-4">
-                  <Button type="submit" disabled={isGenerating} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-11">
+                  <Button type="submit" disabled={isGenerating} className={`w-full font-bold h-11 text-white ${inputMode === 'manual' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
                     {isGenerating ? (
                       <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sedang Menulis...</>
+                    ) : inputMode === 'manual' ? (
+                      <><AlignLeft className="w-4 h-4 mr-2" /> Pratinjau Materi</>
                     ) : (
                       <><Sparkles className="w-4 h-4 mr-2" /> Generate Bahan Ajar</>
                     )}

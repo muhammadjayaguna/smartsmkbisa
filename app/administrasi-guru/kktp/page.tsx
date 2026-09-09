@@ -247,11 +247,35 @@ export default function KKTPPage() {
 
       {/* KKTP Cards (Web View) */}
       {kktpList.length === 0 ? (
-        <Card className="bg-slate-50 no-print"><CardContent className="p-12 flex flex-col items-center text-center">
-          <Target className="w-12 h-12 text-slate-300 mb-3" />
-          <h4 className="font-bold text-slate-700">Belum ada KKTP</h4>
-          <p className="text-sm text-slate-500 mt-1">Tambahkan kriteria ketercapaian untuk setiap tujuan pembelajaran</p>
-        </CardContent></Card>
+        <Card className="bg-slate-50 no-print">
+          <CardContent className="p-12 flex flex-col items-center text-center">
+            <Target className="w-12 h-12 text-slate-300 mb-3" />
+            <h4 className="font-bold text-slate-700">Belum ada KKTP</h4>
+            <p className="text-sm text-slate-500 mt-1 mb-5">Tambahkan kriteria ketercapaian secara manual atau gunakan AI</p>
+            
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => setShowAddForm(true)} 
+                variant="outline"
+                className="bg-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah KKTP
+              </Button>
+              <Button 
+                onClick={handleGenerateAI} 
+                disabled={generating} 
+                className="bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200 shadow-sm"
+              >
+                {generating ? (
+                  <><div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-700 border-t-transparent mr-2"></div> AI...</>
+                ) : (
+                  <><Sparkles className="w-4 h-4 mr-2" /> Generate dengan AI</>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-4 no-print">
           {kktpList.map((item) => (

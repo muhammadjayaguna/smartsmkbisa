@@ -81,6 +81,26 @@ export default function ProtaPromesPage() {
     }
   };
 
+  const togglePromesMonth = async (tpId: string, month: string, currentAllocation: string[] = []) => {
+    try {
+      const newAllocation = currentAllocation.includes(month)
+        ? currentAllocation.filter(m => m !== month)
+        : [...currentAllocation, month];
+        
+      // Optimistic UI update
+      setAtpList(prev => prev.map(tp => tp.id === tpId ? { ...tp, alokasi_promes: newAllocation } : tp));
+      
+      const { error } = await supabase.from('atp').update({ alokasi_promes: newAllocation }).eq('id', tpId);
+      if (error) {
+        fetchData(); // revert on error
+        throw error;
+      }
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Gagal mengubah alokasi bulan', variant: 'destructive' });
+    }
+  };
+
   if (loading || contextLoading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>;
 
   const mapel = activeMapel?.mata_pelajaran || 'Mata Pelajaran';
@@ -118,7 +138,8 @@ export default function ProtaPromesPage() {
       <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200/50 no-print">
         <CardContent className="p-4">
           <p className="text-sm text-slate-600">
-            <span className="font-bold text-amber-700">📋 Info:</span> Data Prota & Promes diambil secara otomatis dari <span className="font-bold">Alur Tujuan Pembelajaran (ATP)</span> yang sudah Anda buat/generate sebelumnya. Pastikan ATP sudah terisi untuk melihat data di sini.
+            <span className="font-bold text-amber-700">📋 Info:</span> Data Prota & Promes diambil secara otomatis dari <span className="font-bold">Alur Tujuan Pembelajaran (ATP)</span> yang sudah Anda buat/generate sebelumnya. Pastikan ATP sudah terisi untuk melihat data di sini. <br/><br/>
+            Untuk <strong>Program Semester (Promes)</strong>, Anda bisa menggunakan AI untuk mengalokasikan bulan secara otomatis, atau Anda juga dapat mengklik kotak bulan pada tabel Promes di bawah untuk mengalokasikannya secara manual.
           </p>
         </CardContent>
       </Card>
@@ -221,8 +242,16 @@ export default function ProtaPromesPage() {
                         <td className="p-3 text-slate-700 max-w-[200px] truncate print:max-w-none print:whitespace-normal print:text-black print:border print:border-black print:text-left align-top">{tp.tujuan}</td>
                         <td className="p-3 text-center font-bold print:border print:border-black align-top">{tp.jp}</td>
                         {months1.map((m, mi) => (
-                          <td key={m} className="p-2 text-center print:border print:border-black align-middle">
-                            {Array.isArray(tp.alokasi_promes) && tp.alokasi_promes.includes(m) ? <div className="w-6 h-4 bg-amber-400 rounded mx-auto print:border print:border-black print:bg-black"></div> : ''}
+                          <td 
+                            key={m} 
+                            onClick={() => togglePromesMonth(tp.id, m, Array.isArray(tp.alokasi_promes) ? tp.alokasi_promes : [])}
+                            className="p-2 text-center print:border print:border-black align-middle cursor-pointer hover:bg-slate-100 transition-colors group"
+                          >
+                            {Array.isArray(tp.alokasi_promes) && tp.alokasi_promes.includes(m) ? (
+                              <div className="w-6 h-4 bg-amber-400 rounded mx-auto print:border print:border-black print:bg-black transition-all transform scale-100"></div>
+                            ) : (
+                              <div className="w-6 h-4 border border-dashed border-slate-300 rounded mx-auto opacity-0 group-hover:opacity-100 transition-all no-print"></div>
+                            )}
                           </td>
                         ))}
                       </tr>
@@ -273,8 +302,16 @@ export default function ProtaPromesPage() {
                         <td className="p-3 text-slate-700 max-w-[200px] truncate print:max-w-none print:whitespace-normal print:text-black print:border print:border-black print:text-left align-top">{tp.tujuan}</td>
                         <td className="p-3 text-center font-bold print:border print:border-black align-top">{tp.jp}</td>
                         {months2.map((m, mi) => (
-                          <td key={m} className="p-2 text-center print:border print:border-black align-middle">
-                            {Array.isArray(tp.alokasi_promes) && tp.alokasi_promes.includes(m) ? <div className="w-6 h-4 bg-purple-400 rounded mx-auto print:border print:border-black print:bg-black"></div> : ''}
+                          <td 
+                            key={m} 
+                            onClick={() => togglePromesMonth(tp.id, m, Array.isArray(tp.alokasi_promes) ? tp.alokasi_promes : [])}
+                            className="p-2 text-center print:border print:border-black align-middle cursor-pointer hover:bg-slate-100 transition-colors group"
+                          >
+                            {Array.isArray(tp.alokasi_promes) && tp.alokasi_promes.includes(m) ? (
+                              <div className="w-6 h-4 bg-purple-400 rounded mx-auto print:border print:border-black print:bg-black transition-all transform scale-100"></div>
+                            ) : (
+                              <div className="w-6 h-4 border border-dashed border-slate-300 rounded mx-auto opacity-0 group-hover:opacity-100 transition-all no-print"></div>
+                            )}
                           </td>
                         ))}
                       </tr>
