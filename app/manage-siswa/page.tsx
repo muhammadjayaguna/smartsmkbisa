@@ -59,18 +59,39 @@ const ManageSiswa = () => {
   const fetchData = async () => {
     try {
       // Fetch siswa with rombel info
-      const { data: siswaData, error: siswaError } = await supabase
-        .from('siswa')
-        .select(`
-          *,
-          rombel:rombel_id (
-            nama_rombel
-          )
-        `)
-        .order('nama')
-        .limit(5000);
+      let allSiswa = [];
+      let from = 0;
+      let to = 999;
+      let hasMore = true;
 
-      if (siswaError) throw siswaError;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('siswa')
+          .select(`
+            *,
+            rombel:rombel_id (
+              nama_rombel
+            )
+          `)
+          .order('nama')
+          .range(from, to);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allSiswa = [...allSiswa, ...data];
+          if (data.length < 1000) {
+            hasMore = false;
+          } else {
+            from += 1000;
+            to += 1000;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      setSiswaList(allSiswa);
 
       // Fetch all rombel for dropdown
       const { data: rombelData, error: rombelError } = await supabase
