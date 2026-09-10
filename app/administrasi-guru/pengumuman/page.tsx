@@ -45,35 +45,44 @@ export default function PengumumanKelasPage() {
     if (!user) return;
     setLoading(true);
     try {
-      let uid = user.db_id;
-      if (!uid) {
-        const { data: uData } = await supabase.from('users').select('id').eq('auth_id', user.id).maybeSingle();
-        if (uData) uid = uData.id;
-        else throw new Error("UUID pengguna tidak ditemukan");
-      }
-      
-      // Fetch Rombel for the dropdown
+      // 1. Fetch Rombel FIRST so the dropdown always populates
       const { data: rombelData } = await supabase
         .from('rombel')
         .select('nama_rombel')
         .order('nama_rombel');
       if (rombelData) setRombels(rombelData);
 
-      // Fetch Pengumuman
-      const { data, error } = await supabase
-        .from('pengumuman_kelas')
-        .select('*')
-        .eq('guru_id', uid)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      setPengumuman(data || []);
+      // 2. Resolve UUID
+      let uid = user.db_id;
+      if (!uid) {
+        const { data: uData } = await supabase.from('users').select('id').eq('auth_id', user.id).maybeSingle();
+        if (uData) uid = uData.id;
+      }
+      
+      // 3. If we have a valid UUID, fetch pengumuman
+      if (uid) {
+        const { data, error } = await supabase
+          .from('pengumuman_kelas')
+          .select('*')
+          .eq('guru_id', uid)
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        setPengumuman(data || []);
+      }
+
     } catch (error: any) {
-      console.error('Error:', error);
-      if (error.code === '42P01') {
+      console.error('Error in fetchData:', error);
+      if (error?.code === '42P01') {
          toast({
            title: 'Tabel Belum Dibuat',
            description: 'Harap jalankan script SQL setup_pengumuman_kelas.sql di Supabase Anda.',
+           variant: 'destructive',
+         });
+      } else {
+         toast({
+           title: 'Gagal Memuat Data',
+           description: error?.message || 'Terjadi kesalahan saat memuat data',
            variant: 'destructive',
          });
       }
