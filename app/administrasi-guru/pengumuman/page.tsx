@@ -45,7 +45,12 @@ export default function PengumumanKelasPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const uid = user.db_id || user.id;
+      let uid = user.db_id;
+      if (!uid) {
+        const { data: uData } = await supabase.from('users').select('id').eq('auth_id', user.id).maybeSingle();
+        if (uData) uid = uData.id;
+        else throw new Error("UUID pengguna tidak ditemukan");
+      }
       
       // Fetch Rombel for the dropdown
       const { data: rombelData } = await supabase
@@ -88,7 +93,13 @@ export default function PengumumanKelasPage() {
     
     setSaving(true);
     try {
-      const uid = user.db_id || user.id;
+      let uid = user.db_id;
+      if (!uid) {
+        const { data: uData } = await supabase.from('users').select('id').eq('auth_id', user.id).maybeSingle();
+        if (uData) uid = uData.id;
+        else throw new Error("Akun Anda belum tersinkronisasi sempurna dengan database. Silakan logout dan login kembali.");
+      }
+      
       const { error } = await supabase.from('pengumuman_kelas').insert({
         guru_id: uid,
         kelas: formData.kelas,
