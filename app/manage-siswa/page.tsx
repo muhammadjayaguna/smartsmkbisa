@@ -101,7 +101,6 @@ const ManageSiswa = () => {
 
       if (rombelError) throw rombelError;
 
-      setSiswaList(siswaData || []);
       setRombelList(rombelData || []);
     } catch (error) {
       toast({
