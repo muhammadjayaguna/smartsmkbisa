@@ -147,6 +147,12 @@ const Dashboard = () => {
 
   const siswaMenuItems = useMemo(() => [
     {
+      category: "Akademik & Operasional",
+      items: [
+        { title: 'SiAjar', description: 'Sistem Administrasi Mengajar & Belajar', icon: Settings, color: 'from-teal-500 to-emerald-600', path: '/administrasi-guru' },
+      ]
+    },
+    {
       category: "Prakerin",
       items: [
         { title: 'SiMagang', description: 'Sistem Informasi Magang / Prakerin', icon: Briefcase, color: 'from-teal-500 to-emerald-600', path: '/simagang' }
