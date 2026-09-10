@@ -67,7 +67,8 @@ const ManageSiswa = () => {
             nama_rombel
           )
         `)
-        .order('nama');
+        .order('nama')
+        .limit(5000);
 
       if (siswaError) throw siswaError;
 
