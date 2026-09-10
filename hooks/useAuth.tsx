@@ -32,20 +32,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let supabaseUserId = null;
         let userNama = null;
         try {
-          // 1. Check if user exists in `users` table
-          const { data: existingUsers } = await supabase
+          // 1. Check if user exists by auth_id
+          const { data: authIdMatch } = await supabase
             .from('users')
             .select('id, nama')
             .eq('auth_id', firebaseUser.uid)
             .limit(1);
 
-          const existingUser = existingUsers && existingUsers.length > 0 ? existingUsers[0] : null;
+          let existingUser = authIdMatch && authIdMatch.length > 0 ? authIdMatch[0] : null;
+
+          if (!existingUser && firebaseUser.email) {
+            // 2. Check if user exists by email (pre-populated but no auth_id yet)
+            const { data: emailMatch } = await supabase
+              .from('users')
+              .select('id, nama')
+              .eq('email', firebaseUser.email)
+              .limit(1);
+
+            if (emailMatch && emailMatch.length > 0) {
+              existingUser = emailMatch[0];
+              // Link the auth_id to this existing record
+              await supabase
+                .from('users')
+                .update({ auth_id: firebaseUser.uid })
+                .eq('id', existingUser.id);
+            }
+          }
 
           supabaseUserId = existingUser?.id;
           userNama = existingUser?.nama;
 
           if (!existingUser) {
-            // Insert new user
+            // 3. Insert new user if completely not found
             const { data: newUser, error: insertError } = await supabase
               .from('users')
               .insert({
@@ -54,11 +72,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 nama: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
               })
               .select('id, nama')
-              .single();
+              .limit(1);
               
-            if (!insertError && newUser) {
-              supabaseUserId = newUser.id;
-              userNama = newUser.nama;
+            if (!insertError && newUser && newUser.length > 0) {
+              supabaseUserId = newUser[0].id;
+              userNama = newUser[0].nama;
             }
           }
 
