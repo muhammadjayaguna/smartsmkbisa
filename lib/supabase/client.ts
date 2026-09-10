@@ -19,5 +19,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     headers: {
       'X-Client-Info': 'supabase-js-web/2.49.8',
     },
+    fetch: (url, options) => {
+      return fetch(url, { ...options, cache: 'no-store' });
+    }
   },
 });
