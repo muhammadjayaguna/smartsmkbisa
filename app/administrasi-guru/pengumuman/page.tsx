@@ -55,8 +55,12 @@ export default function PengumumanKelasPage() {
       // 2. Resolve UUID
       let uid = user.db_id;
       if (!uid) {
-        const { data: uData } = await supabase.from('users').select('id').eq('auth_id', user.id).maybeSingle();
-        if (uData) uid = uData.id;
+        const { data: uData } = await supabase.from('users').select('id').eq('auth_id', user.id).limit(1);
+        if (uData && uData.length > 0) {
+          uid = uData[0].id;
+        } else {
+          throw new Error("Akun Anda belum tersinkronisasi. Silakan logout dan login kembali.");
+        }
       }
       
       // 3. If we have a valid UUID, fetch pengumuman
@@ -104,9 +108,12 @@ export default function PengumumanKelasPage() {
     try {
       let uid = user.db_id;
       if (!uid) {
-        const { data: uData } = await supabase.from('users').select('id').eq('auth_id', user.id).maybeSingle();
-        if (uData) uid = uData.id;
-        else throw new Error("Akun Anda belum tersinkronisasi sempurna dengan database. Silakan logout dan login kembali.");
+        const { data: uData } = await supabase.from('users').select('id').eq('auth_id', user.id).limit(1);
+        if (uData && uData.length > 0) {
+          uid = uData[0].id;
+        } else {
+          throw new Error("Akun Anda belum tersinkronisasi sempurna dengan database. Silakan logout dan login kembali.");
+        }
       }
       
       const { error } = await supabase.from('pengumuman_kelas').insert({
