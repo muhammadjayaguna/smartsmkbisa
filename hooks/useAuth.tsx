@@ -33,11 +33,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let userNama = null;
         try {
           // 1. Check if user exists in `users` table
-          const { data: existingUser } = await supabase
+          const { data: existingUsers } = await supabase
             .from('users')
             .select('id, nama')
             .eq('auth_id', firebaseUser.uid)
-            .maybeSingle();
+            .limit(1);
+
+          const existingUser = existingUsers && existingUsers.length > 0 ? existingUsers[0] : null;
 
           supabaseUserId = existingUser?.id;
           userNama = existingUser?.nama;
