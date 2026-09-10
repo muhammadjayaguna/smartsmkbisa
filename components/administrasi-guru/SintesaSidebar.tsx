@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Book, FileText, Target, Calendar, BarChart2, Layers, 
   FlaskConical, FileEdit, Sprout, BookOpen, ClipboardList, CheckSquare, 
   Trophy, Activity, Users, HeartHandshake, TrendingUp, Phone, FileCheck, Brain,
-  GraduationCap, Clock, Star, AlertCircle, Eye, Settings, Shield
+  GraduationCap, Clock, Star, AlertCircle, Eye, Settings, Shield, Megaphone
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole, UserRole } from '@/hooks/useUserRole';
@@ -43,6 +43,7 @@ const guruMenu: MenuGroup[] = [
     { name: 'Instrumen Asesmen', path: '/administrasi-guru/asesmen', icon: ClipboardList },
   ]},
   { group: 'ADMINISTRASI KELAS', items: [
+    { name: 'Pengumuman Kelas', path: '/administrasi-guru/pengumuman', icon: Megaphone },
     { name: 'Absensi Siswa', path: '/administrasi-guru/absensi-siswa', icon: Users },
     { name: 'Absensi Guru Mengajar', path: '/administrasi-guru/absensi', icon: CheckSquare },
     { name: 'Jurnal Mengajar', path: '/administrasi-guru/jurnal', icon: Book },

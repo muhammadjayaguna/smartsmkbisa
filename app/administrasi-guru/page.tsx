@@ -233,6 +233,44 @@ function GuruDashboard() {
 
 function SiswaDashboard() {
   const { user } = useAuth();
+  const [pengumuman, setPengumuman] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPengumuman = async () => {
+      if (!user) return;
+      try {
+        const uid = user.db_id || user.id;
+        
+        // 1. Get student's class
+        const { data: siswaData, error: siswaError } = await supabase
+          .from('siswa')
+          .select('kelas')
+          .eq('auth_id', uid)
+          .single();
+          
+        if (siswaError) throw siswaError;
+        
+        if (siswaData?.kelas) {
+          // 2. Fetch announcements for this class
+          const { data, error } = await supabase
+            .from('pengumuman_kelas')
+            .select('*, users(nama)')
+            .eq('kelas', siswaData.kelas)
+            .order('created_at', { ascending: false });
+            
+          if (error && error.code !== '42P01') throw error; // Ignore table not found if user hasn't run SQL yet
+          if (data) setPengumuman(data);
+        }
+      } catch (error) {
+        console.error('Error fetching pengumuman:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPengumuman();
+  }, [user]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -250,7 +288,56 @@ function SiswaDashboard() {
             </div>
           </div>
         </div>
-        <Monitor className="w-24 h-24 text-white opacity-10 absolute right-8 top-4" />
+        
+        {/* Animated Character */}
+        <div className="hidden md:block absolute right-8 -bottom-4 w-40 h-52 z-10 animate-[float_3s_ease-in-out_infinite] hover:scale-110 transition-transform cursor-pointer">
+          <Image src="/animasi/SMA_menyapa_sebentar.GIF" alt="Siswa" fill className="object-contain object-bottom drop-shadow-2xl" unoptimized />
+        </div>
+        
+        <Monitor className="w-24 h-24 text-white opacity-10 absolute right-32 top-4" />
+      </div>
+
+      {/* Pengumuman Kelas Section */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-lg">📢</span>
+            </div>
+            Pengumuman Kelas Anda
+          </h3>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
+        ) : pengumuman.length === 0 ? (
+          <div className="bg-slate-50 rounded-2xl p-8 text-center border border-dashed border-slate-200">
+            <p className="text-slate-500 text-sm">Belum ada pengumuman terbaru untuk kelas Anda saat ini.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {pengumuman.map((item) => (
+              <div key={item.id} className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-3">
+                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-md">
+                    {item.mata_pelajaran && item.mata_pelajaran !== 'Umum' ? item.mata_pelajaran : 'Pengumuman Umum'}
+                  </span>
+                  <span className="text-[10px] text-blue-400 font-medium bg-white px-2 py-0.5 rounded-full shadow-sm">
+                    {new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+                <h4 className="font-bold text-slate-800 text-base mb-2">{item.judul}</h4>
+                <p className="text-sm text-slate-600 whitespace-pre-wrap">{item.isi}</p>
+                <div className="mt-4 pt-3 border-t border-blue-200/50 flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-blue-200 flex items-center justify-center text-[10px] font-bold text-blue-700">
+                    {item.users?.nama?.charAt(0) || 'G'}
+                  </div>
+                  <span className="text-xs text-slate-500 font-medium">Oleh {item.users?.nama || 'Guru'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Quick Access Cards */}
