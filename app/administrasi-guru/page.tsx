@@ -242,29 +242,36 @@ function SiswaDashboard() {
       try {
         const uid = user.db_id || user.id;
         
-        // 1. Get student's class (via rombel relation matching their email)
+        // 1. Get student's class (via rombel_id matching their email)
         const { data: siswaData, error: siswaError } = await supabase
           .from('siswa')
-          .select('rombel(nama_rombel)')
+          .select('rombel_id')
           .eq('email', user.email)
           .maybeSingle();
           
         if (siswaError) throw siswaError;
         
-        const kelasSiswa = siswaData?.rombel && !Array.isArray(siswaData.rombel) 
-          ? siswaData.rombel.nama_rombel 
-          : null;
-        
-        if (kelasSiswa) {
-          // 2. Fetch announcements for this class
-          const { data, error } = await supabase
-            .from('pengumuman_kelas')
-            .select('*, users(nama)')
-            .eq('kelas', kelasSiswa)
-            .order('created_at', { ascending: false });
+        if (siswaData?.rombel_id) {
+          // 1.5 Get actual class name from rombel table
+          const { data: rombelData } = await supabase
+            .from('rombel')
+            .select('nama_rombel')
+            .eq('id', siswaData.rombel_id)
+            .maybeSingle();
             
-          if (error && error.code !== '42P01') throw error; // Ignore table not found if user hasn't run SQL yet
-          if (data) setPengumuman(data);
+          const kelasSiswa = rombelData?.nama_rombel;
+
+          if (kelasSiswa) {
+            // 2. Fetch announcements for this class
+            const { data, error } = await supabase
+              .from('pengumuman_kelas')
+              .select('*, users(nama)')
+              .eq('kelas', kelasSiswa)
+              .order('created_at', { ascending: false });
+              
+            if (error && error.code !== '42P01') throw error; // Ignore table not found if user hasn't run SQL yet
+            if (data) setPengumuman(data);
+          }
         }
       } catch (error) {
         console.error('Error fetching pengumuman:', error);
