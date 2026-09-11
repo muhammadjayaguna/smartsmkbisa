@@ -242,21 +242,25 @@ function SiswaDashboard() {
       try {
         const uid = user.db_id || user.id;
         
-        // 1. Get student's class
+        // 1. Get student's class (via rombel relation)
         const { data: siswaData, error: siswaError } = await supabase
           .from('siswa')
-          .select('kelas')
+          .select('rombel(nama_rombel)')
           .eq('auth_id', uid)
-          .single();
+          .maybeSingle();
           
         if (siswaError) throw siswaError;
         
-        if (siswaData?.kelas) {
+        const kelasSiswa = siswaData?.rombel && !Array.isArray(siswaData.rombel) 
+          ? siswaData.rombel.nama_rombel 
+          : null;
+        
+        if (kelasSiswa) {
           // 2. Fetch announcements for this class
           const { data, error } = await supabase
             .from('pengumuman_kelas')
             .select('*, users(nama)')
-            .eq('kelas', siswaData.kelas)
+            .eq('kelas', kelasSiswa)
             .order('created_at', { ascending: false });
             
           if (error && error.code !== '42P01') throw error; // Ignore table not found if user hasn't run SQL yet
