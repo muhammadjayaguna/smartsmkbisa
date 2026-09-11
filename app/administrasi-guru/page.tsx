@@ -242,11 +242,11 @@ function SiswaDashboard() {
       try {
         const uid = user.db_id || user.id;
         
-        // 1. Get student's class (via rombel relation)
+        // 1. Get student's class (via rombel relation matching their email)
         const { data: siswaData, error: siswaError } = await supabase
           .from('siswa')
           .select('rombel(nama_rombel)')
-          .eq('auth_id', uid)
+          .eq('email', user.email)
           .maybeSingle();
           
         if (siswaError) throw siswaError;
