@@ -228,7 +228,7 @@ const Index = () => {
           <p className="mx-auto mt-4 max-w-lg text-sm text-white/90 md:text-base font-medium leading-relaxed">
             Siswa SMKN 1 Banjarmasin bisa membuka toko gratis dan menjual produk atau jasa langsung di platform ini. Bangun portofolio dan dapatkan penghasilan!
           </p>
-          <Link href="/marketplace/toko-saya"
+          <Link href="/marketplace/seller/dashboard"
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-accent-foreground shadow-xl transition-all hover:bg-accent/90 hover:scale-105 active:scale-95 hover:shadow-accent/40"
           >
             Buka Toko Gratis Sekarang <ArrowRight size={18} />
